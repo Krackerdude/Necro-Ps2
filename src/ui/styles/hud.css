@@ -1,0 +1,161 @@
+/* ============================================================ *
+ * NECRO — in-game HUD: diegetic-minimal. Condition tag, prompts,
+ * toasts, and the note overlay.
+ * ============================================================ */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Condition readout — bottom left, ECG-adjacent */
+.hud-condition {
+  position: absolute;
+  left: 3vw;
+  bottom: 4vh;
+  transform: skewX(-8deg) rotate(-1deg);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.hud-condition .tag {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--bone-dim);
+}
+
+.hud-condition .value {
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.hud-condition .value.FINE { color: #7fae62; }
+.hud-condition .value.CAUTION { color: #d9a13b; animation: cond-blink 1.6s steps(2) infinite; }
+.hud-condition .value.DANGER { color: var(--blood-bright); animation: cond-blink 0.7s steps(2) infinite; }
+
+@keyframes cond-blink {
+  50% { opacity: 0.55; }
+}
+
+/* Interaction prompt — lower center */
+.hud-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 9vh;
+  transform: translateX(-50%) skewX(-6deg);
+  font-family: var(--font-display);
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--bone);
+  background: linear-gradient(90deg, transparent, rgba(158, 22, 22, 0.85) 12%, rgba(158, 22, 22, 0.85) 88%, transparent);
+  padding: 6px 34px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.hud-prompt .key {
+  color: #000;
+  background: var(--bone);
+  padding: 0 7px;
+  margin-right: 10px;
+  clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
+}
+
+/* Toast feed — top right, stacked slashes */
+.hud-toasts {
+  position: absolute;
+  top: 5vh;
+  right: 3vw;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.toast {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bone);
+  background: rgba(8, 6, 10, 0.9);
+  border-right: 3px solid var(--blood-bright);
+  padding: 8px 16px;
+  transform: skewX(-6deg);
+  max-width: 44vw;
+  animation: toast-in 220ms steps(3) both;
+}
+
+@keyframes toast-in {
+  from { transform: skewX(-6deg) translateX(60px); opacity: 0; }
+  to { transform: skewX(-6deg) translateX(0); opacity: 1; }
+}
+
+.toast.leaving {
+  transition: opacity 300ms steps(3);
+  opacity: 0;
+}
+
+/* Note overlay — reads like a found document */
+.note-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 2, 5, 0.82);
+}
+
+.note-paper {
+  width: min(620px, 90vw);
+  max-height: 78vh;
+  overflow-y: auto;
+  background: linear-gradient(175deg, #d8cfae, #b8ac8a 90%);
+  color: #241c12;
+  padding: 44px 48px;
+  transform: rotate(-1.6deg);
+  clip-path: polygon(1% 0, 99% 1%, 100% 98%, 2% 100%);
+  box-shadow: 14px 14px 0 rgba(0, 0, 0, 0.65);
+}
+
+.note-paper h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #4a1008;
+  border-bottom: 2px solid rgba(74, 16, 8, 0.5);
+  padding-bottom: 10px;
+}
+
+.note-paper p {
+  font-size: 16px;
+  line-height: 1.65;
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+}
+
+.note-paper .note-close {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #4a1008;
+  opacity: 0.8;
+}
+
+/* Damage flash */
+.hud-damage {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(158, 22, 22, 0.55) 100%);
+  opacity: 0;
+}
+
+.hud-damage.active {
+  animation: dmg 500ms steps(4) both;
+}
+
+@keyframes dmg {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

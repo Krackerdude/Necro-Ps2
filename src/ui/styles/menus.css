@@ -1,0 +1,403 @@
+/* ============================================================ *
+ * NECRO — menus (title, pause, options, saves)
+ * ============================================================ */
+
+/* ---------------- Title screen ---------------- */
+
+.title-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 0 8vh 7vw;
+  background: linear-gradient(100deg, rgba(5, 4, 8, 0.92) 26%, rgba(5, 4, 8, 0.25) 55%, transparent 75%);
+}
+
+.title-block {
+  transform: rotate(-3.5deg);
+  margin-bottom: 5vh;
+}
+
+.title-block .over {
+  font-family: var(--font-display);
+  font-size: clamp(11px, 1.4vw, 18px);
+  letter-spacing: 0.55em;
+  color: var(--blood-bright);
+  margin-left: 0.4em;
+}
+
+.title-block h1 {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 12vw, 170px);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  color: var(--bone);
+  text-shadow:
+    5px 4px 0 var(--blood),
+    10px 8px 0 rgba(0, 0, 0, 0.85),
+    -2px -2px 0 #000;
+}
+
+.title-block .under {
+  font-size: clamp(11px, 1.2vw, 16px);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  margin: 1.2em 0 0 0.3em;
+}
+
+/* ---------------- Menu lists (shared) ---------------- */
+
+.menu-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.menu-list li {
+  transform: skewX(-8deg);
+}
+
+/* Stagger: each row steps right, Persona-style cascade. */
+.menu-list li:nth-child(2) { margin-left: 1.2em; }
+.menu-list li:nth-child(3) { margin-left: 2.4em; }
+.menu-list li:nth-child(4) { margin-left: 3.6em; }
+.menu-list li:nth-child(5) { margin-left: 4.8em; }
+
+.menu-list button {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.4vw, 46px);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  padding: 0.06em 0.5em 0.1em 0.35em;
+  display: inline-block;
+  position: relative;
+  transition: transform 80ms steps(2), color 80ms steps(2);
+}
+
+.menu-list button.disabled {
+  color: #3d3a33;
+  cursor: default;
+}
+
+.menu-list li.selected button:not(.disabled) {
+  color: var(--bone);
+  transform: translateX(0.35em) scale(1.06);
+  background: linear-gradient(100deg, var(--blood) 0%, var(--blood) 78%, transparent 100%);
+  clip-path: polygon(0 8%, 100% 0, 97% 100%, 2% 92%);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.menu-list li.selected button.disabled {
+  transform: translateX(0.2em);
+}
+
+.menu-hint {
+  margin-top: 4vh;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  opacity: 0.7;
+}
+
+/* ---------------- Panels (options / saves / pause card) ---------------- */
+
+.panel-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 3, 7, 0.72);
+}
+
+.panel {
+  width: min(880px, 92vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-soft);
+  border: 2px solid var(--bone);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 0 100%);
+  box-shadow: 10px 10px 0 rgba(158, 22, 22, 0.35);
+  transform: rotate(-0.6deg);
+}
+
+.panel-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1em;
+  padding: 18px 26px 12px;
+  border-bottom: 2px solid var(--blood);
+}
+
+.panel-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 40px);
+  text-transform: uppercase;
+  transform: skewX(-6deg);
+  color: var(--bone);
+  text-shadow: 3px 2px 0 var(--blood);
+}
+
+.panel-header .crumb {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.panel-body {
+  padding: 20px 26px 26px;
+  overflow-y: auto;
+}
+
+.panel-footer {
+  padding: 10px 26px 16px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  border-top: 1px solid rgba(230, 221, 198, 0.2);
+}
+
+/* ---------------- Options: tabs ---------------- */
+
+.tab-row {
+  display: flex;
+  gap: 4px;
+  padding: 14px 26px 0;
+}
+
+.tab-row button {
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bone-dim);
+  padding: 7px 18px 6px;
+  transform: skewX(-10deg);
+  border: 1px solid rgba(230, 221, 198, 0.25);
+  border-bottom: none;
+}
+
+.tab-row button.active {
+  color: var(--bone);
+  background: var(--blood);
+  border-color: var(--bone);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* ---------------- Options: rows ---------------- */
+
+.opt-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 9px 6px;
+  border-bottom: 1px solid rgba(230, 221, 198, 0.12);
+}
+
+.opt-row.selected {
+  background: linear-gradient(90deg, rgba(158, 22, 22, 0.5), transparent 85%);
+}
+
+.opt-label {
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.opt-label small {
+  display: block;
+  color: var(--bone-dim);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  margin-top: 2px;
+}
+
+.opt-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  min-width: 210px;
+  justify-content: flex-end;
+}
+
+.opt-value .val {
+  min-width: 96px;
+  text-align: center;
+  color: var(--bone);
+}
+
+.opt-value .val.on { color: #7fae62; }
+.opt-value .val.off { color: var(--blood-bright); }
+
+.opt-value button.arrow {
+  color: var(--blood-bright);
+  font-size: 18px;
+  padding: 0 8px;
+  transform: skewX(-8deg);
+}
+
+.opt-value button.arrow:hover {
+  color: var(--bone);
+}
+
+/* Keybind capture chip */
+.bind-chip {
+  border: 1px solid var(--bone-dim);
+  padding: 3px 12px;
+  min-width: 130px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--bone);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  background: rgba(230, 221, 198, 0.07);
+}
+
+.bind-chip.listening {
+  background: var(--blood);
+  animation: bind-pulse 0.6s steps(2) infinite;
+}
+
+@keyframes bind-pulse {
+  50% { background: var(--blood-bright); }
+}
+
+.opt-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;
+}
+
+.text-btn {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  border: 1px solid var(--bone-dim);
+  padding: 7px 16px;
+  transform: skewX(-8deg);
+}
+
+.text-btn:hover,
+.text-btn.selected {
+  color: var(--bone);
+  background: var(--blood);
+  border-color: var(--bone);
+}
+
+/* ---------------- Save slots ---------------- */
+
+.slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid rgba(230, 221, 198, 0.3);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  background: rgba(230, 221, 198, 0.04);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.slot.selected {
+  border-color: var(--bone);
+  background: linear-gradient(90deg, rgba(158, 22, 22, 0.55), rgba(158, 22, 22, 0.08));
+  transform: translateX(6px) skewX(-1.5deg);
+}
+
+.slot .slot-id {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--blood-bright);
+  transform: skewX(-8deg);
+}
+
+.slot.selected .slot-id { color: var(--bone); }
+
+.slot .slot-meta {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--bone);
+}
+
+.slot .slot-meta small {
+  display: block;
+  color: var(--bone-dim);
+  margin-top: 2px;
+}
+
+.slot .slot-cond {
+  font-family: var(--font-display);
+  font-size: 13px;
+}
+
+.slot .slot-cond.FINE { color: #7fae62; }
+.slot .slot-cond.CAUTION { color: #d9a13b; }
+.slot .slot-cond.DANGER { color: var(--blood-bright); }
+
+.slot.empty .slot-meta { color: #4a463d; }
+
+/* ---------------- Pause ---------------- */
+
+.pause-screen {
+  display: flex;
+  align-items: center;
+  padding-left: 9vw;
+  background:
+    linear-gradient(100deg, rgba(5, 4, 8, 0.9) 30%, rgba(120, 16, 16, 0.18) 60%, rgba(5, 4, 8, 0.55) 100%);
+}
+
+.pause-tag {
+  position: absolute;
+  top: 7vh;
+  left: 7vw;
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 92px);
+  text-transform: uppercase;
+  color: var(--bone);
+  transform: rotate(-4deg);
+  text-shadow: 4px 3px 0 var(--blood), -2px -2px 0 #000;
+}
+
+/* ---------------- Game over ---------------- */
+
+.gameover-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6vh;
+  background: radial-gradient(ellipse at center, rgba(60, 4, 4, 0.78), rgba(2, 1, 2, 0.96) 75%);
+}
+
+.gameover-screen h1 {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 9vw, 120px);
+  text-transform: uppercase;
+  color: var(--blood-bright);
+  transform: rotate(-2.5deg) skewX(-4deg);
+  text-shadow: 5px 4px 0 #000, -2px -2px 0 rgba(230, 221, 198, 0.25);
+  animation: gameover-in 1.4s steps(6) both;
+}
+
+@keyframes gameover-in {
+  from { opacity: 0; transform: rotate(-2.5deg) skewX(-4deg) scale(1.6); }
+  to { opacity: 1; transform: rotate(-2.5deg) skewX(-4deg) scale(1); }
+}
