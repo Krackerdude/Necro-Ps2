@@ -1,0 +1,116 @@
+/* ============================================================ *
+ * NECRO — UI design language, layer 0
+ *
+ * Palette + global chrome. The UI is a poster, not a dialog box:
+ * bone-white type on ink black, blood-red slashes, everything
+ * slightly sheared, everything slightly degraded (grain, scanlines).
+ * ============================================================ */
+
+:root {
+  --ink: #0b0a0e;
+  --ink-soft: rgba(11, 10, 14, 0.88);
+  --bone: #e6ddc6;
+  --bone-dim: #9a927e;
+  --blood: #9e1616;
+  --blood-bright: #d42b2b;
+  --rot: #6f7d4e;
+  --font-display: 'Arial Black', 'Impact', 'Haettenschweiler', sans-serif;
+  --font-body: 'Arial Narrow', 'Helvetica Neue Condensed', Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-body);
+  color: var(--bone);
+  user-select: none;
+}
+
+/* 3D viewport — canvas is low-res internally, stretched here. */
+#viewport {
+  position: fixed;
+  inset: 0;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* UI overlay root. */
+#ui-root {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none; /* screens opt back in */
+}
+
+#ui-root > * {
+  pointer-events: auto;
+}
+
+/* CRT scanlines + vignette over EVERYTHING, always. */
+#ui-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.14) 3px
+    ),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.42) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Shared full-screen layer container for screens. */
+.screen {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- Type utilities ------------------------------------------------ */
+
+.display-type {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.86;
+}
+
+/* The signature offset: bone text, blood ghost behind it. */
+.ghosted {
+  text-shadow:
+    3px 3px 0 var(--blood),
+    -1px -1px 0 rgba(0, 0, 0, 0.9);
+}
+
+/* --- Shared button reset ------------------------------------------- */
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-transform: inherit;
+}
+
+button:focus {
+  outline: none;
+}
