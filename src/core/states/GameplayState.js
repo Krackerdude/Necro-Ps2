@@ -8,7 +8,7 @@ import { PlayerStats } from '../../gameplay/player/PlayerStats.js';
 import { InteractionSystem } from '../../gameplay/interaction/InteractionSystem.js';
 import { Inventory } from '../../gameplay/inventory/Inventory.js';
 import { WeaponSystem } from '../../gameplay/combat/WeaponSystem.js';
-import { MuzzleFlash } from '../../gameplay/combat/MuzzleFlash.js';
+import { GunFx } from '../../gameplay/combat/GunFx.js';
 import { EnemyRoster } from '../../gameplay/enemies/EnemyRoster.js';
 import { HudOverlay } from '../../ui/screens/HudOverlay.js';
 import { NoteScreen } from '../../ui/screens/NoteScreen.js';
@@ -35,7 +35,7 @@ export class GameplayState extends GameState {
   #stats = null;
   #inventory = null;
   #weapons = null;
-  #muzzleFlash = null;
+  #gunFx = null;
   #roster = null;
   #interaction = null;
   #hud = null;
@@ -91,7 +91,7 @@ export class GameplayState extends GameState {
       physics: s.get(Services.PHYSICS),
       getEnemies: () => this.#roster.living(),
     });
-    this.#muzzleFlash = new MuzzleFlash(events);
+    this.#gunFx = new GunFx(events);
 
     this.#interaction = new InteractionSystem(events, s.get(Services.INPUT));
 
@@ -116,6 +116,12 @@ export class GameplayState extends GameState {
       events.on('ui/show-note', ({ title, body }) => this.#openNote(title, body)),
       events.on('ui/open-save-menu', () => this.#openSaveMenu()),
       events.on('player/died', () => this.#onDeath()),
+      // Condition is physical: DANGER means a limp, CAUTION a slowed pace.
+      events.on('player/stats-changed', ({ condition }) => {
+        this.#player?.setSpeedMultiplier(
+          condition === 'DANGER' ? 0.6 : condition === 'CAUTION' ? 0.85 : 1
+        );
+      }),
       events.on('level/transition', (target) => this.#beginTransition(target)),
     ];
     events.emit('ui/fade', { opacity: 0, duration: 0.6 });
@@ -164,7 +170,7 @@ export class GameplayState extends GameState {
     this.services.get(Services.WORLD).update(dt);
     this.#player.update(dt);
     this.#weapons.update(dt);
-    this.#muzzleFlash.update(dt);
+    this.#gunFx.update(dt);
     this.#roster.update(dt);
     this.#interaction.update();
   }
@@ -187,7 +193,7 @@ export class GameplayState extends GameState {
     // Detach session objects so world disposal can't touch them.
     this.#roster.dispose();
     this.#player.object.removeFromParent();
-    this.#muzzleFlash.light.removeFromParent();
+    this.#gunFx.object.removeFromParent();
 
     const runtime = world.loadLevel(levelId, { story, inventory: this.#inventory });
     this.#levelId = levelId;
@@ -195,7 +201,7 @@ export class GameplayState extends GameState {
 
     const spawn = (spawnName && runtime.spawnPoints?.[spawnName]) ?? runtime.spawn;
     this.#player.spawnAt(spawn);
-    world.scene.add(this.#player.object, this.#muzzleFlash.light);
+    world.scene.add(this.#player.object, this.#gunFx.object);
 
     this.#roster.populate(
       runtime.enemySpawns,

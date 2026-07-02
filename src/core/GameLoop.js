@@ -20,6 +20,7 @@ export class GameLoop {
   #accumulator = 0;
   #lastTime = 0;
   #rafId = 0;
+  #hitstopRemaining = 0;
 
   onUpdate(fn) {
     this.#updateCallbacks.push(fn);
@@ -53,11 +54,26 @@ export class GameLoop {
     cancelAnimationFrame(this.#rafId);
   }
 
+  /**
+   * Hitstop: freeze simulation (not rendering) for a beat. Impact frames —
+   * melee contact, gunshots, kills — call this to give hits weight.
+   * Stacks by taking the max, so overlapping impacts don't snowball.
+   */
+  hitstop(seconds) {
+    this.#hitstopRemaining = Math.max(this.#hitstopRemaining, seconds);
+  }
+
   #tick(now) {
     const step = GameLoop.FIXED_STEP;
     let frameDelta = (now - this.#lastTime) / 1000;
     this.#lastTime = now;
     if (frameDelta > GameLoop.MAX_FRAME_DELTA) frameDelta = GameLoop.MAX_FRAME_DELTA;
+
+    if (this.#hitstopRemaining > 0) {
+      const consumed = Math.min(this.#hitstopRemaining, frameDelta);
+      this.#hitstopRemaining -= consumed;
+      frameDelta -= consumed;
+    }
 
     this.#accumulator += frameDelta;
     while (this.#accumulator >= step) {

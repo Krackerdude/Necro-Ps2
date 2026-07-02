@@ -193,6 +193,17 @@ const RECIPES = {
     noise.start();
   },
 
+  casing: (ctx, bus) => {
+    // Brass tick on stone.
+    const gain = envGain(ctx, bus, 0.001, 0.07, 0.12);
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = 3400 + Math.random() * 600;
+    osc.connect(gain);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.08);
+  },
+
   weaponReady: (ctx, bus) => {
     const gain = envGain(ctx, bus, 0.002, 0.09, 0.2);
     const noise = noiseSource(ctx, 0.09);
