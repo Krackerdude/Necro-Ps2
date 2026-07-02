@@ -5,6 +5,7 @@ import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
 import { buildWeaponModel } from '../../assets/models/weaponModels.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * THE SUNKEN CLOISTER — level 2.
@@ -114,6 +115,23 @@ export const SUNKEN_CLOISTER = {
         { position: new THREE.Vector3(0.4, -0.4, -3.3), rotationY: 1.1, scale: 0.95 },
       ], { castShadow: true })
     );
+    // Signature landmark: a coffin half-swallowed by the garth, nose down
+    // where the ground gave way — visible from the overhead god-shot.
+    add(kit.sunkenCoffin({ position: [2.2, -2.0], rotationY: 0.55 }));
+    // A doorway someone boarded shut in a hurry (north walk).
+    add(kit.boardedDoorway({ position: [-4.2, -9.8], rotationY: 0 }));
+    // Banners flanking the ossuary gate — this door MATTERS.
+    add(kit.banner({ position: [-2.4, 9.8], rotationY: Math.PI, y: 3.3 }));
+    add(kit.banner({ position: [2.4, 9.8], rotationY: Math.PI, y: 3.3 }));
+    // Scriptorium: candelabra by the shrine, urn niche in the north walk.
+    add(kit.candelabra({ position: [-14.4, 2.3] }));
+    add(kit.urnNiche({ position: [3.5, -9.8], rotationY: 0 }));
+    // Damp rot everywhere the water reaches.
+    add(kit.wallStain({ position: [9.8, -1.5], y: 1.2, rotationY: -Math.PI / 2, size: 1.6, kind: 'damp' }));
+    add(kit.wallStain({ position: [-9.8, 2.8], y: 1.1, rotationY: Math.PI / 2, size: 1.5, kind: 'damp' }));
+    add(kit.wallStain({ position: [-6.5, 9.8], y: 1.4, rotationY: Math.PI, size: 1.3, kind: 'damp' }));
+    add(kit.votives({ position: [-1.4, 8.9], seed: 19 }));
+
     // The sundial the key rests on, dead center.
     add(kit.pillar({ position: [0, 0], radius: 0.3, height: 1.0, texture: 'stoneWall' }));
     // Bodies: one at the gate (revolver), one slumped in the north walk.
@@ -171,6 +189,8 @@ export const SUNKEN_CLOISTER = {
     root.add(gateDark);
     // ...and its collider, since the wall gap is wider than the bars.
     colliders.push(new THREE.Box3(new THREE.Vector3(-1.2, 0, 10.1), new THREE.Vector3(1.2, 3, 10.6)));
+    // Lintel above the gate: the bars stop at 2.6 under a 3.5 wall.
+    add(kit.wall({ from: [-1, 10], to: [1, 10], height: WALL_H - 2.6, yBase: 2.6 }));
 
     /* --------------------------- INTERACTABLES -------------------------- */
     interactables.push(
@@ -224,17 +244,7 @@ export const SUNKEN_CLOISTER = {
         position: new THREE.Vector3(-12.4, 1, -1.9),
         radius: 1.2,
         prompt: 'Read the planting ledger',
-        onInteract: () => {
-          story.set('readPlantingLedger', true);
-          events.emit('ui/show-note', {
-            title: 'THE PLANTING LEDGER',
-            body:
-              'Row 3: Brother Aldous. Planted shallow. Rose within the week.\n\n' +
-              'Row 5: The Verger. Planted with the green key, as he asked, so no ' +
-              'one would open the gate while he changed.\n\n' +
-              'We do not plant them deep. The warden says the ground is already full.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'plantingLedger'),
       }
     );
 
@@ -291,6 +301,33 @@ export const SUNKEN_CLOISTER = {
         position: new THREE.Vector3(-14.4, 1, 1.8),
         prompt: 'Take the grave tonic',
         flavor: 'Taken — GRAVE TONIC. The cork is sealed with red wax.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'garth-moss',
+        itemId: 'graveMoss',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-3.2, 0.3, 3.2),
+          color: 0x8fae72,
+          emissive: 0x2a3a1a,
+        }),
+        glowColor: 0xb8e0a0,
+        position: new THREE.Vector3(-3.2, 1, 3.2),
+        prompt: 'Gather grave moss',
+        flavor: 'Taken — GRAVE MOSS ×2, fat from the water.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'scriptorium-linen',
+        itemId: 'linenStrips',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-12.2, 0.3, 1.7),
+          color: 0xc9bd9e,
+          emissive: 0x4a4232,
+        }),
+        position: new THREE.Vector3(-12.2, 1, 1.7),
+        prompt: 'Take the folded linen',
+        flavor: 'Taken — LINEN STRIPS ×2, pressed and waiting.',
       }),
     ]) {
       if (pickup) interactables.push(pickup);
@@ -387,6 +424,18 @@ export const SUNKEN_CLOISTER = {
         regions: [
           { min: [-5.1, -5.1], max: [5.1, 5.1], type: 'water' }, // flooded garth
           { min: [-16, -3], max: [-10, 3], type: 'wood' },       // scriptorium
+        ],
+      },
+      map: {
+        rooms: [
+          { id: 'garth', label: 'Garth', min: [-5, -5], max: [5, 5] },
+          { id: 'scriptorium', label: 'Scriptorium', min: [-16, -3], max: [-10, 3] },
+          { id: 'walks', label: 'Cloister Walk', min: [-10, -10], max: [10, 10] },
+        ],
+        markers: [
+          { type: 'shrine', position: [-15.2, 0] },
+          { type: 'door', position: [8.6, -9.5] },
+          { type: 'door', position: [0, 9.5] },
         ],
       },
     };

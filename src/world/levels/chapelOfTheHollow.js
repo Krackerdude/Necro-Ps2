@@ -5,6 +5,7 @@ import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
 import { buildWeaponModel } from '../../assets/models/weaponModels.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * CHAPEL OF THE HOLLOW — the first playable level, and the reference for how
@@ -108,6 +109,11 @@ export const CHAPEL_OF_THE_HOLLOW = {
     add(kit.wall({ from: [24, -2], to: [24, 8], height: ROOM_H }));
     add(kit.wall({ from: [16, -2], to: [16, 2.5], height: ROOM_H }));
     add(kit.wall({ from: [16, 5.5], to: [16, 8], height: ROOM_H }));
+    // Door jambs + lintel: the doorway cut is 3 m wide but the crypt door
+    // leaf is 1.6 m — these fill the gaps so the door meets its frame.
+    add(kit.wall({ from: [16, 2.5], to: [16, 3.2], height: ROOM_H }));
+    add(kit.wall({ from: [16, 4.8], to: [16, 5.5], height: ROOM_H }));
+    add(kit.wall({ from: [16, 3.2], to: [16, 4.8], height: ROOM_H - 2.6, yBase: 2.6 }));
     add(kit.rubble({ position: [22.8, -0.8], seed: 33, count: 9, solid: true }));
 
     // Gravestones (instanced — one draw call).
@@ -143,6 +149,26 @@ export const CHAPEL_OF_THE_HOLLOW = {
     });
 
     /* --------------------------- SET DRESSING -------------------------- */
+    // Signature landmark: the toppled saint by the south-west pews — the
+    // first thing the entrance shot frames.
+    add(kit.fallenStatue({ position: [-4.2, 6.8], rotationY: 0.6 }));
+    // Candelabra pair flanking the altar.
+    add(kit.candelabra({ position: [-1.7, -7.2] }));
+    add(kit.candelabra({ position: [1.7, -7.2] }));
+    // Processional banners on the north wall, framing the altar.
+    add(kit.banner({ position: [-3, -9.8], rotationY: 0, y: 4.6 }));
+    add(kit.banner({ position: [3, -9.8], rotationY: 0, y: 4.6 }));
+    // Votives at a pillar base; an urn niche in the vestry.
+    add(kit.votives({ position: [4.0, -1.6], seed: 7 }));
+    add(kit.urnNiche({ position: [-11.85, -2.4], rotationY: Math.PI / 2 }));
+    // Grime: soot climbing above the altar candles, damp rot at the
+    // entrance, claw gouges where the crypt door was fought over.
+    add(kit.wallStain({ position: [0, -9.8], y: 2.8, rotationY: 0, size: 1.6, kind: 'soot' }));
+    add(kit.wallStain({ position: [-3.4, 9.8], y: 1.5, rotationY: Math.PI, size: 1.4, kind: 'damp' }));
+    add(kit.wallStain({ position: [3.1, 9.8], y: 1.7, rotationY: Math.PI, size: 1.2, kind: 'damp' }));
+    add(kit.wallStain({ position: [15.82, 4.6], y: 1.2, rotationY: -Math.PI / 2, size: 0.9, kind: 'scratch' }));
+    add(kit.wallStain({ position: [5.82, 1.6], y: 1.3, rotationY: -Math.PI / 2, size: 1.0, kind: 'scratch' }));
+
     // Candles (instanced).
     const candle = kit.candleTemplate();
     root.add(
@@ -221,18 +247,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
         position: new THREE.Vector3(-2.6, 1, 0.7),
         radius: 1.2,
         prompt: 'Read the warden’s note',
-        onInteract: () => {
-          story.set('readWardenNote', true);
-          events.emit('ui/show-note', {
-            title: 'THE WARDEN’S NOTE',
-            body:
-              'The congregation would not stop singing, so I nailed the doors.\n\n' +
-              'I keep the black key upon the altar, where He can watch it.\n\n' +
-              'Do not go below. The thing we buried does not know it is dead, ' +
-              'and the icon it clutches is the only thing keeping the ground closed.\n\n' +
-              '— If you must pray, pray at the bones.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'wardenNote'),
       },
       {
         id: 'crypt-door',
@@ -273,6 +288,10 @@ export const CHAPEL_OF_THE_HOLLOW = {
         prompt: 'Take the Hollow Icon',
         canInteract: () => story.get('cryptDoorOpen') && !story.get('hasHollowIcon'),
         onInteract: () => {
+          if (inventory && !inventory.canFit('hollowIcon')) {
+            events.emit('ui/toast', { text: 'Your satchel is full. It will not be carried loosely.' });
+            return;
+          }
           // Inventory first — the flag change triggers the autosave.
           inventory?.add('hollowIcon');
           story.set('hasHollowIcon', true);
@@ -368,6 +387,33 @@ export const CHAPEL_OF_THE_HOLLOW = {
         prompt: 'Search the body',
         flavor: 'Taken — TALLOW ROUNDS ×6. He never got to use them.',
       }),
+      makeItemPickup(pickupCtx, {
+        id: 'crypt-moss',
+        itemId: 'graveMoss',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(18.4, 0.25, 6.6),
+          color: 0x8fae72,
+          emissive: 0x2a3a1a,
+        }),
+        glowColor: 0xb8e0a0,
+        position: new THREE.Vector3(18.4, 1, 6.6),
+        prompt: 'Gather grave moss',
+        flavor: 'Taken — GRAVE MOSS ×2, growing thickest over row five.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'vestry-linen',
+        itemId: 'linenStrips',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-9.6, 0.3, -2.2),
+          color: 0xc9bd9e,
+          emissive: 0x4a4232,
+        }),
+        position: new THREE.Vector3(-9.6, 1, -2.2),
+        prompt: 'Take the altar linen',
+        flavor: 'Taken — LINEN STRIPS ×2, already torn to width.',
+      }),
     ]) {
       if (pickup) interactables.push(pickup);
     }
@@ -455,6 +501,19 @@ export const CHAPEL_OF_THE_HOLLOW = {
         regions: [
           { min: [-12, -7], max: [-6, -1], type: 'wood' }, // vestry
           { min: [16, -2], max: [24, 8], type: 'bone' },   // crypt
+        ],
+      },
+      map: {
+        rooms: [
+          { id: 'vestry', label: 'Vestry', min: [-12, -7], max: [-6, -1] },
+          { id: 'corridor', label: 'Passage', min: [6, 2.5], max: [16, 5.5] },
+          { id: 'crypt', label: 'Crypt', min: [16, -2], max: [24, 8] },
+          { id: 'nave', label: 'Nave', min: [-6, -10], max: [6, 10] },
+        ],
+        markers: [
+          { type: 'shrine', position: [-11.2, -4] },
+          { type: 'door', position: [16, 4] },
+          { type: 'door', position: [22.5, 7] },
         ],
       },
     };

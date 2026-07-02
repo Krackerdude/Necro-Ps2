@@ -14,6 +14,9 @@ import { EnemyRoster } from '../../gameplay/enemies/EnemyRoster.js';
 import { HudOverlay } from '../../ui/screens/HudOverlay.js';
 import { NoteScreen } from '../../ui/screens/NoteScreen.js';
 import { SaveLoadScreen } from '../../ui/screens/SaveLoadScreen.js';
+import { ShrineScreen } from '../../ui/screens/ShrineScreen.js';
+import { ItemBoxScreen } from '../../ui/screens/ItemBoxScreen.js';
+import { MapScreen } from '../../ui/screens/MapScreen.js';
 import { InventoryScreen } from '../../ui/screens/InventoryScreen.js';
 import { GameOverScreen } from '../../ui/screens/GameOverScreen.js';
 import { MainMenuState } from './MainMenuState.js';
@@ -42,6 +45,7 @@ export class GameplayState extends GameState {
   #player = null;
   #stats = null;
   #inventory = null;
+  #itemBox = null;
   #weapons = null;
   #gunFx = null;
   #bloodFx = null;
@@ -49,6 +53,7 @@ export class GameplayState extends GameState {
   #interaction = null;
   #hud = null;
   #levelId = null;
+  #currentRoomId = null;
   #playtime = 0;
   #unsubs = [];
   #dead = false;
@@ -70,8 +75,11 @@ export class GameplayState extends GameState {
     this.#dead = false;
 
     // --- session-scoped systems -------------------------------------------
-    this.#inventory = new Inventory(events);
+    // The satchel is capped (carry pressure); the reliquary is not.
+    this.#inventory = new Inventory(events, { maxSlots: 8 });
     if (snapshot) this.#inventory.restoreState(snapshot.participants.inventory);
+    this.#itemBox = new Inventory(events);
+    if (snapshot) this.#itemBox.restoreState(snapshot.participants.itemBox);
 
     const rig = new PlayerRig(renderer.ps2Materials);
     this.#player = new PlayerController({
@@ -127,7 +135,7 @@ export class GameplayState extends GameState {
     // --- session event wiring ----------------------------------------------
     this.#unsubs = [
       events.on('ui/show-note', ({ title, body }) => this.#openNote(title, body)),
-      events.on('ui/open-save-menu', () => this.#openSaveMenu()),
+      events.on('ui/open-save-menu', () => this.#openShrine()),
       events.on('player/died', () => this.#onDeath()),
       // Condition is physical: DANGER means a limp, a muffled world, and a
       // heartbeat under everything.
@@ -152,7 +160,11 @@ export class GameplayState extends GameState {
         setTimeout(() => audio.playAmbient('ossuary'), 7500);
       }),
       events.on('level/transition', (target) => this.#beginTransition(target)),
-      events.on('inventory/changed', ({ equipped }) => rig.setHeldWeapon(equipped)),
+      // Read the satchel model, not the payload — the reliquary emits the
+      // same event and must not unequip the held weapon.
+      events.on('inventory/changed', () =>
+        rig.setHeldWeapon(this.#inventory.equippedWeaponId)
+      ),
     ];
     events.emit('ui/fade', { opacity: 0, duration: 0.6 });
 
@@ -195,10 +207,15 @@ export class GameplayState extends GameState {
       this.#openInventory();
       return;
     }
+    if (input.wasPressed('map')) {
+      this.#openMap();
+      return;
+    }
 
     this.#playtime += dt;
     const world = this.services.get(Services.WORLD);
     world.update(dt);
+    this.#trackSurveyRoom(world);
     // Wading through water costs speed (and dignity).
     this.#player.setTerrainMultiplier(
       world.getSurfaceAt(this.#player.object.position) === 'water' ? 0.72 : 1
@@ -208,6 +225,37 @@ export class GameplayState extends GameState {
     this.#gunFx.update(dt);
     this.#roster.update(dt);
     this.#interaction.update();
+  }
+
+  /** The survey only draws rooms you have stood in. */
+  #trackSurveyRoom(world) {
+    const rooms = world.runtime?.map?.rooms;
+    if (!rooms) return;
+    const p = this.#player.object.position;
+    const room = rooms.find(
+      (r) => p.x >= r.min[0] && p.x <= r.max[0] && p.z >= r.min[1] && p.z <= r.max[1]
+    );
+    if (!room || room.id === this.#currentRoomId) return;
+    this.#currentRoomId = room.id;
+    const story = this.services.get(Services.STORY);
+    const flag = `mapSeen:${this.#levelId}:${room.id}`;
+    if (!story.get(flag)) story.set(flag, true);
+  }
+
+  #openMap() {
+    const world = this.services.get(Services.WORLD);
+    if (!world.runtime?.map) return;
+    const machine = this.services.get(Services.STATE_MACHINE);
+    const screen = new MapScreen({
+      levelName: getLevel(this.#levelId).name,
+      map: world.runtime.map,
+      story: this.services.get(Services.STORY),
+      levelId: this.#levelId,
+      playerObject: this.#player.object,
+      events: this.services.get(Services.EVENTS),
+      onClose: () => machine.pop(),
+    });
+    machine.push(new ModalUiState(this.services, screen));
   }
 
   /* ------------------------ level plumbing ------------------------- */
@@ -236,6 +284,7 @@ export class GameplayState extends GameState {
     this.#levelId = levelId;
     if (!story.get(`visited:${levelId}`)) story.set(`visited:${levelId}`, true);
 
+    this.#currentRoomId = null;
     const spawn = (spawnName && runtime.spawnPoints?.[spawnName]) ?? runtime.spawn;
     this.#player.spawnAt(spawn);
     world.scene.add(this.#player.object, this.#gunFx.object, this.#bloodFx.object);
@@ -279,6 +328,7 @@ export class GameplayState extends GameState {
         stats: this.#stats.captureState(),
         story: this.services.get(Services.STORY).captureState(),
         inventory: this.#inventory.captureState(),
+        itemBox: this.#itemBox.captureState(),
         enemies: this.#roster.captureState(),
       },
     };
@@ -293,6 +343,7 @@ export class GameplayState extends GameState {
       stats: this.#stats,
       events: this.services.get(Services.EVENTS),
       ps2: this.services.get(Services.RENDERER).ps2Materials,
+      story: this.services.get(Services.STORY),
       onClose: () => machine.pop(),
     });
     machine.push(new ModalUiState(this.services, screen));
@@ -301,6 +352,38 @@ export class GameplayState extends GameState {
   #openNote(title, body) {
     const machine = this.services.get(Services.STATE_MACHINE);
     const screen = new NoteScreen({ title, body, onClose: () => machine.pop() });
+    machine.push(new ModalUiState(this.services, screen));
+  }
+
+  /** Praying at the bones: save, or open the reliquary. */
+  #openShrine() {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    const events = this.services.get(Services.EVENTS);
+    const ui = this.services.get(Services.UI);
+    const screen = new ShrineScreen({
+      events,
+      ui,
+      onSave: () => {
+        machine.pop();
+        this.#openSaveMenu();
+      },
+      onBox: () => {
+        machine.pop();
+        this.#openItemBox();
+      },
+      onLeave: () => machine.pop(),
+    });
+    machine.push(new ModalUiState(this.services, screen));
+  }
+
+  #openItemBox() {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    const screen = new ItemBoxScreen({
+      satchel: this.#inventory,
+      box: this.#itemBox,
+      events: this.services.get(Services.EVENTS),
+      onBack: () => machine.pop(),
+    });
     machine.push(new ModalUiState(this.services, screen));
   }
 

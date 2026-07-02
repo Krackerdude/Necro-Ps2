@@ -3,7 +3,8 @@ import { defineCameraZone } from '../CameraZone.js';
 import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
-import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { makeItemPickup, makeTransition, makeItemSocket, makePickupMesh } from './levelHelpers.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * OSSUARY OF THE HOLLOW — level 3, the finale of this build.
@@ -53,6 +54,8 @@ export const OSSUARY_OF_THE_HOLLOW = {
     // the passage back reads as a place, not a hole into the void.
     const entranceDoor = kit.door({ position: [0, -10], width: 2.0, height: 2.3 });
     add(entranceDoor);
+    // Lintel strip: the door is 2.3 high under a 2.4 ceiling — close the gap.
+    add(kit.wall({ from: [-1, -10], to: [1, -10], height: CEIL - 2.25, yBase: 2.25 }));
     add(kit.wall({ from: [-4, -10], to: [-4, -4], height: CEIL }));
     // East wall with shrine alcove gap (z -8.2..-6.8).
     add(kit.wall({ from: [4, -10], to: [4, -8.2], height: CEIL }));
@@ -131,6 +134,22 @@ export const OSSUARY_OF_THE_HOLLOW = {
     add(kit.rubble({ position: [5.8, 12.8], seed: 91, count: 8 }));
     add(kit.rubble({ position: [-2.9, -8.7], seed: 93, count: 5 }));
 
+    // Signature dressing: arms reach from the bone walls of the
+    // processional — the one-point shot walks you straight between them.
+    add(kit.reachingNiche({ position: [-1.18, -1.4], rotationY: Math.PI / 2 }));
+    add(kit.reachingNiche({ position: [1.18, 0.8], rotationY: -Math.PI / 2, y: 0.9 }));
+    add(kit.reachingNiche({ position: [-1.18, 2.6], rotationY: Math.PI / 2, y: 1.2 }));
+    // Banners flanking the bell against the south wall.
+    add(kit.banner({ position: [-2.6, 13.8], rotationY: Math.PI, y: 3.9 }));
+    add(kit.banner({ position: [2.6, 13.8], rotationY: Math.PI, y: 3.9 }));
+    // Candelabra pair at the altar socket; votives by the shrine.
+    add(kit.candelabra({ position: [-1.4, 8.2] }));
+    add(kit.candelabra({ position: [1.4, 8.2] }));
+    add(kit.votives({ position: [6.2, -8.4], seed: 29 }));
+    // Soot above the chamber brazier light; scratches in the antechamber.
+    add(kit.wallStain({ position: [0, 13.82], y: 3.2, rotationY: Math.PI, size: 1.8, kind: 'soot' }));
+    add(kit.wallStain({ position: [-3.98, -8.2], y: 1.3, rotationY: Math.PI / 2, size: 1.0, kind: 'scratch' }));
+
     /* ----------------------------- LIGHTING ----------------------------- */
     root.add(new THREE.AmbientLight(0x282436, 2.1));
     root.add(new THREE.HemisphereLight(0x2c2840, 0x141008, 0.9));
@@ -176,39 +195,21 @@ export const OSSUARY_OF_THE_HOLLOW = {
         position: new THREE.Vector3(-3.4, 1, 5.4),
         radius: 1.2,
         prompt: 'Read the verger’s last page',
-        onInteract: () => {
-          story.set('readVergerNote', true);
-          events.emit('ui/show-note', {
-            title: 'THE VERGER’S LAST PAGE',
-            body:
-              'The bell is not for calling the living. It is for telling the ground ' +
-              'the hour, so it stays asleep.\n\n' +
-              'The icon is the clapper’s heart. Without it the bell only whispers, ' +
-              'and the whisper is what woke them.\n\n' +
-              'Seat the icon. Ring the hour. Forgive me for keeping the key.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'vergerNote'),
       },
-      {
-        id: 'icon-socket',
-        position: new THREE.Vector3(0, 1, 8.2),
-        radius: 1.4,
-        prompt: () =>
-          story.get('iconSeated') ? 'The icon is seated' : 'Seat the Hollow Icon',
-        canInteract: () => !story.get('iconSeated'),
-        onInteract: () => {
-          if (!inventory?.has('hollowIcon')) {
-            events.emit('ui/toast', {
-              text: 'An empty socket in the altar stone, shaped like a held bird.',
-            });
-            return;
-          }
-          inventory.remove('hollowIcon', 1);
-          story.set('iconSeated', true);
-          events.emit('audio/sfx', { id: 'saveChime' });
-          events.emit('ui/toast', { text: 'The icon settles into the socket. The bell leans in.' });
-        },
-      },
+      // The altar socket — built on the puzzle primitive.
+      makeItemSocket(
+        { story, inventory, events },
+        {
+          id: 'icon-socket',
+          itemId: 'hollowIcon',
+          flag: 'iconSeated',
+          position: new THREE.Vector3(0, 1, 8.2),
+          prompt: 'Seat the Hollow Icon',
+          missingText: 'An empty socket in the altar stone, shaped like a held bird.',
+          placedText: 'The icon settles into the socket. The bell leans in.',
+        }
+      ),
       {
         id: 'the-bell',
         position: new THREE.Vector3(0, 1, 10.5),
@@ -340,6 +341,19 @@ export const OSSUARY_OF_THE_HOLLOW = {
       fog: { color: 0x0c0a10, density: 0.06 },
       ambientTrack: 'ossuary',
       surfaces: { default: 'bone', regions: [] },
+      map: {
+        rooms: [
+          { id: 'antechamber', label: 'Antechamber', min: [-4, -10], max: [4, -4] },
+          { id: 'alcove', label: 'Shrine', min: [4, -9], max: [8, -6] },
+          { id: 'processional', label: 'Processional', min: [-1.2, -4], max: [1.2, 4] },
+          { id: 'chamber', label: 'Bell Chamber', min: [-7, 4], max: [7, 14] },
+        ],
+        markers: [
+          { type: 'shrine', position: [7.2, -7.5] },
+          { type: 'bell', position: [0, 10.5] },
+          { type: 'door', position: [0, -9.5] },
+        ],
+      },
     };
   },
 };

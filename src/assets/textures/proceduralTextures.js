@@ -204,6 +204,112 @@ const GENERATORS = {
     }
   },
 
+  /* --- alpha stains (transparent canvas; used by kit.wallStain) --- */
+
+  stainDamp: (ctx) => {
+    // Water damage: dark streaks bleeding downward from a soaked band.
+    const rand = mulberry32(41);
+    for (let i = 0; i < 7; i++) {
+      const x = 6 + rand() * 52;
+      const w = 3 + rand() * 7;
+      const len = 24 + rand() * 36;
+      const grad = ctx.createLinearGradient(0, 0, 0, len);
+      grad.addColorStop(0, 'rgba(18, 26, 22, 0.55)');
+      grad.addColorStop(1, 'rgba(18, 26, 22, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, 0, w, len);
+    }
+    const band = ctx.createLinearGradient(0, 0, 0, 14);
+    band.addColorStop(0, 'rgba(14, 20, 18, 0.6)');
+    band.addColorStop(1, 'rgba(14, 20, 18, 0)');
+    ctx.fillStyle = band;
+    ctx.fillRect(0, 0, SIZE, 14);
+  },
+
+  stainSoot: (ctx) => {
+    // Candle soot: a black fan blooming upward.
+    const rand = mulberry32(43);
+    for (let i = 0; i < 9; i++) {
+      const x = 32 + (rand() - 0.5) * 26;
+      const y = 50 - i * 5;
+      const r = 8 + i * 2.2;
+      const grad = ctx.createRadialGradient(x, y, 1, x, y, r);
+      grad.addColorStop(0, 'rgba(8, 7, 7, 0.5)');
+      grad.addColorStop(1, 'rgba(8, 7, 7, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+  },
+
+  stainScratch: (ctx) => {
+    // Claw gouges: parallel raking lines, dark cut + pale lip.
+    const rand = mulberry32(47);
+    for (let set = 0; set < 2; set++) {
+      const ox = 8 + rand() * 20;
+      const oy = 8 + rand() * 16;
+      const angle = 0.5 + rand() * 0.5;
+      for (let i = 0; i < 3; i++) {
+        const x0 = ox + i * 7;
+        const y0 = oy + i * 3;
+        const len = 26 + rand() * 18;
+        const dx = Math.cos(angle) * len;
+        const dy = Math.sin(angle) * len;
+        ctx.strokeStyle = 'rgba(220, 210, 190, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x0 + 1, y0 + 1);
+        ctx.lineTo(x0 + dx + 1, y0 + dy + 1);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(12, 8, 6, 0.75)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0 + dx, y0 + dy);
+        ctx.stroke();
+      }
+    }
+  },
+
+  bannerCloth: (ctx) => {
+    // Processional banner: blood field, bone border, the Hollow sigil (a
+    // ring with an empty center), frayed bottom edge.
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(SIZE, 0);
+    ctx.lineTo(SIZE, 52);
+    // jagged fray
+    for (let x = SIZE; x >= 0; x -= 8) {
+      ctx.lineTo(x - 4, 52 + (x % 16 === 0 ? 9 : 3));
+      ctx.lineTo(x - 8, 52);
+    }
+    ctx.closePath();
+    ctx.save();
+    ctx.clip();
+    // field + weave noise
+    ctx.fillStyle = '#5e1010';
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    const rand = mulberry32(53);
+    for (let i = 0; i < 220; i++) {
+      ctx.fillStyle = `rgba(0,0,0,${0.06 + rand() * 0.08})`;
+      ctx.fillRect(Math.floor(rand() * SIZE), Math.floor(rand() * SIZE), 2, 1);
+    }
+    // bone border
+    ctx.strokeStyle = '#cfc2a4';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(4, 4, SIZE - 8, 56);
+    // the Hollow sigil
+    ctx.strokeStyle = '#cfc2a4';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(32, 28, 11, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(32, 44);
+    ctx.lineTo(32, 50);
+    ctx.stroke();
+    ctx.restore();
+  },
+
   clothShroud: (ctx) => {
     fillNoise(ctx, [120, 116, 104], 8, 808);
     ctx.strokeStyle = 'rgba(80, 76, 66, 0.4)';

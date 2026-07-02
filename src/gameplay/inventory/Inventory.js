@@ -1,24 +1,52 @@
 import { getItem } from './itemCatalog.js';
+import { findRecipe } from './recipes.js';
 
 /**
- * Inventory — the player's belongings for one game session.
+ * Inventory — a container of item stacks (the satchel AND the shrine
+ * reliquary are both instances; only the satchel has a slot cap and an
+ * equipped weapon).
  *
- * A list of stacks plus one equipped-weapon slot. Pure model: no DOM, no
- * three.js. The inventory screen renders it; WeaponSystem reads the equipped
- * weapon and draws ammo from it.
+ * Capacity is measured in STACKS (a weapon is one slot, thirty rounds is
+ * one slot) — the classic carry-pressure model. Pure model: no DOM, no
+ * three.js.
  *
  * Emits 'inventory/changed' after any mutation (single coarse event — UI
  * re-renders are cheap at this scale).
  */
 export class Inventory {
   #events;
+  #maxSlots;
   /** @type {Array<{ id: string, qty: number }>} */
   #stacks = [];
   /** @type {string | null} */
   #equippedWeaponId = null;
 
-  constructor(events) {
+  /** @param {object} events @param {{ maxSlots?: number }} [opts] */
+  constructor(events, { maxSlots = Infinity } = {}) {
     this.#events = events;
+    this.#maxSlots = maxSlots;
+  }
+
+  get maxSlots() {
+    return this.#maxSlots;
+  }
+
+  get slotsUsed() {
+    return this.#stacks.length;
+  }
+
+  /** Would `qty` of item fit without exceeding the slot cap? */
+  canFit(id, qty = 1) {
+    const def = getItem(id);
+    const stackMax = def.stack ?? 1;
+    let remaining = qty;
+    if (stackMax > 1) {
+      for (const stack of this.#stacks) {
+        if (stack.id === id) remaining -= Math.min(stackMax - stack.qty, remaining);
+      }
+    }
+    const newSlots = Math.ceil(Math.max(0, remaining) / stackMax);
+    return this.#stacks.length + newSlots <= this.#maxSlots;
   }
 
   get stacks() {
@@ -90,6 +118,21 @@ export class Inventory {
     if (!def.use(ctx)) return false;
     this.remove(id, 1);
     return true;
+  }
+
+  /**
+   * Combine two items per the recipes registry. Consumes one of each and
+   * yields the result (which always fits: two slots freed, one gained).
+   * @returns {{ ok: boolean, recipe?: object }}
+   */
+  combine(idA, idB) {
+    const recipe = findRecipe(idA, idB);
+    if (!recipe || !this.has(idA) || !this.has(idB)) return { ok: false };
+    if (idA === idB && this.count(idA) < 2) return { ok: false };
+    this.remove(idA, 1);
+    this.remove(idB, 1);
+    this.add(recipe.result, 1);
+    return { ok: true, recipe };
   }
 
   /** Equip a weapon (or null to unequip). No-op if not owned. */

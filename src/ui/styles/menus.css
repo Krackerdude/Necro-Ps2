@@ -426,6 +426,15 @@
   color: var(--blood-bright);
 }
 
+.inv-tile.combine-target {
+  border-color: #7fae62;
+  animation: combine-pulse 0.7s steps(2) infinite;
+}
+
+@keyframes combine-pulse {
+  50% { background: rgba(127, 174, 98, 0.18); }
+}
+
 .inv-tile .inv-equip-tag {
   position: absolute;
   bottom: 4px;
@@ -484,6 +493,74 @@
   color: var(--blood-bright);
 }
 
+/* Documents shelf — full width under the satchel grid */
+.inv-docs {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(230, 221, 198, 0.2);
+  padding-top: 12px;
+  margin-top: 6px;
+}
+
+.inv-docs-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  color: var(--bone-dim);
+  margin-bottom: 8px;
+}
+
+.inv-docs-empty {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #4a463d;
+  text-transform: uppercase;
+}
+
+.inv-docs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inv-doc {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--bone);
+  border: 1px solid rgba(230, 221, 198, 0.35);
+  background: rgba(230, 221, 198, 0.05);
+  padding: 5px 14px;
+  transform: skewX(-8deg);
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+.inv-doc:hover {
+  background: var(--blood);
+  border-color: var(--bone);
+}
+
+/* Reliquary transfer columns */
+.box-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  min-height: 260px;
+}
+
+.box-column {
+  border: 1px solid rgba(230, 221, 198, 0.18);
+  padding: 14px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+
+.box-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 10px;
+}
+
 /* ---------------- Pause ---------------- */
 
 .pause-screen {
@@ -530,4 +607,18 @@
 @keyframes gameover-in {
   from { opacity: 0; transform: rotate(-2.5deg) skewX(-4deg) scale(1.6); }
   to { opacity: 1; transform: rotate(-2.5deg) skewX(-4deg) scale(1); }
+}
+
+/* Survey map */
+.map-body {
+  display: flex;
+  justify-content: center;
+}
+
+.map-canvas {
+  max-width: 100%;
+  background:
+    radial-gradient(ellipse at center, rgba(230, 221, 198, 0.03), transparent 70%),
+    rgba(4, 3, 7, 0.6);
+  border: 1px solid rgba(230, 221, 198, 0.2);
 }

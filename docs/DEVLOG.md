@@ -5,6 +5,59 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 10: Tier 6 — systems depth
+
+- **Combination**: recipes registry (gameplay/inventory/recipes.js);
+  Inventory.combine consumes the pair, yields the result. Satchel gains
+  combine mode (Combine button → pick partner, tiles pulse green, Esc backs
+  out). Chain: graveMoss+linenStrips→mossPoultice; poultice+tonic→
+  blessedSalve (full heal). New gatherables placed: moss (crypt, garth),
+  linen (vestry, scriptorium).
+- **Carry cap + reliquary**: the satchel is 8 STACKS (weapons/keys count).
+  Pickups that don't fit stay in the world (beacon intact, flag unset).
+  Shrines now open a ShrineScreen (Commit to Bone / The Reliquary / Rise);
+  the reliquary is an uncapped Inventory instance shared by all shrines and
+  saved as participants.itemBox. GOTCHA: both inventories emit
+  'inventory/changed' — listeners must read the SATCHEL MODEL, not the
+  payload (the held-weapon visual bug).
+- **Puzzle primitive**: levelHelpers.makeItemSocket (place item → flag →
+  gates anything). The ossuary icon socket is the reference usage.
+- **Survey map** (M): levels author map.rooms/markers; GameplayState flags
+  `mapSeen:<level>:<room>` as you walk (rooms match in order — nested rooms
+  list first). MapScreen draws only walked rooms on canvas, shrine crosses,
+  bell circle, door notches, blood-arrow player marker.
+- Verified headless: combine ok, 8/8 cap blocks pickups without consuming
+  them, reliquary transfer survives the save roundtrip, map renders.
+
+---
+
+## 2026-07-02 — Session 9: playtest fixes + Tier 5 (dressing density)
+
+**Fixes from playtest:**
+- Footsteps were too loud/bright: all four surface recipes dropped to
+  ~0.10–0.13 peak and darker filters (stone lp 200–260 Hz, etc.).
+- Wraiths were "insufferable": hp 150→90 (3 revolver rounds), pursue speed
+  2.4, loseRadius 8.5, and PURSUIT FATIGUE — a hunt burns out after 6 s,
+  then a 5 s aggro cooldown (hearNoise suppressed) while it drifts home.
+  Pressure now comes in waves. RULE: relentless pursuit is only for scripted
+  chase beats, never ambient enemies.
+
+**Tier 5 — environmental storytelling:**
+- Kit set-dressing vocabulary: candelabra, banner (procedural Hollow-sigil
+  cloth w/ frayed alpha edge), urnNiche, boardedDoorway, votives,
+  fallenStatue, sunkenCoffin, reachingNiche (arms from the walls),
+  wallStain (alpha grime quads: damp/soot/scratch).
+- New alpha textures: stainDamp/stainSoot/stainScratch/bannerCloth.
+- Signature landmarks per room: nave = toppled saint; garth = half-sunken
+  coffin; processional = reaching arms between the one-point walls; bell
+  chamber = flanking banners. RULE: every authored camera shot should
+  contain one memorable object.
+- Documents system: gameplay/story/documents.js registry; levels call
+  readDocument() (sets `doc:<id>`, rides in saves); the satchel now has a
+  DOCUMENTS shelf (n/3 counter, re-read any collected paper).
+
+---
+
 ## 2026-07-02 — Session 8: Tier 4 — ambience polish
 
 - **Bell finale**: kit.bell exposes `userData.swing` (pivot at the beam);
