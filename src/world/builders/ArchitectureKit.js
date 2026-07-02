@@ -326,6 +326,249 @@ export class ArchitectureKit {
     return { object: group, colliders: [] };
   }
 
+  /* ==================== SET DRESSING (Tier 5) ==================== */
+
+  /** Iron candelabra: pole, drip tray, three lit candles. Pair with a
+   *  FlickerLight from the level for the actual glow. */
+  candelabra({ position }) {
+    const group = new THREE.Group();
+    const iron = this.material('ironDark', { metalness: 0.5, roughness: 0.6 });
+    const wax = this.material('boneDust', { emissive: 0xff9a3c, emissiveIntensity: 0.3 });
+    const base = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.12, 6), iron);
+    base.position.y = 0.06;
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.028, 1.35, 5), iron);
+    pole.position.y = 0.72;
+    const tray = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.03, 6), iron);
+    tray.position.y = 1.4;
+    group.add(base, pole, tray);
+    for (let i = 0; i < 3; i++) {
+      const angle = (i / 3) * Math.PI * 2;
+      const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.024, 0.14, 5), wax);
+      candle.position.set(Math.cos(angle) * 0.09, 1.49, Math.sin(angle) * 0.09);
+      group.add(candle);
+    }
+    group.traverse((n) => (n.castShadow = true));
+    group.position.set(position[0], 0, position[1]);
+    group.updateMatrixWorld(true);
+    return { object: group, colliders: [new THREE.Box3().setFromObject(group)] };
+  }
+
+  /** Hanging processional banner (the Hollow sigil). `y` is the rod height;
+   *  rotationY faces the cloth out from its wall. */
+  banner({ position, rotationY = 0, y = 3.4, width = 0.85, length = 2.2 }) {
+    const group = new THREE.Group();
+    const rod = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02, 0.02, width + 0.24, 5),
+      this.material('woodPlanks', { color: 0x6a5238 })
+    );
+    rod.rotation.z = Math.PI / 2;
+    const texture = getTexture('bannerCloth').clone();
+    const cloth = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, length),
+      this.#ps2.patch(
+        new THREE.MeshStandardMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          roughness: 1,
+        })
+      )
+    );
+    cloth.position.y = -length / 2;
+    cloth.rotation.x = 0.06; // hangs slightly off the wall
+    group.add(rod, cloth);
+    group.position.set(position[0], y, position[1]);
+    group.rotation.y = rotationY;
+    return { object: group, colliders: [] };
+  }
+
+  /** Wall niche holding a funerary urn: a dark recess faked with a black
+   *  backing quad, shelf, and the urn itself. */
+  urnNiche({ position, rotationY = 0, y = 1.15 }) {
+    const group = new THREE.Group();
+    const backing = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.55, 0.75),
+      new THREE.MeshBasicMaterial({ color: 0x030303 })
+    );
+    const shelf = new THREE.Mesh(
+      new THREE.BoxGeometry(0.55, 0.05, 0.22),
+      this.material('stoneWall')
+    );
+    shelf.position.set(0, -0.3, 0.1);
+    const urnBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.055, 0.24, 6),
+      this.material('boneDust', { color: 0xb8ac8e })
+    );
+    urnBody.position.set(0, -0.15, 0.1);
+    const urnLid = new THREE.Mesh(
+      new THREE.ConeGeometry(0.07, 0.07, 6),
+      this.material('boneDust', { color: 0xa89c7e })
+    );
+    urnLid.position.set(0, 0.005, 0.1);
+    group.add(backing, shelf, urnBody, urnLid);
+    group.traverse((n) => (n.castShadow = true));
+    group.position.set(position[0], y, position[1]);
+    group.rotation.y = rotationY;
+    return { object: group, colliders: [] };
+  }
+
+  /** Doorway boarded over in a hurry: black void quad + nailed planks. */
+  boardedDoorway({ position, rotationY = 0, width = 1.3, height = 2.3 }) {
+    const group = new THREE.Group();
+    const void_ = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({ color: 0x020202 })
+    );
+    void_.position.y = height / 2;
+    group.add(void_);
+    const wood = this.material('woodPlanks');
+    let s = 3;
+    const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 4; i++) {
+      const plank = new THREE.Mesh(
+        new THREE.BoxGeometry(width + 0.3, 0.16, 0.045),
+        wood
+      );
+      plank.position.set((rand() - 0.5) * 0.12, 0.4 + i * 0.55, 0.05);
+      plank.rotation.z = (rand() - 0.5) * 0.3;
+      group.add(plank);
+    }
+    group.traverse((n) => (n.castShadow = true));
+    group.position.set(position[0], 0, position[1]);
+    group.rotation.y = rotationY;
+    group.updateMatrixWorld(true);
+    return { object: group, colliders: [new THREE.Box3().setFromObject(group)] };
+  }
+
+  /** Votive cluster: stumpy candles of uneven height on a wax-drip tray. */
+  votives({ position, seed = 1 }) {
+    const group = new THREE.Group();
+    const wax = this.material('boneDust', {
+      color: 0xd8ccae,
+      emissive: 0xff9a3c,
+      emissiveIntensity: 0.25,
+    });
+    const tray = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.2, 0.22, 0.03, 7),
+      this.material('ironDark')
+    );
+    tray.position.y = 0.015;
+    group.add(tray);
+    let s = seed;
+    const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 5; i++) {
+      const h = 0.05 + rand() * 0.13;
+      const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, h, 5), wax);
+      const angle = rand() * Math.PI * 2;
+      const r = rand() * 0.13;
+      candle.position.set(Math.cos(angle) * r, 0.03 + h / 2, Math.sin(angle) * r);
+      group.add(candle);
+    }
+    group.position.set(position[0], 0, position[1]);
+    return { object: group, colliders: [] };
+  }
+
+  /** Toppled robed statue: the pedestal still stands; the saint does not. */
+  fallenStatue({ position, rotationY = 0 }) {
+    const group = new THREE.Group();
+    const stone = this.material('stoneWall', { color: 0xb8b2a4 });
+    const pedestal = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.7), stone);
+    pedestal.position.y = 0.25;
+    group.add(pedestal);
+    // The figure, lying where it fell beside the pedestal.
+    const figure = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.24, 1.3, 6), stone);
+    const hood = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.3, 6), stone);
+    hood.position.y = 0.78;
+    const armStub = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.42, 0.1), stone);
+    armStub.position.set(0.2, 0.2, 0.05);
+    armStub.rotation.z = -0.5;
+    figure.add(body, hood, armStub);
+    figure.rotation.z = Math.PI / 2 - 0.06; // lying down
+    figure.position.set(1.0, 0.18, 0.15);
+    group.add(figure);
+    group.traverse((n) => {
+      n.castShadow = true;
+      n.receiveShadow = true;
+    });
+    group.position.set(position[0], 0, position[1]);
+    group.rotation.y = rotationY;
+    group.updateMatrixWorld(true);
+    return { object: group, colliders: [new THREE.Box3().setFromObject(group)] };
+  }
+
+  /** Coffin half-sunk, nose down, where the ground gave way. */
+  sunkenCoffin({ position, rotationY = 0 }) {
+    const group = new THREE.Group();
+    const coffin = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.35, 1.7),
+      this.material('woodPlanks', { color: 0x5a4632 })
+    );
+    coffin.rotation.x = 0.38; // tilted into the water
+    coffin.position.y = 0.02;
+    const lid = new THREE.Mesh(
+      new THREE.BoxGeometry(0.62, 0.05, 0.9),
+      this.material('woodPlanks', { color: 0x6a5238 })
+    );
+    lid.rotation.x = 0.7;
+    lid.rotation.y = 0.25;
+    lid.position.set(0.15, 0.32, -0.5);
+    group.add(coffin, lid);
+    group.traverse((n) => (n.castShadow = true));
+    group.position.set(position[0], 0, position[1]);
+    group.rotation.y = rotationY;
+    group.updateMatrixWorld(true);
+    return { object: group, colliders: [new THREE.Box3().setFromObject(group)] };
+  }
+
+  /** Bone niche with arms reaching out of the dark. Corridor dressing. */
+  reachingNiche({ position, rotationY = 0, y = 1.05 }) {
+    const group = new THREE.Group();
+    const backing = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.5, 0.6),
+      new THREE.MeshBasicMaterial({ color: 0x020202 })
+    );
+    group.add(backing);
+    const skin = this.material('boneDust', { color: 0x9a8f78 });
+    for (const [x, ry, len] of [
+      [-0.1, 0.35, 0.42],
+      [0.12, -0.25, 0.34],
+    ]) {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, len), skin);
+      arm.position.set(x, -0.08, len / 2);
+      arm.rotation.y = ry;
+      arm.rotation.x = -0.15;
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.04, 0.11), skin);
+      hand.position.set(x + Math.sin(ry) * len, -0.14, Math.cos(ry) * len);
+      group.add(arm, hand);
+    }
+    group.traverse((n) => (n.castShadow = true));
+    group.position.set(position[0], y, position[1]);
+    group.rotation.y = rotationY;
+    return { object: group, colliders: [] };
+  }
+
+  /** Grime quad flush against a wall. kind: 'damp' | 'soot' | 'scratch'. */
+  wallStain({ position, y = 1.6, rotationY = 0, size = 1.2, kind = 'damp' }) {
+    const texture = getTexture(
+      kind === 'soot' ? 'stainSoot' : kind === 'scratch' ? 'stainScratch' : 'stainDamp'
+    );
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(size, size),
+      new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+      })
+    );
+    mesh.position.set(position[0], y, position[1]);
+    mesh.rotation.y = rotationY;
+    mesh.renderOrder = 1;
+    return { object: mesh, colliders: [] };
+  }
+
   /** Ossuary shrine — the save point. Distinct silhouette, faint glow. */
   shrine({ position, rotationY = 0 }) {
     const group = new THREE.Group();

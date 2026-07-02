@@ -5,6 +5,33 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 9: playtest fixes + Tier 5 (dressing density)
+
+**Fixes from playtest:**
+- Footsteps were too loud/bright: all four surface recipes dropped to
+  ~0.10–0.13 peak and darker filters (stone lp 200–260 Hz, etc.).
+- Wraiths were "insufferable": hp 150→90 (3 revolver rounds), pursue speed
+  2.4, loseRadius 8.5, and PURSUIT FATIGUE — a hunt burns out after 6 s,
+  then a 5 s aggro cooldown (hearNoise suppressed) while it drifts home.
+  Pressure now comes in waves. RULE: relentless pursuit is only for scripted
+  chase beats, never ambient enemies.
+
+**Tier 5 — environmental storytelling:**
+- Kit set-dressing vocabulary: candelabra, banner (procedural Hollow-sigil
+  cloth w/ frayed alpha edge), urnNiche, boardedDoorway, votives,
+  fallenStatue, sunkenCoffin, reachingNiche (arms from the walls),
+  wallStain (alpha grime quads: damp/soot/scratch).
+- New alpha textures: stainDamp/stainSoot/stainScratch/bannerCloth.
+- Signature landmarks per room: nave = toppled saint; garth = half-sunken
+  coffin; processional = reaching arms between the one-point walls; bell
+  chamber = flanking banners. RULE: every authored camera shot should
+  contain one memorable object.
+- Documents system: gameplay/story/documents.js registry; levels call
+  readDocument() (sets `doc:<id>`, rides in saves); the satchel now has a
+  DOCUMENTS shelf (n/3 counter, re-read any collected paper).
+
+---
+
 ## 2026-07-02 — Session 8: Tier 4 — ambience polish
 
 - **Bell finale**: kit.bell exposes `userData.swing` (pivot at the beam);

@@ -293,6 +293,7 @@ export class GameplayState extends GameState {
       stats: this.#stats,
       events: this.services.get(Services.EVENTS),
       ps2: this.services.get(Services.RENDERER).ps2Materials,
+      story: this.services.get(Services.STORY),
       onClose: () => machine.pop(),
     });
     machine.push(new ModalUiState(this.services, screen));

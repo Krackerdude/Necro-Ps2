@@ -8,14 +8,19 @@ import { EnemyHealth } from '../combat/EnemyHealth.js';
  * mortality in combat/EnemyHealth.
  *
  * Speeds are tuned so a walking player gets caught and a running player
- * escapes — the classic pressure valve. It takes most of a revolver's worth
- * of rounds to put one down; running remains the honest option.
+ * escapes — the classic pressure valve. Three revolver rounds put one down.
+ *
+ * FATIGUE: a wraith can only sustain a hunt for a few seconds before the
+ * shroud "spends itself" — it breaks off, drifts home, and cannot re-aggro
+ * for a beat. Pressure comes in waves, not a permanent chase.
  */
-const SPEED = { haunt: 0.7, pursue: 2.6, investigate: 1.7, return: 1.2 };
+const SPEED = { haunt: 0.7, pursue: 2.4, investigate: 1.6, return: 1.2 };
 const CONTACT_RANGE = 0.65;
 const CONTACT_DAMAGE = 18;
 const CONTACT_COOLDOWN = 1.2;
-const HP = 150;
+const HP = 90;
+const PURSUE_STAMINA = 6.0;
+const AGGRO_COOLDOWN = 5.0;
 
 export class Wraith {
   /** @type {THREE.Group} */
@@ -64,21 +69,23 @@ export class Wraith {
       home: spawn.position,
       homeRadius: spawn.homeRadius ?? 5,
       detectRadius: 5.5,
-      loseRadius: 10,
+      loseRadius: 8.5,
       hasLineOfSight: (from, to) => !physics.segmentBlockedXZ(from, to),
     });
   }
 
   #flickerRemaining = 0;
   #basePosition = new THREE.Vector3();
+  #pursueTime = 0;
+  #aggroCooldown = 0;
 
   get alive() {
     return this.health.alive;
   }
 
-  /** Wraiths hear everything the walls let through. */
+  /** Wraiths hear everything the walls let through — unless spent. */
   hearNoise(position, radius) {
-    if (!this.health.alive) return;
+    if (!this.health.alive || this.#aggroCooldown > 0) return;
     this.#behavior.hearNoise(this.object.position, position, radius);
   }
 
@@ -115,7 +122,26 @@ export class Wraith {
       return;
     }
 
+    // Fatigue: a hunt burns out after PURSUE_STAMINA seconds; while spent,
+    // any re-aggro is suppressed and the wraith drifts home.
+    if (this.#aggroCooldown > 0) {
+      this.#aggroCooldown -= dt;
+      if (this.#behavior.state === 'pursue') this.#behavior.state = 'return';
+    }
+
     const dir = this.#behavior.update(this.object.position, this.#playerObject.position, dt);
+
+    if (this.#behavior.state === 'pursue') {
+      this.#pursueTime += dt;
+      if (this.#pursueTime >= PURSUE_STAMINA) {
+        this.#pursueTime = 0;
+        this.#aggroCooldown = AGGRO_COOLDOWN;
+        this.#behavior.state = 'return';
+      }
+    } else {
+      this.#pursueTime = Math.max(0, this.#pursueTime - dt * 0.5);
+    }
+
     const speed = SPEED[this.#behavior.state] ?? SPEED.haunt;
     this.#physics.moveCircle(this.object.position, dir.x * speed * dt, dir.z * speed * dt, 0.3);
 

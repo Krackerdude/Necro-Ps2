@@ -5,6 +5,7 @@ import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
 import { buildWeaponModel } from '../../assets/models/weaponModels.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * CHAPEL OF THE HOLLOW — the first playable level, and the reference for how
@@ -148,6 +149,26 @@ export const CHAPEL_OF_THE_HOLLOW = {
     });
 
     /* --------------------------- SET DRESSING -------------------------- */
+    // Signature landmark: the toppled saint by the south-west pews — the
+    // first thing the entrance shot frames.
+    add(kit.fallenStatue({ position: [-4.2, 6.8], rotationY: 0.6 }));
+    // Candelabra pair flanking the altar.
+    add(kit.candelabra({ position: [-1.7, -7.2] }));
+    add(kit.candelabra({ position: [1.7, -7.2] }));
+    // Processional banners on the north wall, framing the altar.
+    add(kit.banner({ position: [-3, -9.8], rotationY: 0, y: 4.6 }));
+    add(kit.banner({ position: [3, -9.8], rotationY: 0, y: 4.6 }));
+    // Votives at a pillar base; an urn niche in the vestry.
+    add(kit.votives({ position: [4.0, -1.6], seed: 7 }));
+    add(kit.urnNiche({ position: [-11.85, -2.4], rotationY: Math.PI / 2 }));
+    // Grime: soot climbing above the altar candles, damp rot at the
+    // entrance, claw gouges where the crypt door was fought over.
+    add(kit.wallStain({ position: [0, -9.8], y: 2.8, rotationY: 0, size: 1.6, kind: 'soot' }));
+    add(kit.wallStain({ position: [-3.4, 9.8], y: 1.5, rotationY: Math.PI, size: 1.4, kind: 'damp' }));
+    add(kit.wallStain({ position: [3.1, 9.8], y: 1.7, rotationY: Math.PI, size: 1.2, kind: 'damp' }));
+    add(kit.wallStain({ position: [15.82, 4.6], y: 1.2, rotationY: -Math.PI / 2, size: 0.9, kind: 'scratch' }));
+    add(kit.wallStain({ position: [5.82, 1.6], y: 1.3, rotationY: -Math.PI / 2, size: 1.0, kind: 'scratch' }));
+
     // Candles (instanced).
     const candle = kit.candleTemplate();
     root.add(
@@ -226,18 +247,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
         position: new THREE.Vector3(-2.6, 1, 0.7),
         radius: 1.2,
         prompt: 'Read the warden’s note',
-        onInteract: () => {
-          story.set('readWardenNote', true);
-          events.emit('ui/show-note', {
-            title: 'THE WARDEN’S NOTE',
-            body:
-              'The congregation would not stop singing, so I nailed the doors.\n\n' +
-              'I keep the black key upon the altar, where He can watch it.\n\n' +
-              'Do not go below. The thing we buried does not know it is dead, ' +
-              'and the icon it clutches is the only thing keeping the ground closed.\n\n' +
-              '— If you must pray, pray at the bones.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'wardenNote'),
       },
       {
         id: 'crypt-door',

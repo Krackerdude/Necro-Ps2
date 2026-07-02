@@ -4,6 +4,7 @@ import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * OSSUARY OF THE HOLLOW — level 3, the finale of this build.
@@ -133,6 +134,22 @@ export const OSSUARY_OF_THE_HOLLOW = {
     add(kit.rubble({ position: [5.8, 12.8], seed: 91, count: 8 }));
     add(kit.rubble({ position: [-2.9, -8.7], seed: 93, count: 5 }));
 
+    // Signature dressing: arms reach from the bone walls of the
+    // processional — the one-point shot walks you straight between them.
+    add(kit.reachingNiche({ position: [-1.18, -1.4], rotationY: Math.PI / 2 }));
+    add(kit.reachingNiche({ position: [1.18, 0.8], rotationY: -Math.PI / 2, y: 0.9 }));
+    add(kit.reachingNiche({ position: [-1.18, 2.6], rotationY: Math.PI / 2, y: 1.2 }));
+    // Banners flanking the bell against the south wall.
+    add(kit.banner({ position: [-2.6, 13.8], rotationY: Math.PI, y: 3.9 }));
+    add(kit.banner({ position: [2.6, 13.8], rotationY: Math.PI, y: 3.9 }));
+    // Candelabra pair at the altar socket; votives by the shrine.
+    add(kit.candelabra({ position: [-1.4, 8.2] }));
+    add(kit.candelabra({ position: [1.4, 8.2] }));
+    add(kit.votives({ position: [6.2, -8.4], seed: 29 }));
+    // Soot above the chamber brazier light; scratches in the antechamber.
+    add(kit.wallStain({ position: [0, 13.82], y: 3.2, rotationY: Math.PI, size: 1.8, kind: 'soot' }));
+    add(kit.wallStain({ position: [-3.98, -8.2], y: 1.3, rotationY: Math.PI / 2, size: 1.0, kind: 'scratch' }));
+
     /* ----------------------------- LIGHTING ----------------------------- */
     root.add(new THREE.AmbientLight(0x282436, 2.1));
     root.add(new THREE.HemisphereLight(0x2c2840, 0x141008, 0.9));
@@ -178,18 +195,7 @@ export const OSSUARY_OF_THE_HOLLOW = {
         position: new THREE.Vector3(-3.4, 1, 5.4),
         radius: 1.2,
         prompt: 'Read the verger’s last page',
-        onInteract: () => {
-          story.set('readVergerNote', true);
-          events.emit('ui/show-note', {
-            title: 'THE VERGER’S LAST PAGE',
-            body:
-              'The bell is not for calling the living. It is for telling the ground ' +
-              'the hour, so it stays asleep.\n\n' +
-              'The icon is the clapper’s heart. Without it the bell only whispers, ' +
-              'and the whisper is what woke them.\n\n' +
-              'Seat the icon. Ring the hour. Forgive me for keeping the key.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'vergerNote'),
       },
       {
         id: 'icon-socket',

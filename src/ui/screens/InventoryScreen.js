@@ -2,6 +2,7 @@ import { Screen } from '../Screen.js';
 import { el } from '../components/dom.js';
 import { ExamineView } from '../components/ExamineView.js';
 import { getItem } from '../../gameplay/inventory/itemCatalog.js';
+import { DOCUMENTS, collectedDocuments } from '../../gameplay/story/documents.js';
 
 /**
  * InventoryScreen — the satchel. A tile grid on the left, the selected
@@ -21,12 +22,15 @@ export class InventoryScreen extends Screen {
   #examine = null;
   #examineItemId = null;
 
-  constructor({ inventory, stats, events, ps2 = null, onClose }) {
+  #story;
+
+  constructor({ inventory, stats, events, ps2 = null, story = null, onClose }) {
     super();
     this.#inventory = inventory;
     this.#stats = stats;
     this.#events = events;
     this.#ps2 = ps2;
+    this.#story = story;
     this.#onClose = onClose;
   }
 
@@ -125,7 +129,8 @@ export class InventoryScreen extends Screen {
 
     if (stacks.length === 0) {
       body.replaceChildren(
-        el('div.inv-empty', {}, 'Nothing but lint and church dust.')
+        el('div.inv-empty', {}, 'Nothing but lint and church dust.'),
+        this.#buildDocumentsShelf()
       );
       return;
     }
@@ -180,6 +185,34 @@ export class InventoryScreen extends Screen {
         : el('div.inv-kind', {}, 'Its use will present itself.')
     );
 
-    body.replaceChildren(grid, dossier);
+    body.replaceChildren(grid, dossier, this.#buildDocumentsShelf());
+  }
+
+  /** Every document you've read, re-readable. The lore is a collection. */
+  #buildDocumentsShelf() {
+    const read = this.#story ? collectedDocuments(this.#story) : [];
+    return el(
+      'div.inv-docs',
+      {},
+      el('div.inv-docs-title', {}, `DOCUMENTS ・ ${read.length}/${Object.keys(DOCUMENTS).length}`),
+      read.length === 0
+        ? el('div.inv-docs-empty', {}, 'No papers collected. The dead wrote things down.')
+        : el(
+            'div.inv-docs-list',
+            {},
+            read.map((id) =>
+              el(
+                'button.inv-doc',
+                {
+                  onclick: () => {
+                    this.#events.emit('audio/sfx', { id: 'uiConfirm' });
+                    this.#events.emit('ui/show-note', DOCUMENTS[id]);
+                  },
+                },
+                DOCUMENTS[id].title
+              )
+            )
+          )
+    );
   }
 }

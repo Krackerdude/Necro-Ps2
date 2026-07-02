@@ -5,6 +5,7 @@ import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
 import { buildWeaponModel } from '../../assets/models/weaponModels.js';
+import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
  * THE SUNKEN CLOISTER — level 2.
@@ -114,6 +115,23 @@ export const SUNKEN_CLOISTER = {
         { position: new THREE.Vector3(0.4, -0.4, -3.3), rotationY: 1.1, scale: 0.95 },
       ], { castShadow: true })
     );
+    // Signature landmark: a coffin half-swallowed by the garth, nose down
+    // where the ground gave way — visible from the overhead god-shot.
+    add(kit.sunkenCoffin({ position: [2.2, -2.0], rotationY: 0.55 }));
+    // A doorway someone boarded shut in a hurry (north walk).
+    add(kit.boardedDoorway({ position: [-4.2, -9.8], rotationY: 0 }));
+    // Banners flanking the ossuary gate — this door MATTERS.
+    add(kit.banner({ position: [-2.4, 9.8], rotationY: Math.PI, y: 3.3 }));
+    add(kit.banner({ position: [2.4, 9.8], rotationY: Math.PI, y: 3.3 }));
+    // Scriptorium: candelabra by the shrine, urn niche in the north walk.
+    add(kit.candelabra({ position: [-14.4, 2.3] }));
+    add(kit.urnNiche({ position: [3.5, -9.8], rotationY: 0 }));
+    // Damp rot everywhere the water reaches.
+    add(kit.wallStain({ position: [9.8, -1.5], y: 1.2, rotationY: -Math.PI / 2, size: 1.6, kind: 'damp' }));
+    add(kit.wallStain({ position: [-9.8, 2.8], y: 1.1, rotationY: Math.PI / 2, size: 1.5, kind: 'damp' }));
+    add(kit.wallStain({ position: [-6.5, 9.8], y: 1.4, rotationY: Math.PI, size: 1.3, kind: 'damp' }));
+    add(kit.votives({ position: [-1.4, 8.9], seed: 19 }));
+
     // The sundial the key rests on, dead center.
     add(kit.pillar({ position: [0, 0], radius: 0.3, height: 1.0, texture: 'stoneWall' }));
     // Bodies: one at the gate (revolver), one slumped in the north walk.
@@ -226,17 +244,7 @@ export const SUNKEN_CLOISTER = {
         position: new THREE.Vector3(-12.4, 1, -1.9),
         radius: 1.2,
         prompt: 'Read the planting ledger',
-        onInteract: () => {
-          story.set('readPlantingLedger', true);
-          events.emit('ui/show-note', {
-            title: 'THE PLANTING LEDGER',
-            body:
-              'Row 3: Brother Aldous. Planted shallow. Rose within the week.\n\n' +
-              'Row 5: The Verger. Planted with the green key, as he asked, so no ' +
-              'one would open the gate while he changed.\n\n' +
-              'We do not plant them deep. The warden says the ground is already full.',
-          });
-        },
+        onInteract: () => readDocument(events, story, 'plantingLedger'),
       }
     );
 
