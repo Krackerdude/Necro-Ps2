@@ -64,6 +64,11 @@ export class CameraDirector {
     if (mode !== 'zones') this.#activeZone = null;
   }
 
+  /** Force a re-cut on the next update (after cinematics moved the camera). */
+  refresh() {
+    this.#activeZone = null;
+  }
+
   /**
    * @param {import('../world/CameraZone.js').CameraZone[]} zones
    * @param {THREE.Object3D} target

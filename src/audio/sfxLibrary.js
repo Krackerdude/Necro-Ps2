@@ -377,6 +377,44 @@ const RECIPES = {
     }
   },
 
+  stingerDetect: (ctx, bus) => {
+    // Seen: a dissonant minor-second stab that dies fast.
+    for (const freq of [220, 233.1]) {
+      const gain = envGain(ctx, bus, 0.01, 0.9, 0.16);
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(2400, ctx.currentTime);
+      lp.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.8);
+      osc.connect(lp).connect(gain);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.95);
+    }
+  },
+
+  stingerKill: (ctx, bus) => {
+    // Resolution: a soft low fifth settling downward.
+    for (const [delay, freq] of [
+      [0, 98],
+      [0.22, 65.4],
+    ]) {
+      const t = ctx.currentTime + delay;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.12, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+      gain.connect(bus);
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      osc.start(t);
+      osc.stop(t + 1.45);
+    }
+  },
+
   saveChime: (ctx, bus) => {
     for (const [delay, freq] of [
       [0, 523],

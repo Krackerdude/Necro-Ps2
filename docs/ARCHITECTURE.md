@@ -89,6 +89,8 @@ Add new events here when you introduce them.
 | `camera/impulse` | `{strength}` | weapons, hurt, bell | CameraDirector (trauma shake) |
 | `blood/splat` | `{position,size?}` | PlayerController | BloodFx |
 | `noise/emitted` | `{position,radius}` | footsteps, gunshots | EnemyRoster → enemies (hearing) |
+| `enemy/alerted` | `{}` | enemies (pursue start) | GameplayState (detect stinger, throttled) |
+| `ui/letterbox` / `ui/caption` | `{on}` / `{text}` | CinematicState | CinematicOverlay |
 | `grab/started` / `grab/ended` | `{from, escaped?}` | Husk | PlayerController, HUD |
 | `grab/struggle` | `{}` | PlayerController (mash) | grabbing Husk |
 | `level/transition` | `{levelId,spawn}` | level interactables | GameplayState |

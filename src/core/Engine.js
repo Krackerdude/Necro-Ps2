@@ -13,6 +13,7 @@ import { WorldService } from '../world/WorldService.js';
 import { AudioService } from '../audio/AudioService.js';
 import { UIService } from '../ui/UIService.js';
 import { FadeOverlay } from '../ui/components/FadeOverlay.js';
+import { CinematicOverlay } from '../ui/components/CinematicOverlay.js';
 import { SaveService } from '../save/SaveService.js';
 import { StoryService } from '../gameplay/story/StoryService.js';
 import { DebugOverlay } from '../debug/DebugOverlay.js';
@@ -74,6 +75,7 @@ export class Engine {
     this.services.register(Services.AUDIO, new AudioService(events, settings));
     this.services.register(Services.UI, new UIService(uiRoot));
     new FadeOverlay(events, uiRoot); // event-driven, needs no registry entry
+    new CinematicOverlay(events, uiRoot); // letterbox + captions, same deal
     this.#debug = this.services.register(Services.DEBUG, new DebugOverlay(events, renderer));
 
     // State machine last — states pull services from the registry.

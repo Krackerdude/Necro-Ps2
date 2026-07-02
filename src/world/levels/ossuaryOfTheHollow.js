@@ -223,18 +223,9 @@ export const OSSUARY_OF_THE_HOLLOW = {
             });
             return;
           }
+          // The toll itself (sfx, impulse, enemy fall, cinematic, end note)
+          // is directed by GameplayState off this flag.
           story.set('bellRung', true);
-          events.emit('audio/sfx', { id: 'bellToll' });
-          events.emit('camera/impulse', { strength: 1.0 }); // the toll rocks the room
-          events.emit('ui/show-note', {
-            title: 'THE HOUR IS TOLD',
-            body:
-              'The toll moves through the floor, up the bone walls, out into the ' +
-              'drowned garth and the nave above.\n\n' +
-              'Everything that was standing lies down.\n\n' +
-              'The ground, satisfied, remembers it is only ground.\n\n' +
-              '— END OF THIS BUILD OF NECRO. Your saves will carry forward. —',
-          });
         },
       }
     );

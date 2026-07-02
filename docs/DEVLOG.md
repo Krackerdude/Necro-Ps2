@@ -5,6 +5,30 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 11: key auto-discard + Tier 7 (presentation)
+
+- **Spent keys discard themselves**: key defs carry `spentWhen(story)` +
+  `discardFlavor`; GameplayState sweeps satchel AND reliquary on every flag
+  change (and once on load for old saves).
+- **Cinematic system**: CinematicState runs data scripts (camera dollies,
+  captions, waits, sfx/fade/impulse as instantaneous steps); E/Esc skips;
+  exit restores zones with a director refresh. CinematicOverlay =
+  letterbox + caption, event-driven ('ui/letterbox'/'ui/caption').
+  Scripts in gameplay/cinematics/scripts.js: OPENING (New Game plays it
+  over the menu vista before the chapel loads) and BELL (pushed over
+  gameplay on bellRung; the END_NOTE shows after). Levels no longer own
+  those beats — the bell interactable just sets the flag.
+- **The RE door**: level transitions now cut to a dedicated void scene
+  where a heavy wooden door swings open (DoorTransitionScene, promise-based
+  self-driven animation since gameplay is frozen), then the next level.
+- **Stingers**: 'enemy/alerted' (emitted on pursue start) → dissonant
+  detect stab, throttled to one per 9 s; 'enemy/died' → soft low fifth.
+- **Attract mode**: idle 22 s on the title → cuts through four authored
+  vista shots; any input snaps back. Menu ambience gained a distant bell
+  on an untrustworthy 12–18 s schedule.
+
+---
+
 ## 2026-07-02 — Session 10: Tier 6 — systems depth
 
 - **Combination**: recipes registry (gameplay/inventory/recipes.js);
