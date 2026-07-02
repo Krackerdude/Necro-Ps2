@@ -445,6 +445,16 @@
   gap: 12px;
 }
 
+.examine-canvas {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 150 / 110;
+  image-rendering: pixelated;
+  background: radial-gradient(ellipse at center, rgba(158, 22, 22, 0.14), rgba(4, 3, 7, 0.9) 75%);
+  border: 1px solid rgba(230, 221, 198, 0.3);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+
 .inv-dossier h3 {
   font-family: var(--font-display);
   font-size: 22px;

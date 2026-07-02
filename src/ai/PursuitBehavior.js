@@ -4,9 +4,11 @@ import * as THREE from 'three';
  * PursuitBehavior — reusable chase brain, decoupled from any enemy body.
  *
  * States:
- *   'haunt'   — drift around a home point.
- *   'pursue'  — target entered detection radius with line of sight.
- *   'return'  — target escaped; drift home.
+ *   'haunt'       — drift around a home point.
+ *   'pursue'      — target entered detection radius with line of sight.
+ *   'investigate' — heard something; walking to where the sound was.
+ *                   Sight can escalate it to pursue on the way.
+ *   'return'      — target escaped; drift home.
  *
  * The behavior computes a desired velocity each tick; the OWNING entity
  * applies it (through physics, with its own speed). This keeps AI reusable:
@@ -36,6 +38,32 @@ export class PursuitBehavior {
     this.#hasLineOfSight = hasLineOfSight ?? (() => true);
   }
 
+  #investigateTarget = null;
+
+  /**
+   * A sound happened. If it's within earshot, the brain walks to WHERE THE
+   * SOUND WAS — hearing needs no line of sight (gunfire and running feet
+   * carry through walls), but it doesn't grant sight either. If the target
+   * is close (inside loseRadius), hearing escalates straight to pursuit.
+   * @param {THREE.Vector3} selfPos
+   * @param {THREE.Vector3} noisePos
+   * @param {number} radius
+   * @returns {boolean} true if the noise was heard
+   */
+  hearNoise(selfPos, noisePos, radius) {
+    const dist = selfPos.distanceTo(noisePos);
+    if (dist > radius) return false;
+    if (this.state !== 'pursue') {
+      if (dist < this.#loseRadius) {
+        this.state = 'pursue';
+      } else {
+        this.state = 'investigate';
+        this.#investigateTarget = noisePos.clone();
+      }
+    }
+    return true;
+  }
+
   /**
    * @param {THREE.Vector3} selfPos
    * @param {THREE.Vector3} targetPos
@@ -55,6 +83,13 @@ export class PursuitBehavior {
 
     if (this.state === 'pursue') {
       this.#desired.subVectors(targetPos, selfPos);
+    } else if (this.state === 'investigate' && this.#investigateTarget) {
+      this.#desired.subVectors(this.#investigateTarget, selfPos);
+      if (selfPos.distanceTo(this.#investigateTarget) < 1.0) {
+        // Nothing here. Drift back eventually.
+        this.#investigateTarget = null;
+        this.state = 'return';
+      }
     } else {
       const distHome = selfPos.distanceTo(this.#home);
       if (this.state === 'return' && distHome < 1) this.state = 'haunt';

@@ -59,7 +59,10 @@ export function makeItemPickup(ctx, def) {
  * @param {{ story: object, inventory: object, events: object }} ctx
  * @param {{ id: string, position: THREE.Vector3, radius?: number, prompt: string,
  *           targetLevel: string, targetSpawn: string,
+ *           door?: THREE.Object3D,
  *           lock?: { keyItem: string, flag: string, lockedText: string, unlockText: string } }} def
+ *        `door`: physical door mesh that creaks open a crack before the
+ *        fade — the classic "door beat". The level rebuild resets it.
  */
 export function makeTransition(ctx, def) {
   return {
@@ -83,10 +86,25 @@ export function makeTransition(ctx, def) {
         ctx.events.emit('ui/toast', { text: def.lock.unlockText });
         return; // unlocking and travelling are two beats
       }
-      ctx.events.emit('level/transition', {
-        levelId: def.targetLevel,
-        spawn: def.targetSpawn,
-      });
+      const travel = () =>
+        ctx.events.emit('level/transition', {
+          levelId: def.targetLevel,
+          spawn: def.targetSpawn,
+        });
+      if (def.door) {
+        // The door beat: it creaks open a crack, THEN the fade takes you.
+        const startY = def.door.rotation.y;
+        const t0 = performance.now();
+        const swing = () => {
+          const p = Math.min(1, (performance.now() - t0) / 340);
+          def.door.rotation.y = startY + 0.42 * p * p;
+          if (p < 1) requestAnimationFrame(swing);
+        };
+        requestAnimationFrame(swing);
+        setTimeout(travel, 300);
+      } else {
+        travel();
+      }
     },
   };
 }

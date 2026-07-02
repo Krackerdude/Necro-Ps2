@@ -31,6 +31,7 @@ export class EnemyRoster {
   #scene;
   #levelId;
   #unsubFlags;
+  #unsubNoise;
 
   /**
    * @param {{ events, physics, ps2, story, playerObject, playerStats }} deps
@@ -60,11 +61,23 @@ export class EnemyRoster {
         if (spawn.onlyIf && !this.#isSpawned(index)) this.#trySpawn(spawn, index, undefined);
       });
     });
+
+    // Sound propagates to every enemy that can hear it.
+    this.#unsubNoise = this.#deps.events.on('noise/emitted', ({ position, radius }) => {
+      for (const { entity } of this.#active) entity.hearNoise?.(position, radius);
+    });
   }
 
   /** Living enemies — the weapon system's target list. */
   living() {
     return this.#active.map((a) => a.entity).filter((e) => e.alive);
+  }
+
+  /** The bell tolls: everything standing lies down. */
+  killAll() {
+    for (const { entity } of this.#active) {
+      if (entity.alive) entity.takeHit(99999);
+    }
   }
 
   update(dt) {
@@ -90,6 +103,8 @@ export class EnemyRoster {
   dispose() {
     this.#unsubFlags?.();
     this.#unsubFlags = null;
+    this.#unsubNoise?.();
+    this.#unsubNoise = null;
     for (const { entity } of this.#active) entity.object.removeFromParent();
     this.#active = [];
   }

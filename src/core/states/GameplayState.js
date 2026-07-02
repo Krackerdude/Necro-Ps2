@@ -31,6 +31,13 @@ import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
  */
 const TRANSITION_FADE = 0.45;
 
+const SURFACE_FOOTSTEPS = {
+  stone: 'footstep',
+  wood: 'footstepWood',
+  water: 'footstepWater',
+  bone: 'footstepBone',
+};
+
 export class GameplayState extends GameState {
   #player = null;
   #stats = null;
@@ -122,11 +129,27 @@ export class GameplayState extends GameState {
       events.on('ui/show-note', ({ title, body }) => this.#openNote(title, body)),
       events.on('ui/open-save-menu', () => this.#openSaveMenu()),
       events.on('player/died', () => this.#onDeath()),
-      // Condition is physical: DANGER means a limp, CAUTION a slowed pace.
+      // Condition is physical: DANGER means a limp, a muffled world, and a
+      // heartbeat under everything.
       events.on('player/stats-changed', ({ condition }) => {
         this.#player?.setSpeedMultiplier(
           condition === 'DANGER' ? 0.6 : condition === 'CAUTION' ? 0.85 : 1
         );
+        s.get(Services.AUDIO).setCondition(condition);
+      }),
+      // Footsteps sound like what they land on.
+      events.on('player/footstep', () => {
+        const surface = s.get(Services.WORLD).getSurfaceAt(this.#player.object.position);
+        events.emit('audio/sfx', { id: SURFACE_FOOTSTEPS[surface] ?? 'footstep' });
+      }),
+      // The hour is told: the ambient bed dies for the toll, and everything
+      // still standing lies down.
+      events.on('story/flag-changed', ({ flag, value }) => {
+        if (flag !== 'bellRung' || !value) return;
+        this.#roster.killAll();
+        const audio = s.get(Services.AUDIO);
+        audio.stopAmbient();
+        setTimeout(() => audio.playAmbient('ossuary'), 7500);
       }),
       events.on('level/transition', (target) => this.#beginTransition(target)),
       events.on('inventory/changed', ({ equipped }) => rig.setHeldWeapon(equipped)),
@@ -174,7 +197,12 @@ export class GameplayState extends GameState {
     }
 
     this.#playtime += dt;
-    this.services.get(Services.WORLD).update(dt);
+    const world = this.services.get(Services.WORLD);
+    world.update(dt);
+    // Wading through water costs speed (and dignity).
+    this.#player.setTerrainMultiplier(
+      world.getSurfaceAt(this.#player.object.position) === 'water' ? 0.72 : 1
+    );
     this.#player.update(dt);
     this.#weapons.update(dt);
     this.#gunFx.update(dt);
@@ -264,6 +292,7 @@ export class GameplayState extends GameState {
       inventory: this.#inventory,
       stats: this.#stats,
       events: this.services.get(Services.EVENTS),
+      ps2: this.services.get(Services.RENDERER).ps2Materials,
       onClose: () => machine.pop(),
     });
     machine.push(new ModalUiState(this.services, screen));

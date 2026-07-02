@@ -40,6 +40,7 @@ export class HudOverlay extends Screen {
         el('div.value.FINE', {}, 'FINE')
       ),
       el('div.hud-prompt', { style: 'display:none' }),
+      el('div.hud-grab', { style: 'display:none' }, 'STRUGGLE — MASH ANY KEY'),
       el('div.hud-weapon', { style: 'display:none' }),
       el('div.hud-toasts', {})
     );
@@ -67,6 +68,14 @@ export class HudOverlay extends Screen {
         );
       }),
       this.#events.on('ui/toast', ({ text }) => this.#toast(text)),
+      this.#events.on('grab/started', () => {
+        const node = this.element.querySelector('.hud-grab');
+        if (node) node.style.display = '';
+      }),
+      this.#events.on('grab/ended', () => {
+        const node = this.element.querySelector('.hud-grab');
+        if (node) node.style.display = 'none';
+      }),
       this.#events.on('inventory/changed', () => {
         this.#renderWeapon();
         this.#renderObjective();

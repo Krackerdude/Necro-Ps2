@@ -51,7 +51,8 @@ export const OSSUARY_OF_THE_HOLLOW = {
     add(kit.wall({ from: [1, -10], to: [4, -10], height: CEIL }));
     // The gate you came through — a real door filling the entrance gap so
     // the passage back reads as a place, not a hole into the void.
-    add(kit.door({ position: [0, -10], width: 2.0, height: 2.3 }));
+    const entranceDoor = kit.door({ position: [0, -10], width: 2.0, height: 2.3 });
+    add(entranceDoor);
     add(kit.wall({ from: [-4, -10], to: [-4, -4], height: CEIL }));
     // East wall with shrine alcove gap (z -8.2..-6.8).
     add(kit.wall({ from: [4, -10], to: [4, -8.2], height: CEIL }));
@@ -90,6 +91,19 @@ export const OSSUARY_OF_THE_HOLLOW = {
     }
 
     const bell = add(kit.bell({ position: [0, 10.5] }));
+    // The toll: the bell rocks hard and rings down over ~9 seconds.
+    let tollTime = -1;
+    updatables.push({
+      update: (dt) => {
+        if (tollTime < 0) {
+          if (story.get('bellRung')) tollTime = 0;
+          return;
+        }
+        tollTime += dt;
+        const decay = Math.exp(-tollTime * 0.32);
+        bell.userData.swing.rotation.z = Math.sin(tollTime * 4.6) * 0.55 * decay;
+      },
+    });
     // The empty socket where the icon belongs.
     add(kit.altar({ position: [0, 8.2] }));
 
@@ -147,6 +161,7 @@ export const OSSUARY_OF_THE_HOLLOW = {
           prompt: 'Return to the cloister',
           targetLevel: 'sunken-cloister',
           targetSpawn: 'fromOssuary',
+          door: entranceDoor.object,
         }
       ),
       {
@@ -297,8 +312,6 @@ export const OSSUARY_OF_THE_HOLLOW = {
       }),
     ];
 
-    void bell; // future: swing animation on toll
-
     return {
       root,
       colliders,
@@ -310,13 +323,23 @@ export const OSSUARY_OF_THE_HOLLOW = {
         fromCloister: { position: new THREE.Vector3(0, 0, -9), rotationY: Math.PI },
       },
       enemySpawns: [
-        { type: 'husk', position: new THREE.Vector3(0, 0, 2.2), homeRadius: 3 },
+        // Mid-processional, back turned, facing the bell. It knows you're
+        // coming; it's waiting for you to get close enough to be sure.
+        {
+          type: 'husk',
+          variant: 'watcher',
+          facing: 0,
+          position: new THREE.Vector3(0, 0, 2.2),
+          homeRadius: 3,
+        },
         { type: 'wraith', position: new THREE.Vector3(-4, 0, 9), homeRadius: 4.5 },
         { type: 'wraith', position: new THREE.Vector3(4, 0, 11.5), homeRadius: 4.5 },
-        { type: 'husk', position: new THREE.Vector3(5.5, 0, 6), homeRadius: 4 },
+        // Dragging itself among the skull piles.
+        { type: 'husk', variant: 'crawler', position: new THREE.Vector3(5.5, 0, 6), homeRadius: 4 },
       ],
       fog: { color: 0x0c0a10, density: 0.06 },
       ambientTrack: 'ossuary',
+      surfaces: { default: 'bone', regions: [] },
     };
   },
 };

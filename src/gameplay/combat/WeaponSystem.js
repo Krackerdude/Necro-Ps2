@@ -101,6 +101,8 @@ export class WeaponSystem {
           this.#muzzle.copy(this.#player.object.position).y = 1.35;
           this.#events.emit('combat/fired', { position: this.#muzzle.clone(), ranged: true });
           this.#events.emit('camera/impulse', { strength: 0.24 });
+          // A gunshot underground is a dinner bell.
+          this.#events.emit('noise/emitted', { position: this.#muzzle.clone(), radius: 16 });
           const target = this.#findTarget(stats.range, RANGED_CONE_DEG, true);
           if (target) {
             target.takeHit(stats.damage);

@@ -1,5 +1,6 @@
 import { Screen } from '../Screen.js';
 import { el } from '../components/dom.js';
+import { ExamineView } from '../components/ExamineView.js';
 import { getItem } from '../../gameplay/inventory/itemCatalog.js';
 
 /**
@@ -13,15 +14,19 @@ export class InventoryScreen extends Screen {
   #inventory;
   #stats;
   #events;
+  #ps2;
   #onClose;
   #selected = 0;
   #unsub = null;
+  #examine = null;
+  #examineItemId = null;
 
-  constructor({ inventory, stats, events, onClose }) {
+  constructor({ inventory, stats, events, ps2 = null, onClose }) {
     super();
     this.#inventory = inventory;
     this.#stats = stats;
     this.#events = events;
+    this.#ps2 = ps2;
     this.#onClose = onClose;
   }
 
@@ -47,6 +52,7 @@ export class InventoryScreen extends Screen {
   onShow() {
     window.addEventListener('keydown', this.#onKey);
     this.#unsub = this.#events.on('inventory/changed', () => this.#render());
+    if (this.#ps2) this.#examine = new ExamineView(this.#ps2);
     this.#render();
   }
 
@@ -54,6 +60,9 @@ export class InventoryScreen extends Screen {
     window.removeEventListener('keydown', this.#onKey);
     this.#unsub?.();
     this.#unsub = null;
+    this.#examine?.dispose();
+    this.#examine = null;
+    this.#examineItemId = null;
   }
 
   #onKey = (e) => {
@@ -147,9 +156,15 @@ export class InventoryScreen extends Screen {
     const actionLabel =
       def.kind === 'weapon' ? (equipped ? 'Unequip' : 'Equip') : def.kind === 'consumable' ? 'Use' : null;
 
+    if (this.#examine && this.#examineItemId !== stack.id) {
+      this.#examineItemId = stack.id;
+      this.#examine.setItem(stack.id);
+    }
+
     const dossier = el(
       'div.inv-dossier',
       {},
+      this.#examine ? this.#examine.canvas : null,
       el('h3', {}, def.name),
       el('div.inv-kind', {}, def.kind.toUpperCase()),
       el('p', {}, def.description),
