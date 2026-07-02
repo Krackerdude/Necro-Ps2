@@ -21,6 +21,10 @@ import { InventoryScreen } from '../../ui/screens/InventoryScreen.js';
 import { GameOverScreen } from '../../ui/screens/GameOverScreen.js';
 import { MainMenuState } from './MainMenuState.js';
 import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
+import { ITEMS } from '../../gameplay/inventory/itemCatalog.js';
+import { CinematicState } from './CinematicState.js';
+import { BELL_SCRIPT, END_NOTE } from '../../gameplay/cinematics/scripts.js';
+import { DoorTransitionScene } from '../../world/effects/DoorTransitionScene.js';
 
 /**
  * GameplayState — the running game session.
@@ -58,6 +62,8 @@ export class GameplayState extends GameState {
   #unsubs = [];
   #dead = false;
   #transitioning = false;
+  #doorScene = null;
+  #lastDetectStinger = 0;
 
   enter(params = {}) {
     const s = this.services;
@@ -128,6 +134,9 @@ export class GameplayState extends GameState {
     this.#enterLevel(snapshot?.levelId ?? STARTING_LEVEL_ID, null, snapshot);
     if (snapshot) this.#player.restoreState(snapshot.participants.player);
 
+    // Old saves may carry keys that were already spent.
+    this.#discardSpentKeys();
+
     // --- saving -----------------------------------------------------------
     save.setCaptureProvider(() => this.#capture());
     if (!snapshot) save.autosave(); // a fresh run gets an immediate anchor
@@ -150,15 +159,35 @@ export class GameplayState extends GameState {
         const surface = s.get(Services.WORLD).getSurfaceAt(this.#player.object.position);
         events.emit('audio/sfx', { id: SURFACE_FOOTSTEPS[surface] ?? 'footstep' });
       }),
-      // The hour is told: the ambient bed dies for the toll, and everything
-      // still standing lies down.
+      // A key whose every lock is open leaves the satchel on its own.
+      events.on('story/flag-changed', () => this.#discardSpentKeys()),
+      // The hour is told: the ambient bed dies, everything standing lies
+      // down, and the toll plays as a directed scene ending on the note.
       events.on('story/flag-changed', ({ flag, value }) => {
         if (flag !== 'bellRung' || !value) return;
         this.#roster.killAll();
         const audio = s.get(Services.AUDIO);
         audio.stopAmbient();
-        setTimeout(() => audio.playAmbient('ossuary'), 7500);
+        setTimeout(() => audio.playAmbient('ossuary'), 9000);
+        const machine = s.get(Services.STATE_MACHINE);
+        machine.push(
+          new CinematicState(this.services, {
+            script: BELL_SCRIPT,
+            onComplete: () => {
+              machine.pop();
+              events.emit('ui/show-note', END_NOTE);
+            },
+          })
+        );
       }),
+      // Music stingers: a dissonant stab when something first notices you
+      // (throttled), a low resolution when something dies.
+      events.on('enemy/alerted', () => {
+        if (performance.now() - this.#lastDetectStinger < 9000) return;
+        this.#lastDetectStinger = performance.now();
+        events.emit('audio/sfx', { id: 'stingerDetect' });
+      }),
+      events.on('enemy/died', () => events.emit('audio/sfx', { id: 'stingerKill' })),
       events.on('level/transition', (target) => this.#beginTransition(target)),
       // Read the satchel model, not the payload — the reliquary emits the
       // same event and must not unequip the held weapon.
@@ -225,6 +254,22 @@ export class GameplayState extends GameState {
     this.#gunFx.update(dt);
     this.#roster.update(dt);
     this.#interaction.update();
+  }
+
+  /** Remove key items whose every use is behind them (from satchel AND
+   *  reliquary). Data-driven off `spentWhen` in the item catalog. */
+  #discardSpentKeys() {
+    const story = this.services.get(Services.STORY);
+    const events = this.services.get(Services.EVENTS);
+    for (const [id, def] of Object.entries(ITEMS)) {
+      if (def.kind !== 'key' || !def.spentWhen || !def.spentWhen(story)) continue;
+      for (const container of [this.#inventory, this.#itemBox]) {
+        if (container?.has(id)) {
+          container.remove(id, container.count(id));
+          events.emit('ui/toast', { text: def.discardFlavor ?? `The ${def.name} is spent.` });
+        }
+      }
+    }
   }
 
   /** The survey only draws rooms you have stood in. */
@@ -301,18 +346,30 @@ export class GameplayState extends GameState {
     s.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
   }
 
+  /** The iconic beat: darkness, a door swings open, the next room. */
   #beginTransition({ levelId, spawn }) {
     if (this.#transitioning) return;
     this.#transitioning = true;
     const events = this.services.get(Services.EVENTS);
-    events.emit('audio/sfx', { id: 'doorTransition' });
-    events.emit('ui/fade', { opacity: 1, duration: TRANSITION_FADE });
+    const renderer = this.services.get(Services.RENDERER);
+    if (!this.#doorScene) this.#doorScene = new DoorTransitionScene(renderer.ps2Materials);
+
+    events.emit('ui/fade', { opacity: 1, duration: 0.22 });
     setTimeout(() => {
-      this.#enterLevel(levelId, spawn);
-      this.services.get(Services.SAVE).autosave();
-      events.emit('ui/fade', { opacity: 0, duration: TRANSITION_FADE });
-      this.#transitioning = false;
-    }, TRANSITION_FADE * 1000 + 80);
+      renderer.setScene(this.#doorScene.scene);
+      renderer.setCamera(this.#doorScene.camera);
+      events.emit('ui/fade', { opacity: 0, duration: 0.18 });
+      events.emit('audio/sfx', { id: 'doorTransition' });
+      this.#doorScene.play(1500).then(() => {
+        events.emit('ui/fade', { opacity: 1, duration: 0.22 });
+        setTimeout(() => {
+          this.#enterLevel(levelId, spawn);
+          this.services.get(Services.SAVE).autosave();
+          events.emit('ui/fade', { opacity: 0, duration: TRANSITION_FADE });
+          this.#transitioning = false;
+        }, 260);
+      });
+    }, 260);
   }
 
   /* ------------------------- save snapshot ------------------------- */

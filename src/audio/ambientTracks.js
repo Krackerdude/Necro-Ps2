@@ -59,8 +59,26 @@ const TRACKS = {
       drone(ctx, out, { freq: 82.4, type: 'triangle', gain: 0.02 }),
       ...breathNoise(ctx, out, { cutoff: 200, gain: 0.02 }),
     ];
+    // A bell, far away, on no schedule you can trust.
+    const bell = setInterval(() => {
+      for (const [freq, amp] of [[98, 0.05], [147.3, 0.03]]) {
+        const t = ctx.currentTime;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(amp, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 4.5);
+        g.connect(out);
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(g);
+        osc.start(t);
+        osc.stop(t + 4.6);
+      }
+    }, 12000 + Math.random() * 6000);
     return {
       stop() {
+        clearInterval(bell);
         out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
         setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
       },

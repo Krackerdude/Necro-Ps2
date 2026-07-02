@@ -263,6 +263,7 @@ export class Husk {
 
     if (pursuing && !this.#wasPursuing) {
       this.#events.emit('audio/sfx', { id: 'huskGroan' });
+      this.#events.emit('enemy/alerted', {});
     }
     this.#wasPursuing = pursuing;
 

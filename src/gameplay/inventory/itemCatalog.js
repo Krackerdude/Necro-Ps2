@@ -117,6 +117,9 @@ export const ITEMS = Object.freeze({
     name: 'Black Iron Key',
     glyph: '†',
     description: 'Colder than the room. The wards on the bow face inward.',
+    // Spent keys leave on their own — no dead weight in the satchel.
+    spentWhen: (story) => Boolean(story.get('cryptDoorOpen')),
+    discardFlavor: 'The black key crumbles to cold ash. Its work is done.',
   },
 
   verdigrisKey: {
@@ -124,6 +127,8 @@ export const ITEMS = Object.freeze({
     name: 'Verdigris Key',
     glyph: '‡',
     description: 'Bronze gone green in the flooded garth. It smells of pond water and myrrh.',
+    spentWhen: (story) => Boolean(story.get('cloisterGateOpen')),
+    discardFlavor: 'The verdigris key comes apart in green flakes on your palm.',
   },
 
   hollowIcon: {
