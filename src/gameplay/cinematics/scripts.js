@@ -32,7 +32,7 @@ export const END_NOTE = {
     'drowned garth and the nave above.\n\n' +
     'Everything that was standing lies down.\n\n' +
     'The ground, satisfied, remembers it is only ground.\n\n' +
-    '— END OF THIS BUILD OF NECRO. Your saves will carry forward. —',
+    '— END OF THIS BUILD OF GRAVEN. Your saves will carry forward. —',
 };
 
 /** The bell toll: played in the ossuary the moment the hour is rung. */

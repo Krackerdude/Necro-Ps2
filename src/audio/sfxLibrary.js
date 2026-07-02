@@ -98,6 +98,16 @@ const RECIPES = {
     osc.stop(t + 0.05);
   },
 
+  dialogueTick: (ctx, bus) => {
+    const gain = envGain(ctx, bus, 0.001, 0.03, 0.05);
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 900 + Math.random() * 120;
+    osc.connect(gain);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.035);
+  },
+
   uiMove: (ctx, bus) => {
     const gain = envGain(ctx, bus, 0.002, 0.05, 0.18);
     const osc = ctx.createOscillator();

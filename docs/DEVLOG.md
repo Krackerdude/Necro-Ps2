@@ -5,6 +5,50 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 12: GRAVEN Phase A — retitle, dialogue, townsfolk
+
+The game is now **GRAVEN**. Big story restructure incoming (see plan): a
+pre-chapel intro — drive-in cinematic, a cozy dusk harbor town you explore
+for 30–60 min, 12–15 NPCs, inn sleep, night flip, full-town chase to the
+chapel doors. Phases: A systems (this session) → B town by day → C
+interiors/dialogue → D night+chase → E retcon existing levels.
+
+- **Retitle**: MainMenuScreen h1, index.html, package.json, END_NOTE,
+  README. Storage keys (`necro.saves.v1`/`necro.settings.v1`) deliberately
+  unchanged so existing saves survive.
+- **Dialogue system**: DialogueScreen (paged typewriter, 44 cps,
+  `dialogueTick` sfx; E/Enter/Space/click = reveal-full then advance; Esc
+  closes with NO credit). GameplayState listens for `'dialogue/open'
+  {npc, def}` → modal push; sets `talked:<def.id>` ONLY on full completion,
+  so required conversations can't be skimmed. NPC `faceToward(player)` on
+  open, `faceRest()` on close.
+- **Townsfolk entity** (gameplay/npcs/Townsfolk.js): palette-varied
+  humanoid on the same skeleton family as the husks (deliberate — night
+  makes the silhouette a threat). Idle breathe/sway/glance. `makeNpc()` in
+  levelHelpers builds entity + collider + Talk interactable; ctx needs
+  `{root, ps2: kit.ps2, events, updatables, colliders}`.
+- **HUD minimal mode**: levels may return `hudMinimal: true`; GameplayState
+  emits `'hud/mode' {minimal}` on every level entry; HudOverlay toggles
+  `.hud-minimal` (hides condition + weapon readouts). Daytime GRAVEN is
+  pure exploration — no combat, no enemySpawns, ever.
+- **Town shell** (world/levels/gravenTown.js, id `graven-town`): one square
+  + fountain + facades + sea wall + 3 NPCs (Rosa the baker, Aldous the
+  harbormaster, Maren), warm dusk lighting (sun 0xffc27d, warm fog
+  0xc9a075 @ 0.012), `townDay` ambient (breeze + gulls — the only kind
+  track). Registered but NOT the starting level; it's the Phase B proving
+  ground and will be replaced by the full town.
+- **Gotcha — dialogue box CSS**: `clip-path` on a parent clips absolutely
+  positioned children; the panel chrome lives on `.dialogue-box::before`
+  (z-index:-1 inside the transform's stacking context) so the overhanging
+  name plate isn't clipped.
+- Verified headless: hud-minimal on in town, prompt → typewriter →
+  `talked:baker` true on completion; Esc bail leaves `talked:harbormaster`
+  unset AND doesn't leak into pause.
+- Known placeholder: objective strip still shows chapel text in town —
+  town objectives are Phase B; retcon of objectives/documents is Phase E.
+
+---
+
 ## 2026-07-02 — Session 11: key auto-discard + Tier 7 (presentation)
 
 - **Spent keys discard themselves**: key defs carry `spentWhen(story)` +

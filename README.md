@@ -1,6 +1,6 @@
-# NECRO
+# GRAVEN
 
-*A PS2-era survival horror game. Fixed cameras. Vertex wobble. A chapel, a key, a thing below.*
+*A PS2-era survival horror game. Fixed cameras. Vertex wobble. A letter, a town, a thing below.*
 
 Built on **Three.js** with a custom engine layer: event-driven, service-based, composition-first.
 This README evolves with the project — see `docs/DEVLOG.md` for session-by-session state.

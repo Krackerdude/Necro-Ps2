@@ -2,6 +2,7 @@ import { CHAPEL_OF_THE_HOLLOW } from './chapelOfTheHollow.js';
 import { SUNKEN_CLOISTER } from './sunkenCloister.js';
 import { OSSUARY_OF_THE_HOLLOW } from './ossuaryOfTheHollow.js';
 import { MENU_VISTA } from './menuVista.js';
+import { GRAVEN_TOWN } from './gravenTown.js';
 
 /**
  * Level registry — id -> definition.
@@ -16,6 +17,7 @@ const LEVELS = Object.freeze({
   [SUNKEN_CLOISTER.id]: SUNKEN_CLOISTER,
   [OSSUARY_OF_THE_HOLLOW.id]: OSSUARY_OF_THE_HOLLOW,
   [MENU_VISTA.id]: MENU_VISTA,
+  [GRAVEN_TOWN.id]: GRAVEN_TOWN,
 });
 
 export function getLevel(id) {

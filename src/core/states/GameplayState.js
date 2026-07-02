@@ -17,6 +17,7 @@ import { SaveLoadScreen } from '../../ui/screens/SaveLoadScreen.js';
 import { ShrineScreen } from '../../ui/screens/ShrineScreen.js';
 import { ItemBoxScreen } from '../../ui/screens/ItemBoxScreen.js';
 import { MapScreen } from '../../ui/screens/MapScreen.js';
+import { DialogueScreen } from '../../ui/screens/DialogueScreen.js';
 import { InventoryScreen } from '../../ui/screens/InventoryScreen.js';
 import { GameOverScreen } from '../../ui/screens/GameOverScreen.js';
 import { MainMenuState } from './MainMenuState.js';
@@ -144,6 +145,7 @@ export class GameplayState extends GameState {
     // --- session event wiring ----------------------------------------------
     this.#unsubs = [
       events.on('ui/show-note', ({ title, body }) => this.#openNote(title, body)),
+      events.on('dialogue/open', ({ npc, def }) => this.#openDialogue(npc, def)),
       events.on('ui/open-save-menu', () => this.#openShrine()),
       events.on('player/died', () => this.#onDeath()),
       // Condition is physical: DANGER means a limp, a muffled world, and a
@@ -341,6 +343,8 @@ export class GameplayState extends GameState {
       snapshot?.participants.enemies
     );
     this.#interaction.bind(runtime.interactables, this.#player.object);
+    // Exploration levels (the town by day) hide the survival readouts.
+    this.services.get(Services.EVENTS).emit('hud/mode', { minimal: Boolean(runtime.hudMinimal) });
     cameraDirector.setZones(runtime.cameraZones, this.#player.object);
     renderer.setCamera(cameraDirector.camera);
     s.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
@@ -402,6 +406,28 @@ export class GameplayState extends GameState {
       ps2: this.services.get(Services.RENDERER).ps2Materials,
       story: this.services.get(Services.STORY),
       onClose: () => machine.pop(),
+    });
+    machine.push(new ModalUiState(this.services, screen));
+  }
+
+  /** A conversation: NPC turns to you, the box opens, the flag only sets
+   *  when the LAST page is read (Esc closes without credit). */
+  #openDialogue(npc, def) {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    const events = this.services.get(Services.EVENTS);
+    const story = this.services.get(Services.STORY);
+    npc.faceToward(this.#player.object.position);
+    const screen = new DialogueScreen({
+      name: def.name,
+      lines: def.lines,
+      events,
+      onClose: (completed) => {
+        machine.pop();
+        npc.faceRest();
+        if (completed && !story.get(`talked:${def.id}`)) {
+          story.set(`talked:${def.id}`, true);
+        }
+      },
     });
     machine.push(new ModalUiState(this.services, screen));
   }
