@@ -42,9 +42,11 @@ export class WorldService {
 
   /**
    * @param {string} levelId
-   * @param {import('../gameplay/story/StoryService.js').StoryService} story
+   * @param {{ story: object, inventory?: object }} session state the level
+   *        builds against (story flags gate geometry; inventory backs
+   *        pickups and key checks). Menu levels pass just the story.
    */
-  loadLevel(levelId, story) {
+  loadLevel(levelId, session) {
     this.unload();
 
     const definition = getLevel(levelId);
@@ -53,7 +55,8 @@ export class WorldService {
 
     const runtime = definition.build({
       kit,
-      story,
+      story: session.story,
+      inventory: session.inventory ?? null,
       events: this.#events,
       physics: this.#physics,
       settings: this.#settings,

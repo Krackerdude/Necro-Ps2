@@ -37,10 +37,27 @@ export class PlayerController {
     this.object.add(rig.object);
   }
 
+  #aiming = false;
+
   spawnAt({ position, rotationY }) {
     this.object.position.copy(position);
     this.#rotationY = rotationY;
     this.object.rotation.y = rotationY;
+  }
+
+  /** While aiming the character can pivot but not walk (era-correct). */
+  setAiming(aiming) {
+    this.#aiming = aiming;
+    this.#rig.setAiming(aiming);
+  }
+
+  get rotationY() {
+    return this.#rotationY;
+  }
+
+  /** Unit facing vector on the ground plane. */
+  getForward(out) {
+    return out.set(Math.sin(this.#rotationY), 0, Math.cos(this.#rotationY));
   }
 
   update(dt) {
@@ -62,8 +79,8 @@ export class PlayerController {
       (this.#input.isDown('turnLeft') ? 1 : 0) - (this.#input.isDown('turnRight') ? 1 : 0);
     this.#rotationY += turn * TURN_SPEED * dt;
 
-    const forward = this.#input.isDown('moveForward');
-    const backward = this.#input.isDown('moveBackward');
+    const forward = this.#input.isDown('moveForward') && !this.#aiming;
+    const backward = this.#input.isDown('moveBackward') && !this.#aiming;
     const running = this.#input.isDown('run') && forward;
     let speed = 0;
     if (forward) speed = running ? RUN_SPEED : WALK_SPEED;

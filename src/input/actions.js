@@ -13,7 +13,9 @@ export const ACTIONS = Object.freeze([
   { id: 'run', label: 'Run', category: 'Movement' },
   { id: 'quickTurn', label: 'Quick Turn (180°)', category: 'Movement' },
   { id: 'interact', label: 'Interact / Confirm', category: 'Actions' },
-  { id: 'aim', label: 'Ready Weapon', category: 'Actions' },
+  { id: 'aim', label: 'Ready Weapon (hold)', category: 'Actions' },
+  { id: 'attack', label: 'Attack (while ready)', category: 'Actions' },
+  { id: 'inventory', label: 'Inventory', category: 'Actions' },
   { id: 'pause', label: 'Pause / Back', category: 'System' },
   { id: 'debugOverlay', label: 'Debug Overlay', category: 'System' },
 ]);

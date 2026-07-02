@@ -3,6 +3,7 @@ import { defineCameraZone } from '../CameraZone.js';
 import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
+import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
 
 /**
  * CHAPEL OF THE HOLLOW — the first playable level, and the reference for how
@@ -34,7 +35,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
   id: 'chapel-of-the-hollow',
   name: 'Chapel of the Hollow',
 
-  build({ kit, story, events, physics }) {
+  build({ kit, story, inventory, events, physics }) {
     const root = new THREE.Group();
     const colliders = [];
     const updatables = [];
@@ -195,17 +196,13 @@ export const CHAPEL_OF_THE_HOLLOW = {
       add(cryptDoor);
     }
 
-    // Black Iron Key on the altar. Skipped if already taken.
-    let keyMesh = null;
-    if (!story.get('hasCryptKey')) {
-      keyMesh = new THREE.Mesh(
-        new THREE.TorusGeometry(0.09, 0.03, 4, 6),
-        kit.material('ironDark', { emissive: 0x30303a, emissiveIntensity: 0.6 })
-      );
-      keyMesh.position.set(0.4, 1.2, -8);
-      keyMesh.rotation.x = Math.PI / 2;
-      root.add(keyMesh);
-    }
+    // The crypt trapdoor — hidden until the Hollow Icon is lifted from its
+    // plinth ("the only thing keeping the ground closed").
+    const trapdoor = kit.stairsDown({ position: [22.5, 6.8], rotationY: Math.PI });
+    if (story.get('hasHollowIcon')) root.add(trapdoor.object);
+
+    // Pickup context shared by the loot below.
+    const pickupCtx = { root, story, inventory, events };
 
     /* --------------------------- INTERACTABLES ------------------------- */
     interactables.push(
@@ -237,25 +234,14 @@ export const CHAPEL_OF_THE_HOLLOW = {
         },
       },
       {
-        id: 'black-iron-key',
-        position: new THREE.Vector3(0.4, 1, -7.8),
-        radius: 1.3,
-        prompt: 'Take the Black Iron Key',
-        canInteract: () => !story.get('hasCryptKey'),
-        onInteract: () => {
-          story.set('hasCryptKey', true);
-          keyMesh?.removeFromParent();
-          events.emit('ui/toast', { text: 'Taken — BLACK IRON KEY. It is colder than the room.' });
-        },
-      },
-      {
         id: 'crypt-door',
         position: new THREE.Vector3(15.4, 1, 4),
         radius: 1.5,
-        prompt: () => (story.get('hasCryptKey') ? 'Unlock the crypt door' : 'Inspect the door'),
+        prompt: () =>
+          hasCryptKey() ? 'Unlock the crypt door' : 'Inspect the door',
         canInteract: () => !story.get('cryptDoorOpen'),
         onInteract: () => {
-          if (!story.get('hasCryptKey')) {
+          if (!hasCryptKey()) {
             events.emit('ui/toast', { text: 'Locked. The lock is black iron, and it is warm.' });
             return;
           }
@@ -287,17 +273,102 @@ export const CHAPEL_OF_THE_HOLLOW = {
         canInteract: () => story.get('cryptDoorOpen') && !story.get('hasHollowIcon'),
         onInteract: () => {
           story.set('hasHollowIcon', true);
+          inventory?.add('hollowIcon');
           icon.removeFromParent();
+          // Lifting the icon opens the ground: the trapdoor appears.
+          root.add(trapdoor.object);
+          events.emit('audio/sfx', { id: 'doorUnlock' });
           events.emit('ui/show-note', {
             title: 'THE HOLLOW ICON',
             body:
               'The metal squirms faintly, like a held bird.\n\n' +
-              'Somewhere beneath your feet, the ground remembers it is a mouth.\n\n' +
-              '(You have reached the end of this build of NECRO. The chapel keeps the rest.)',
+              'Behind you, stone grinds against stone — a stairway exhales a ' +
+              'draught of pond water and myrrh.\n\n' +
+              'Somewhere beneath your feet, the ground remembers it is a mouth.',
           });
         },
-      }
+      },
+      // Down into the Sunken Cloister (appears with the icon).
+      makeTransition(
+        { story, inventory, events },
+        {
+          id: 'trapdoor-to-cloister',
+          position: new THREE.Vector3(22.5, 1, 7),
+          radius: 1.4,
+          prompt: 'Descend the stair',
+          targetLevel: 'sunken-cloister',
+          targetSpawn: 'fromChapel',
+        }
+      )
     );
+    // The trapdoor route only exists once the icon is taken.
+    const trapdoorRoute = interactables[interactables.length - 1];
+    const baseCanInteract = trapdoorRoute.canInteract;
+    trapdoorRoute.canInteract = () =>
+      story.get('hasHollowIcon') && (baseCanInteract?.() ?? true);
+
+    // Old saves stored the key as a story flag; honor both.
+    const hasCryptKey = () =>
+      Boolean(inventory?.has('blackIronKey') || story.get('hasCryptKey'));
+
+    /* ------------------------------ LOOT ------------------------------- */
+    for (const pickup of [
+      makeItemPickup(pickupCtx, {
+        id: 'chapel-key',
+        itemId: 'blackIronKey',
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(0.4, 1.25, -8),
+          color: 0x3a3a44,
+          emissive: 0x30303a,
+        }),
+        position: new THREE.Vector3(0.4, 1, -7.8),
+        radius: 1.3,
+        prompt: 'Take the Black Iron Key',
+        flavor: 'Taken — BLACK IRON KEY. It is colder than the room.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'chapel-machete',
+        itemId: 'rustMachete',
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-7, 0.4, -6.3),
+          color: 0x8a5a3a,
+          emissive: 0x402a10,
+        }),
+        position: new THREE.Vector3(-7, 1, -6.3),
+        prompt: 'Take the groundskeeper’s machete',
+        flavor: 'Taken — RUST-EATEN MACHETE. Someone left in a hurry.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'chapel-poultice',
+        itemId: 'mossPoultice',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(2.6, 0.65, 4.6),
+          color: 0x6f7d4e,
+          emissive: 0x2a3a1a,
+        }),
+        position: new THREE.Vector3(2.6, 1, 4.6),
+        prompt: 'Gather the moss poultices',
+        flavor: 'Taken — MOSS POULTICE ×2, folded into a hymnal.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'corridor-shells',
+        itemId: 'boneShells',
+        qty: 6,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(13.5, 0.3, 3.2),
+          color: 0xc9b37a,
+          emissive: 0x4a3a10,
+        }),
+        position: new THREE.Vector3(13.5, 1, 3.2),
+        prompt: 'Search the body',
+        flavor: 'Taken — TALLOW ROUNDS ×6. He never got to use them.',
+      }),
+    ]) {
+      if (pickup) interactables.push(pickup);
+    }
+    // The body the shells came from.
+    add(kit.corpse({ position: [13.6, 4.6], rotationY: 2.2 }));
     void shrine; // shot dressing reference retained for future shrine VFX
 
     /* --------------------------- CAMERA ZONES -------------------------- */
@@ -359,7 +430,19 @@ export const CHAPEL_OF_THE_HOLLOW = {
       interactables,
       updatables,
       spawn: { position: new THREE.Vector3(0, 0, 8), rotationY: Math.PI },
-      enemySpawns: [{ type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 }],
+      spawnPoints: {
+        fromCloister: { position: new THREE.Vector3(21.5, 0, 6.2), rotationY: -Math.PI / 2 },
+      },
+      enemySpawns: [
+        { type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 },
+        // Opening the crypt lets something wander up into the nave.
+        {
+          type: 'husk',
+          position: new THREE.Vector3(0.5, 0, 2),
+          homeRadius: 6,
+          onlyIf: 'cryptDoorOpen',
+        },
+      ],
       fog: { color: 0x0a0c11, density: 0.055 },
       ambientTrack: 'chapel',
     };

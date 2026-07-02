@@ -80,11 +80,36 @@ Add new events here when you introduce them.
 | `player/died` | — | PlayerStats | GameplayState |
 | `player/footstep` | `{running}` | PlayerController | (future: surface FX) |
 | `interaction/prompt-changed` | `{prompt}` | InteractionSystem | HUD |
+| `inventory/changed` | `{stacks,equipped}` | Inventory | InventoryScreen, HUD |
+| `combat/aim-changed` | `{aiming}` | WeaponSystem | HUD |
+| `combat/fired` | `{position,ranged}` | WeaponSystem | MuzzleFlash |
+| `enemy/died` / `enemy/damaged` | `{}` | EnemyHealth | (future: score/FX) |
+| `level/transition` | `{levelId,spawn}` | level interactables | GameplayState |
+| `ui/fade` | `{opacity,duration}` | anyone | FadeOverlay |
 | `ui/toast` | `{text}` | anyone | HUD |
 | `ui/show-note` | `{title,body}` | levels | GameplayState (modal) |
 | `ui/open-save-menu` | — | shrine interactable | GameplayState (modal) |
 | `save/saved` | `{slot,auto}` | SaveService | HUD |
 | `audio/sfx` | `{id}` | anyone | AudioService |
+
+## Gameplay session composition
+
+GameplayState composes two scopes:
+
+- **Session scope** (lives across level transitions): PlayerController+Rig,
+  PlayerStats, Inventory, WeaponSystem, MuzzleFlash, EnemyRoster (object),
+  HUD. Serialized into saves via each system's captureState/restoreState.
+- **Level scope** (rebuilt by `#enterLevel` on every transition): world
+  runtime, colliders, camera zones, interactable bindings, roster population,
+  ambient track.
+
+Items are data (`gameplay/inventory/itemCatalog.js`); enemies register in
+`EnemyRoster`'s ENEMY_TYPES; level loot/doors use the helpers in
+`world/levels/levelHelpers.js` (`makeItemPickup`, `makeTransition`). Adding
+content means adding entries, not editing systems.
+
+Enemy death persistence: `enemyDead:<levelId>:<spawnIndex>` story flags.
+Item persistence: `took:<pickupId>` story flags. Both ride inside saves.
 
 ## Rendering pipeline
 
