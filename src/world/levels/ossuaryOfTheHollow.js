@@ -53,6 +53,8 @@ export const OSSUARY_OF_THE_HOLLOW = {
     // the passage back reads as a place, not a hole into the void.
     const entranceDoor = kit.door({ position: [0, -10], width: 2.0, height: 2.3 });
     add(entranceDoor);
+    // Lintel strip: the door is 2.3 high under a 2.4 ceiling — close the gap.
+    add(kit.wall({ from: [-1, -10], to: [1, -10], height: CEIL - 2.25, yBase: 2.25 }));
     add(kit.wall({ from: [-4, -10], to: [-4, -4], height: CEIL }));
     // East wall with shrine alcove gap (z -8.2..-6.8).
     add(kit.wall({ from: [4, -10], to: [4, -8.2], height: CEIL }));

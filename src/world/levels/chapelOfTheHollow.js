@@ -108,6 +108,11 @@ export const CHAPEL_OF_THE_HOLLOW = {
     add(kit.wall({ from: [24, -2], to: [24, 8], height: ROOM_H }));
     add(kit.wall({ from: [16, -2], to: [16, 2.5], height: ROOM_H }));
     add(kit.wall({ from: [16, 5.5], to: [16, 8], height: ROOM_H }));
+    // Door jambs + lintel: the doorway cut is 3 m wide but the crypt door
+    // leaf is 1.6 m — these fill the gaps so the door meets its frame.
+    add(kit.wall({ from: [16, 2.5], to: [16, 3.2], height: ROOM_H }));
+    add(kit.wall({ from: [16, 4.8], to: [16, 5.5], height: ROOM_H }));
+    add(kit.wall({ from: [16, 3.2], to: [16, 4.8], height: ROOM_H - 2.6, yBase: 2.6 }));
     add(kit.rubble({ position: [22.8, -0.8], seed: 33, count: 9, solid: true }));
 
     // Gravestones (instanced — one draw call).

@@ -171,6 +171,8 @@ export const SUNKEN_CLOISTER = {
     root.add(gateDark);
     // ...and its collider, since the wall gap is wider than the bars.
     colliders.push(new THREE.Box3(new THREE.Vector3(-1.2, 0, 10.1), new THREE.Vector3(1.2, 3, 10.6)));
+    // Lintel above the gate: the bars stop at 2.6 under a 3.5 wall.
+    add(kit.wall({ from: [-1, 10], to: [1, 10], height: WALL_H - 2.6, yBase: 2.6 }));
 
     /* --------------------------- INTERACTABLES -------------------------- */
     interactables.push(
