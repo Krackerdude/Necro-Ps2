@@ -49,8 +49,15 @@ export class PlayerController {
           .normalize()
           .multiplyScalar(3.2);
       }
-      this.#stunRemaining = 0.3;
-      this.#rig.play('hurtFlinch');
+      // An attack in flight is COMMITTED: taking a hit mid-swing hurts and
+      // shoves you but must not cancel the swing (playing the flinch clip
+      // would silently replace the attack clip and drop its 'hit' frame).
+      if (!this.#rig.isActing) {
+        this.#stunRemaining = 0.3;
+        this.#rig.play('hurtFlinch');
+      }
+      events.emit('camera/impulse', { strength: 0.42 });
+      events.emit('blood/splat', { position: this.object.position.clone(), size: 0.32 });
     });
   }
 

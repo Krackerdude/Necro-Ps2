@@ -130,10 +130,14 @@ export class Wraith {
     if (this.#cooldown <= 0) {
       const d = this.object.position.distanceTo(this.#playerObject.position);
       if (d < CONTACT_RANGE + 0.32) {
-        this.#playerStats.damage(CONTACT_DAMAGE);
-        this.#events.emit('player/damaged', { from: this.object.position });
-        this.#events.emit('audio/sfx', { id: 'hurt' });
-        this.#cooldown = CONTACT_COOLDOWN;
+        // I-frames may absorb the hit; only a landed hit flinches the player.
+        if (this.#playerStats.damage(CONTACT_DAMAGE)) {
+          this.#events.emit('player/damaged', { from: this.object.position });
+          this.#events.emit('audio/sfx', { id: 'hurt' });
+          this.#cooldown = CONTACT_COOLDOWN;
+        } else {
+          this.#cooldown = 0.25;
+        }
       }
     }
   }

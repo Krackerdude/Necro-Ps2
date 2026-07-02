@@ -15,6 +15,7 @@ export class EnemyHealth {
   hp;
 
   #events;
+  #root;
   #materials = [];
   #flashTimer = 0;
   #dyingTimer = 0;
@@ -25,6 +26,7 @@ export class EnemyHealth {
    */
   constructor(events, { hp, root }) {
     this.#events = events;
+    this.#root = root;
     this.hp = hp;
     root.traverse((node) => {
       if (node.material?.emissive) {
@@ -48,9 +50,10 @@ export class EnemyHealth {
     if (this.hp <= 0) {
       this.state = 'dying';
       this.#dyingTimer = DYING_TIME;
-      this.#events.emit('enemy/died', {});
+      this.#events.emit('enemy/died', { position: this.#root.position.clone() });
       this.#events.emit('audio/sfx', { id: 'enemyDie' });
     } else {
+      this.#events.emit('enemy/damaged', { position: this.#root.position.clone() });
       this.#events.emit('audio/sfx', { id: 'enemyHit' });
     }
   }
