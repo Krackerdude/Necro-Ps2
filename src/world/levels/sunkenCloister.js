@@ -4,6 +4,7 @@ import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { buildWeaponModel } from '../../assets/models/weaponModels.js';
 
 /**
  * THE SUNKEN CLOISTER — level 2.
@@ -239,11 +240,13 @@ export const SUNKEN_CLOISTER = {
       makeItemPickup(pickupCtx, {
         id: 'cloister-revolver',
         itemId: 'boneRevolver',
-        mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(1.8, 0.35, 8.4),
-          color: 0x8a8a9a,
-          emissive: 0x3a3a52,
-        }),
+        mesh: (() => {
+          const model = buildWeaponModel('boneRevolver', kit.ps2);
+          model.scale.setScalar(2.4); // reads at pickup distance
+          model.rotation.z = Math.PI / 2.3; // barrel presented sideways
+          model.position.set(1.8, 0.35, 8.4);
+          return model;
+        })(),
         glowColor: 0xd0dcff,
         position: new THREE.Vector3(1.8, 1, 8.4),
         prompt: 'Take the revolver from the body',

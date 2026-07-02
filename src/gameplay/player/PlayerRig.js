@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { AnimationPlayer } from '../../animation/AnimationPlayer.js';
 import { PLAYER_CLIPS } from '../animation/playerClips.js';
+import {
+  buildWeaponModel,
+  getHoldTransform,
+  hasWeaponModel,
+} from '../../assets/models/weaponModels.js';
 
 /**
  * PlayerRig — the visible character: a low-poly, SH2-proportioned figure
@@ -34,6 +39,10 @@ export class PlayerRig {
   #runFactor = 1;
   #aiming = false;
   #limping = false;
+  #ps2;
+  #handR;
+  #heldWeaponId = null;
+  #weaponCache = new Map();
 
   /** @param {import('../../rendering/materials/Ps2MaterialSystem.js').Ps2MaterialSystem} ps2 */
   constructor(ps2) {
@@ -67,6 +76,12 @@ export class PlayerRig {
 
     const armL = mkLimb(0.11, 0.52, coat, torso, -0.28, 0.48);
     const armR = mkLimb(0.11, 0.52, coat, torso, 0.28, 0.48);
+    // Hand anchor at the end of the right arm — the equipped weapon parents
+    // here, so it hangs at the side and points down-range when aiming.
+    this.#ps2 = ps2;
+    this.#handR = new THREE.Group();
+    this.#handR.position.set(0, -0.5, 0.02);
+    armR.add(this.#handR);
     const legL = mkLimb(0.14, 0.78, trousers, this.object, -0.12, 0.78);
     const legR = mkLimb(0.14, 0.78, trousers, this.object, 0.12, 0.78);
 
@@ -88,6 +103,23 @@ export class PlayerRig {
   /** @param {keyof typeof PLAYER_CLIPS} name */
   play(name, opts) {
     this.anim.play(PLAYER_CLIPS[name], opts);
+  }
+
+  /** Show the equipped weapon in the right hand (null = empty-handed). */
+  setHeldWeapon(itemId) {
+    if (itemId === this.#heldWeaponId) return;
+    this.#heldWeaponId = itemId;
+    this.#handR.clear();
+    if (!itemId || !hasWeaponModel(itemId)) return;
+    if (!this.#weaponCache.has(itemId)) {
+      this.#weaponCache.set(itemId, buildWeaponModel(itemId, this.#ps2));
+    }
+    const model = this.#weaponCache.get(itemId);
+    const hold = getHoldTransform(itemId);
+    model.position.set(...hold.position);
+    model.rotation.set(...hold.rotation);
+    model.scale.setScalar(hold.scale ?? 1);
+    this.#handR.add(model);
   }
 
   /** @param {boolean} moving @param {boolean} running */

@@ -160,6 +160,50 @@ const GENERATORS = {
     fillNoise(ctx, [46, 46, 52], 8, 707);
   },
 
+  rustBlade: (ctx) => {
+    // Weathered blade steel: grey base, orange rot blooming from the spine,
+    // one bright honed line along the edge (x=0 column).
+    fillNoise(ctx, [116, 118, 122], 12, 808);
+    const rand = mulberry32(23);
+    for (let i = 0; i < 9; i++) {
+      const x = 20 + rand() * 44;
+      const y = rand() * SIZE;
+      const r = 4 + rand() * 11;
+      const grad = ctx.createRadialGradient(x, y, 1, x, y, r);
+      grad.addColorStop(0, 'rgba(122, 62, 24, 0.75)');
+      grad.addColorStop(0.6, 'rgba(96, 48, 20, 0.4)');
+      grad.addColorStop(1, 'rgba(96, 48, 20, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    ctx.fillStyle = 'rgba(215, 218, 222, 0.9)';
+    ctx.fillRect(0, 0, 3, SIZE);
+    // Nicks in the edge.
+    ctx.fillStyle = 'rgba(60, 40, 24, 0.9)';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(0, Math.floor(rand() * SIZE), 3, 2 + Math.floor(rand() * 2));
+    }
+  },
+
+  gunMetal: (ctx) => {
+    // Blued steel with holster wear: dark base, lengthwise streaks, bright
+    // rubbed patches on the high lines.
+    fillNoise(ctx, [52, 55, 62], 7, 909);
+    const rand = mulberry32(31);
+    ctx.strokeStyle = 'rgba(30, 32, 38, 0.5)';
+    for (let i = 0; i < 14; i++) {
+      const y = Math.floor(rand() * SIZE);
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(SIZE, y + (rand() - 0.5) * 4);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(140, 144, 152, 0.35)';
+    for (let i = 0; i < 6; i++) {
+      ctx.fillRect(Math.floor(rand() * SIZE), Math.floor(rand() * SIZE), 6 + rand() * 14, 2);
+    }
+  },
+
   clothShroud: (ctx) => {
     fillNoise(ctx, [120, 116, 104], 8, 808);
     ctx.strokeStyle = 'rgba(80, 76, 66, 0.4)';

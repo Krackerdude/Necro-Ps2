@@ -4,6 +4,7 @@ import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { buildWeaponModel } from '../../assets/models/weaponModels.js';
 
 /**
  * CHAPEL OF THE HOLLOW — the first playable level, and the reference for how
@@ -330,11 +331,13 @@ export const CHAPEL_OF_THE_HOLLOW = {
       makeItemPickup(pickupCtx, {
         id: 'chapel-machete',
         itemId: 'rustMachete',
-        mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(-7, 0.4, -6.3),
-          color: 0x8a5a3a,
-          emissive: 0x402a10,
-        }),
+        mesh: (() => {
+          const model = buildWeaponModel('rustMachete', kit.ps2);
+          model.rotation.z = -Math.PI / 2.2; // presented blade-out
+          model.position.set(-7, 0.45, -6.3);
+          return model;
+        })(),
+        glowColor: 0xffc890,
         position: new THREE.Vector3(-7, 1, -6.3),
         prompt: 'Take the groundskeeper’s machete',
         flavor: 'Taken — RUST-EATEN MACHETE. Someone left in a hurry.',

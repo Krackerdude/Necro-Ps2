@@ -5,6 +5,26 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 5: weapon models
+
+- `src/assets/models/weaponModels.js` — detailed low-poly procedural models
+  (machete: extruded bolo blade, riveted wood grip, lanyard ring; revolver:
+  octagonal barrel, fluted drum ringed with bone teeth, bird's-head grip,
+  hammer/trigger/guard/sight). New textures: `rustBlade` (honed edge line +
+  rust bloom), `gunMetal` (blued steel with holster wear).
+- CONVENTION: models built along -Y, origin at the grip. They parent to the
+  rig's right-hand anchor, so hanging arm = carried at the side, aim raise =
+  pointed down-range, no per-pose math.
+- HOLD_TRANSFORMS includes per-weapon SCALE (machete 1.45×, revolver 2.1×;
+  pickups 2.4×): at 448p a true-scale handgun is 2 pixels. PS2 games
+  oversized weapons for exactly this reason — keep doing it for new weapons.
+- Held model tracks the equip slot via 'inventory/changed'; world pickups
+  for weapons use the same builders (levels call buildWeaponModel(kit.ps2)).
+- When real GLTF art arrives: replace a BUILDERS entry, keep the -Y/grip
+  convention and HOLD_TRANSFORMS.
+
+---
+
 ## 2026-07-02 — Session 4: Tier 1 combat feel (animation layer)
 
 **The "weight" pass.** Everything verified headless: melee damage lands on

@@ -74,6 +74,9 @@ export class GameplayState extends GameState {
     this.#stats = new PlayerStats(events);
     if (snapshot) this.#stats.restoreState(snapshot.participants.stats);
 
+    // The visible held weapon tracks the equip slot.
+    rig.setHeldWeapon(this.#inventory.equippedWeaponId);
+
     this.#roster = new EnemyRoster({
       events,
       physics: s.get(Services.PHYSICS),
@@ -123,6 +126,7 @@ export class GameplayState extends GameState {
         );
       }),
       events.on('level/transition', (target) => this.#beginTransition(target)),
+      events.on('inventory/changed', ({ equipped }) => rig.setHeldWeapon(equipped)),
     ];
     events.emit('ui/fade', { opacity: 0, duration: 0.6 });
 

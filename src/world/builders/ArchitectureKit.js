@@ -23,6 +23,12 @@ export class ArchitectureKit {
     this.#ps2 = ps2Materials;
   }
 
+  /** The material system, for level content built outside the kit
+   *  (weapon pickup models, bespoke meshes). */
+  get ps2() {
+    return this.#ps2;
+  }
+
   /**
    * Shared, cached PS2-patched material.
    * @param {string} textureName procedural texture id
