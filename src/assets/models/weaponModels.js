@@ -48,8 +48,10 @@ export function hasWeaponModel(itemId) {
  * this reason; it's part of the look, not a hack.
  */
 const HOLD_TRANSFORMS = {
-  rustMachete: { position: [0, -0.02, 0.01], rotation: [0, 0, 0], scale: 1.45 },
-  boneRevolver: { position: [0, -0.1, -0.05], rotation: [-0.15, 0, 0], scale: 2.1 },
+  // Machete rotates 90° about Y so the blade plane is vertical: edge leads
+  // the swing instead of slapping flat.
+  rustMachete: { position: [0, -0.02, 0.01], rotation: [0, Math.PI / 2, 0], scale: 1.45 },
+  boneRevolver: { position: [0, -0.1, 0.03], rotation: [-0.15, 0, 0], scale: 2.1 },
 };
 
 export function getHoldTransform(itemId) {
@@ -137,6 +139,11 @@ function buildRevolver(ps2) {
   const wood = mat(ps2, 'woodPlanks', { color: 0x5a3c28, repeat: [0.5, 0.5] });
   const bone = mat(ps2, 'boneDust', { color: 0xd8ccae, roughness: 0.9 });
 
+  // ORIENTATION: -Y is the muzzle. When the aim pose rotates the arm down
+  // -90° about X, model +Z becomes world UP — so everything "on top" of the
+  // pistol (topstrap, sight, hammer) lives on +Z, and everything hanging
+  // below (grip, trigger guard) lives on -Z.
+
   // Barrel: octagonal, long, along -Y. Muzzle at y = -0.19.
   const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.15, 8), steel);
   barrel.position.y = -0.115;
@@ -145,56 +152,56 @@ function buildRevolver(ps2) {
     mat(ps2, 'ironDark', { color: 0x0a0a0a }));
   bore.position.y = -0.1905;
   group.add(bore);
-  // Front blade sight.
+  // Front blade sight — on top.
   const sight = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.014, 0.01), steel);
-  sight.position.set(0, -0.178, -0.014);
+  sight.position.set(0, -0.178, 0.014);
   group.add(sight);
 
   // Frame: topstrap over the cylinder + standing breech.
   const topstrap = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.085, 0.012), steel);
-  topstrap.position.set(0, -0.014, -0.024);
+  topstrap.position.set(0, -0.014, 0.024);
   group.add(topstrap);
   const frame = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.05, 0.03), steel);
-  frame.position.set(0, 0.014, 0.002);
+  frame.position.set(0, 0.014, -0.002);
   group.add(frame);
 
   // Cylinder: six-fluted drum, axis along the barrel.
   const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.048, 6), steel);
-  drum.position.set(0, -0.018, 0.004);
+  drum.position.set(0, -0.018, -0.004);
   group.add(drum);
   // Carved bone teeth ringing the drum (the lore detail).
   for (let i = 0; i < 6; i++) {
     const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
     const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.014, 0.004), bone);
-    tooth.position.set(Math.cos(angle) * 0.021, -0.018, 0.004 + Math.sin(angle) * 0.021);
+    tooth.position.set(Math.cos(angle) * 0.021, -0.018, -0.004 + Math.sin(angle) * 0.021);
     tooth.rotation.y = -angle;
     group.add(tooth);
   }
 
-  // Hammer spur, cocked back.
+  // Hammer spur, cocked back — top rear.
   const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.026, 0.008), steel);
-  hammer.position.set(0, 0.032, 0.03);
-  hammer.rotation.x = -0.6;
+  hammer.position.set(0, 0.036, 0.024);
+  hammer.rotation.x = 0.6;
   group.add(hammer);
 
   // Trigger guard: half torus under the frame; trigger stub inside.
   const guard = new THREE.Mesh(new THREE.TorusGeometry(0.016, 0.0035, 4, 8, Math.PI), steel);
-  guard.position.set(0, 0.028, 0.018);
-  guard.rotation.set(0, Math.PI / 2, Math.PI);
+  guard.position.set(0, 0.028, -0.018);
+  guard.rotation.set(0, Math.PI / 2, 0);
   group.add(guard);
   const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.014, 0.005), steel);
-  trigger.position.set(0, 0.032, 0.014);
-  trigger.rotation.x = 0.3;
+  trigger.position.set(0, 0.032, -0.014);
+  trigger.rotation.x = -0.3;
   group.add(trigger);
 
-  // Grip: drooping bird's-head profile, angled back into the palm.
+  // Grip: drooping bird's-head profile, angled back-and-down into the palm.
   const grip = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.075, 0.036), wood);
-  grip.position.set(0, 0.056, 0.038);
-  grip.rotation.x = 0.55;
+  grip.position.set(0, 0.056, -0.038);
+  grip.rotation.x = -0.55;
   group.add(grip);
   const gripCap = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.018, 0.04), bone);
-  gripCap.position.set(0, 0.092, 0.058);
-  gripCap.rotation.x = 0.55;
+  gripCap.position.set(0, 0.092, -0.058);
+  gripCap.rotation.x = -0.55;
   group.add(gripCap);
 
   return group;
