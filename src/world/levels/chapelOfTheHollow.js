@@ -450,6 +450,13 @@ export const CHAPEL_OF_THE_HOLLOW = {
       ],
       fog: { color: 0x0a0c11, density: 0.055 },
       ambientTrack: 'chapel',
+      surfaces: {
+        default: 'stone',
+        regions: [
+          { min: [-12, -7], max: [-6, -1], type: 'wood' }, // vestry
+          { min: [16, -2], max: [24, 8], type: 'bone' },   // crypt
+        ],
+      },
     };
   },
 };

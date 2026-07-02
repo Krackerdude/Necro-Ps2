@@ -42,6 +42,62 @@ const RECIPES = {
     noise.start();
   },
 
+  footstepWood: (ctx, bus) => {
+    // Hollow knock: short low square + a whisper of noise.
+    const gain = envGain(ctx, bus, 0.003, 0.1, 0.28);
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 140 + Math.random() * 40;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 420;
+    osc.connect(lp).connect(gain);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.11);
+  },
+
+  footstepWater: (ctx, bus) => {
+    // Wade-splash: bright noise burst + a lower slosh tail.
+    const splash = envGain(ctx, bus, 0.004, 0.16, 0.3);
+    const noise = noiseSource(ctx, 0.18);
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 900 + Math.random() * 500;
+    bp.Q.value = 1.2;
+    noise.connect(bp).connect(splash);
+    noise.start();
+    const slosh = envGain(ctx, bus, 0.05, 0.22, 0.14);
+    const noise2 = noiseSource(ctx, 0.26);
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 300;
+    noise2.connect(lp).connect(slosh);
+    noise2.start();
+  },
+
+  footstepBone: (ctx, bus) => {
+    // Dry crunch: bright crackle with a couple of snap transients.
+    const gain = envGain(ctx, bus, 0.002, 0.09, 0.3);
+    const noise = noiseSource(ctx, 0.1);
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 1200;
+    noise.connect(hp).connect(gain);
+    noise.start();
+    const t = ctx.currentTime + 0.03 + Math.random() * 0.03;
+    const snap = ctx.createGain();
+    snap.gain.setValueAtTime(0, t);
+    snap.gain.linearRampToValueAtTime(0.16, t + 0.002);
+    snap.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    snap.connect(bus);
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = 2600 + Math.random() * 800;
+    osc.connect(snap);
+    osc.start(t);
+    osc.stop(t + 0.05);
+  },
+
   uiMove: (ctx, bus) => {
     const gain = envGain(ctx, bus, 0.002, 0.05, 0.18);
     const osc = ctx.createOscillator();

@@ -41,6 +41,7 @@ export class PlayerController {
   #shove = new THREE.Vector3();
   #stunRemaining = 0;
   #speedMultiplier = 1;
+  #terrainMultiplier = 1;
   #grabbed = false;
 
   constructor({ events, input, physics, rig }) {
@@ -96,6 +97,11 @@ export class PlayerController {
   setSpeedMultiplier(multiplier) {
     this.#speedMultiplier = multiplier;
     this.#rig.setLimping(multiplier < 0.7);
+  }
+
+  /** Ground-driven pace (wading through the garth costs you). */
+  setTerrainMultiplier(multiplier) {
+    this.#terrainMultiplier = multiplier;
   }
 
   /** External impulse (melee lunge, hurt knockback). Decays on its own. */
@@ -185,7 +191,7 @@ export class PlayerController {
     let speed = 0;
     if (forward) speed = running ? RUN_SPEED : WALK_SPEED;
     else if (backward) speed = -BACK_SPEED;
-    speed *= this.#speedMultiplier;
+    speed *= this.#speedMultiplier * this.#terrainMultiplier;
 
     if (speed !== 0) {
       const dx = Math.sin(this.#rotationY) * speed * dt;
@@ -195,8 +201,9 @@ export class PlayerController {
       this.#footstepTimer -= dt * (running ? 1.6 : 1);
       if (this.#footstepTimer <= 0) {
         this.#footstepTimer = 0.48;
+        // Surface-specific audio is resolved by GameplayState (it knows the
+        // world); this event is the step itself.
         this.#events.emit('player/footstep', { running });
-        this.#events.emit('audio/sfx', { id: 'footstep' });
         // Feet make noise the dead can hear. Walking is the stealth option.
         this.#events.emit('noise/emitted', {
           position: this.object.position.clone(),

@@ -89,6 +89,28 @@ export class WorldService {
     for (const updatable of this.runtime.updatables) updatable.update(dt);
   }
 
+  /**
+   * Ground surface under a world position — drives footstep sound and
+   * wading. Levels declare `surfaces: { default, regions: [{min, max,
+   * type}] }` with min/max as [x, z]; absent config means stone.
+   * @returns {'stone'|'wood'|'water'|'bone'}
+   */
+  getSurfaceAt(position) {
+    const surfaces = this.runtime?.surfaces;
+    if (!surfaces) return 'stone';
+    for (const region of surfaces.regions ?? []) {
+      if (
+        position.x >= region.min[0] &&
+        position.x <= region.max[0] &&
+        position.z >= region.min[1] &&
+        position.z <= region.max[1]
+      ) {
+        return region.type;
+      }
+    }
+    return surfaces.default ?? 'stone';
+  }
+
   #applyFog() {
     if (!this.scene || !this.runtime) return;
     const enabled = this.#settings.get('graphics.fog');

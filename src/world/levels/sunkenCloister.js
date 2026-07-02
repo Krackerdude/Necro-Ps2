@@ -120,8 +120,10 @@ export const SUNKEN_CLOISTER = {
     add(kit.corpse({ position: [1.8, 8.6], rotationY: -1.9 }));
     add(kit.corpse({ position: [-6.2, -7.9], rotationY: 0.7 }));
     add(kit.rubble({ position: [8.6, 8.7], seed: 57, count: 7 }));
-    // The door back up to the chapel crypt — a real door, always shut.
-    add(kit.door({ position: [8.6, -9.8], width: 1.6, height: 2.4 }));
+    // The door back up to the chapel crypt — a real door, always shut
+    // (it creaks a crack open on travel).
+    const chapelDoor = kit.door({ position: [8.6, -9.8], width: 1.6, height: 2.4 });
+    add(chapelDoor);
 
     /* ----------------------------- LIGHTING ----------------------------- */
     root.add(new THREE.AmbientLight(0x252a38, 2.0));
@@ -181,6 +183,7 @@ export const SUNKEN_CLOISTER = {
           prompt: 'Climb back to the crypt',
           targetLevel: 'chapel-of-the-hollow',
           targetSpawn: 'fromCloister',
+          door: chapelDoor.object,
         }
       ),
       {
@@ -379,6 +382,13 @@ export const SUNKEN_CLOISTER = {
       ],
       fog: { color: 0x0b0e14, density: 0.05 },
       ambientTrack: 'cloister',
+      surfaces: {
+        default: 'stone',
+        regions: [
+          { min: [-5.1, -5.1], max: [5.1, 5.1], type: 'water' }, // flooded garth
+          { min: [-16, -3], max: [-10, 3], type: 'wood' },       // scriptorium
+        ],
+      },
     };
   },
 };

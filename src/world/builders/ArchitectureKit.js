@@ -244,7 +244,8 @@ export class ArchitectureKit {
     return { object: group, colliders: [new THREE.Box3().setFromObject(group)] };
   }
 
-  /** A great bronze bell on a frame. */
+  /** A great bronze bell on a frame. The bell itself hangs from a swing
+   *  pivot at the beam (`group.userData.swing`) so a toll can rock it. */
   bell({ position }) {
     const group = new THREE.Group();
     const bronze = this.material('ironDark', {
@@ -252,10 +253,14 @@ export class ArchitectureKit {
       metalness: 0.7,
       roughness: 0.45,
     });
+    const swing = new THREE.Group();
+    swing.position.y = 3.05;
     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.95, 1.3, 8), bronze);
-    body.position.y = 2.0;
+    body.position.y = -1.05;
     const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.3, 6), bronze);
-    crown.position.y = 2.8;
+    crown.position.y = -0.25;
+    swing.add(body, crown);
+    group.userData.swing = swing;
     const frame = this.material('woodPlanks');
     for (const x of [-1.2, 1.2]) {
       const post = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.2, 0.22), frame);
@@ -264,7 +269,7 @@ export class ArchitectureKit {
     }
     const beam = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.22, 0.22), frame);
     beam.position.y = 3.1;
-    group.add(body, crown, beam);
+    group.add(swing, beam);
     group.traverse((n) => {
       n.castShadow = true;
       n.receiveShadow = true;

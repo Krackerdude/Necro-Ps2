@@ -73,6 +73,13 @@ export class EnemyRoster {
     return this.#active.map((a) => a.entity).filter((e) => e.alive);
   }
 
+  /** The bell tolls: everything standing lies down. */
+  killAll() {
+    for (const { entity } of this.#active) {
+      if (entity.alive) entity.takeHit(99999);
+    }
+  }
+
   update(dt) {
     for (const entry of [...this.#active]) {
       entry.entity.update(dt);

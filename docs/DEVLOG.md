@@ -5,6 +5,34 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 8: Tier 4 — ambience polish
+
+- **Bell finale**: kit.bell exposes `userData.swing` (pivot at the beam);
+  the ossuary animates a decaying toll swing (~9 s). GameplayState on
+  bellRung: roster.killAll() (everything standing lies down) + ambient bed
+  stops for 7.5 s of ringing "silence". Camera impulse 1.0 already there.
+- **Footstep surfaces**: levels declare `surfaces: { default, regions:
+  [{min:[x,z], max:[x,z], type}] }`; WorldService.getSurfaceAt resolves.
+  Types: stone/wood/water/bone with distinct synthesized steps. Wading
+  (water) also multiplies speed ×0.72 (terrain multiplier on the
+  controller, separate from the condition multiplier). Chapel: vestry wood
+  + crypt bone; cloister: garth water + scriptorium wood; ossuary: bone.
+- **Condition audio**: DANGER lowpasses the ambient bed to 480 Hz and runs
+  a 52 Hz lub-dub heartbeat on the master bus (AudioService.setCondition,
+  fed from player/stats-changed in GameplayState).
+- **Door beat**: makeTransition accepts `door` (mesh); on travel it creaks
+  open a crack (rAF tween, 0.42 rad over 340 ms) before the fade. Wired on
+  cloister→chapel and ossuary→cloister doors.
+- **Examine view**: satchel dossier shows a rotating 3D model of the
+  selected item (ExamineView: tiny dedicated low-res renderer, pixelated
+  upscale, pedestal spin outside a 3/4 tilt). itemModels.js builds bespoke
+  models for non-weapons (shell fold, tonic bottle, poultice, keys, icon);
+  weapons reuse weaponModels. GL context disposed on screen close.
+- Verified headless: surfaces resolve (water/stone/wood), wading slows,
+  bell toll kills all 4 ossuary enemies and swings, examine renders.
+
+---
+
 ## 2026-07-02 — Session 7: Tier 3 — enemy behavior texture
 
 - **Husk variants** (spawn def `variant`, registry in Husk.js VARIANTS):
