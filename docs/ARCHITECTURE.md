@@ -88,6 +88,9 @@ Add new events here when you introduce them.
 | `time/hitstop` | `{duration}` | WeaponSystem (impacts) | Engine → GameLoop |
 | `camera/impulse` | `{strength}` | weapons, hurt, bell | CameraDirector (trauma shake) |
 | `blood/splat` | `{position,size?}` | PlayerController | BloodFx |
+| `noise/emitted` | `{position,radius}` | footsteps, gunshots | EnemyRoster → enemies (hearing) |
+| `grab/started` / `grab/ended` | `{from, escaped?}` | Husk | PlayerController, HUD |
+| `grab/struggle` | `{}` | PlayerController (mash) | grabbing Husk |
 | `level/transition` | `{levelId,spawn}` | level interactables | GameplayState |
 | `ui/fade` | `{opacity,duration}` | anyone | FadeOverlay |
 | `ui/toast` | `{text}` | anyone | HUD |

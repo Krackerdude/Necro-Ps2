@@ -442,6 +442,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
         // Opening the crypt lets something wander up into the nave.
         {
           type: 'husk',
+          variant: 'twitcher',
           position: new THREE.Vector3(0.5, 0, 2),
           homeRadius: 6,
           onlyIf: 'cryptDoorOpen',

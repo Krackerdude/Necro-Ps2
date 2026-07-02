@@ -11,7 +11,7 @@ import { EnemyHealth } from '../combat/EnemyHealth.js';
  * escapes — the classic pressure valve. It takes most of a revolver's worth
  * of rounds to put one down; running remains the honest option.
  */
-const SPEED = { haunt: 0.7, pursue: 2.6, return: 1.2 };
+const SPEED = { haunt: 0.7, pursue: 2.6, investigate: 1.7, return: 1.2 };
 const CONTACT_RANGE = 0.65;
 const CONTACT_DAMAGE = 18;
 const CONTACT_COOLDOWN = 1.2;
@@ -74,6 +74,12 @@ export class Wraith {
 
   get alive() {
     return this.health.alive;
+  }
+
+  /** Wraiths hear everything the walls let through. */
+  hearNoise(position, radius) {
+    if (!this.health.alive) return;
+    this.#behavior.hearNoise(this.object.position, position, radius);
   }
 
   takeHit(damage) {

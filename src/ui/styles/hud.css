@@ -106,6 +106,31 @@
   clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
 }
 
+/* Grab struggle banner — dead center, panicked */
+.hud-grab {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translateX(-50%) skewX(-8deg) rotate(-1.5deg);
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.6vw, 34px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone);
+  background: var(--blood);
+  padding: 8px 30px;
+  clip-path: polygon(0 10%, 100% 0, 98% 100%, 2% 90%);
+  text-shadow: 2px 2px 0 #000;
+  animation: grab-panic 0.22s steps(2) infinite;
+}
+
+@keyframes grab-panic {
+  50% {
+    transform: translateX(-50%) skewX(-8deg) rotate(1.2deg) scale(1.04);
+    background: var(--blood-bright);
+  }
+}
+
 /* Toast feed — top right, stacked slashes */
 .hud-toasts {
   position: absolute;

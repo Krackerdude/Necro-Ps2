@@ -41,10 +41,14 @@ export class PlayerStats {
     return 'DEAD';
   }
 
-  /** @returns {boolean} true if the damage landed (not absorbed by i-frames) */
-  damage(amount) {
+  /**
+   * @param {number} amount
+   * @param {{ ignoreIframes?: boolean }} [opts] grab ticks etc. always land
+   * @returns {boolean} true if the damage landed (not absorbed by i-frames)
+   */
+  damage(amount, { ignoreIframes = false } = {}) {
     if (this.#health <= 0) return false;
-    if (performance.now() - this.#lastDamageAt < IFRAME_MS) return false;
+    if (!ignoreIframes && performance.now() - this.#lastDamageAt < IFRAME_MS) return false;
     this.#lastDamageAt = performance.now();
     this.#health = Math.max(0, this.#health - amount);
     this.#emit();

@@ -11,6 +11,15 @@ import * as THREE from 'three';
  * (PlayerRig) and a transform, consults InputService and PhysicsService, and
  * reports movement via events ('player/footstep').
  */
+const GRAB_STRUGGLE_ACTIONS = [
+  'moveForward',
+  'moveBackward',
+  'turnLeft',
+  'turnRight',
+  'interact',
+  'attack',
+  'run',
+];
 const WALK_SPEED = 2.1;
 const RUN_SPEED = 4.2;
 const BACK_SPEED = 1.3;
@@ -32,6 +41,7 @@ export class PlayerController {
   #shove = new THREE.Vector3();
   #stunRemaining = 0;
   #speedMultiplier = 1;
+  #grabbed = false;
 
   constructor({ events, input, physics, rig }) {
     this.#events = events;
@@ -58,6 +68,22 @@ export class PlayerController {
       }
       events.emit('camera/impulse', { strength: 0.42 });
       events.emit('blood/splat', { position: this.object.position.clone(), size: 0.32 });
+    });
+
+    // Grabbed: control is taken away; mashing anything is the way out.
+    events.on('grab/started', () => {
+      this.#grabbed = true;
+      if (!this.#rig.isActing) this.#rig.play('hurtFlinch');
+    });
+    events.on('grab/ended', ({ from, escaped }) => {
+      this.#grabbed = false;
+      if (from) {
+        this.#shove
+          .set(this.object.position.x - from.x, 0, this.object.position.z - from.z)
+          .normalize()
+          .multiplyScalar(escaped ? 3.6 : 2.4);
+      }
+      this.#stunRemaining = escaped ? 0.1 : 0.45;
     });
   }
 
@@ -113,6 +139,20 @@ export class PlayerController {
       this.#shove.multiplyScalar(Math.max(0, 1 - 9 * dt));
     }
 
+    // Grabbed: movement is gone; every mashed key is a struggle pulse.
+    if (this.#grabbed) {
+      for (const action of GRAB_STRUGGLE_ACTIONS) {
+        if (this.#input.wasPressed(action)) {
+          this.#events.emit('grab/struggle', {});
+          this.#events.emit('audio/sfx', { id: 'uiMove' });
+          break;
+        }
+      }
+      this.#rig.setMoving(false);
+      this.#rig.update(dt);
+      return;
+    }
+
     // Stunned or mid-attack: the body is committed; input is ignored.
     if (this.#stunRemaining > 0 || this.#rig.isActing) {
       this.#stunRemaining = Math.max(0, this.#stunRemaining - dt);
@@ -157,6 +197,11 @@ export class PlayerController {
         this.#footstepTimer = 0.48;
         this.#events.emit('player/footstep', { running });
         this.#events.emit('audio/sfx', { id: 'footstep' });
+        // Feet make noise the dead can hear. Walking is the stealth option.
+        this.#events.emit('noise/emitted', {
+          position: this.object.position.clone(),
+          radius: running ? 7 : 2.5,
+        });
       }
     }
 

@@ -31,6 +31,7 @@ export class EnemyRoster {
   #scene;
   #levelId;
   #unsubFlags;
+  #unsubNoise;
 
   /**
    * @param {{ events, physics, ps2, story, playerObject, playerStats }} deps
@@ -59,6 +60,11 @@ export class EnemyRoster {
       this.#spawns.forEach((spawn, index) => {
         if (spawn.onlyIf && !this.#isSpawned(index)) this.#trySpawn(spawn, index, undefined);
       });
+    });
+
+    // Sound propagates to every enemy that can hear it.
+    this.#unsubNoise = this.#deps.events.on('noise/emitted', ({ position, radius }) => {
+      for (const { entity } of this.#active) entity.hearNoise?.(position, radius);
     });
   }
 
@@ -90,6 +96,8 @@ export class EnemyRoster {
   dispose() {
     this.#unsubFlags?.();
     this.#unsubFlags = null;
+    this.#unsubNoise?.();
+    this.#unsubNoise = null;
     for (const { entity } of this.#active) entity.object.removeFromParent();
     this.#active = [];
   }

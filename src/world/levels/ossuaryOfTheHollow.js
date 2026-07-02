@@ -310,10 +310,19 @@ export const OSSUARY_OF_THE_HOLLOW = {
         fromCloister: { position: new THREE.Vector3(0, 0, -9), rotationY: Math.PI },
       },
       enemySpawns: [
-        { type: 'husk', position: new THREE.Vector3(0, 0, 2.2), homeRadius: 3 },
+        // Mid-processional, back turned, facing the bell. It knows you're
+        // coming; it's waiting for you to get close enough to be sure.
+        {
+          type: 'husk',
+          variant: 'watcher',
+          facing: 0,
+          position: new THREE.Vector3(0, 0, 2.2),
+          homeRadius: 3,
+        },
         { type: 'wraith', position: new THREE.Vector3(-4, 0, 9), homeRadius: 4.5 },
         { type: 'wraith', position: new THREE.Vector3(4, 0, 11.5), homeRadius: 4.5 },
-        { type: 'husk', position: new THREE.Vector3(5.5, 0, 6), homeRadius: 4 },
+        // Dragging itself among the skull piles.
+        { type: 'husk', variant: 'crawler', position: new THREE.Vector3(5.5, 0, 6), homeRadius: 4 },
       ],
       fog: { color: 0x0c0a10, density: 0.06 },
       ambientTrack: 'ossuary',

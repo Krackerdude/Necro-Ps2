@@ -365,9 +365,17 @@ export const SUNKEN_CLOISTER = {
         fromOssuary: { position: new THREE.Vector3(0, 0, 8.8), rotationY: Math.PI },
       },
       enemySpawns: [
-        { type: 'husk', position: new THREE.Vector3(-2.5, 0, 1.5), homeRadius: 4 },
+        // In the black water of the garth: something without legs.
+        { type: 'husk', variant: 'crawler', position: new THREE.Vector3(-2.5, 0, 1.5), homeRadius: 4 },
         { type: 'husk', position: new THREE.Vector3(7.6, 0, 2.5), homeRadius: 5 },
-        { type: 'husk', position: new THREE.Vector3(-4, 0, 7.8), homeRadius: 6 },
+        // Facing the ossuary gate, perfectly still, until you come for it.
+        {
+          type: 'husk',
+          variant: 'watcher',
+          facing: Math.PI,
+          position: new THREE.Vector3(-2.2, 0, 8.6),
+          homeRadius: 6,
+        },
       ],
       fog: { color: 0x0b0e14, density: 0.05 },
       ambientTrack: 'cloister',

@@ -5,6 +5,32 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 7: Tier 3 — enemy behavior texture
+
+- **Husk variants** (spawn def `variant`, registry in Husk.js VARIANTS):
+  shambler (baseline), watcher (dormant, `facing` authored; wakes on
+  proximity/noise/pain — placed back-turned mid-processional and staring at
+  the cloister gate), crawler (legless, prone rig, ground-drag gait, no
+  knockdown, in the garth water and the ossuary skull piles), twitcher
+  (violent torso spasms, faster — the nave spawn).
+- **The grab**: pursuing husk lunges within 1.15 m → hold: control taken,
+  5 dmg ticks/0.75 s (ignoreIframes), HUD panic banner, mash any action to
+  break (0.2/press vs 0.25/s decay, hold caps at 3.2 s). Escape staggers
+  the husk; grab cooldown 4.5 s. Damaging it breaks the hold. Event flow:
+  grab/started → grab/struggle (from PlayerController mash) → grab/ended.
+- **Noise/hearing**: 'noise/emitted' {position, radius} — walk 2.5, run 7,
+  gunshot 16. EnemyRoster fans out to entities' hearNoise(). PursuitBehavior
+  gained an **investigate** state: hearing sends enemies to WHERE THE SOUND
+  WAS (sight can escalate en route); only noise inside loseRadius escalates
+  straight to pursue. Lesson: plain "hear → pursue" self-cancels beyond
+  loseRadius on the next tick — investigate is required.
+- Verified headless: wraith closed 11.2→6.6 m toward a gunshot through
+  walls; watcher held its pose then turned on approach; grab triggered,
+  ticked damage, and broke on a ~30-press mash (escaped=true).
+- Tuning note: mash escape assumes ≥5 presses/s; STRUGGLE_PER_PRESS 0.2.
+
+---
+
 ## 2026-07-02 — Session 6: Tier 2 — camera impulse, blood, combat fairness
 
 - **Camera impulse ("trauma")**: 'camera/impulse' {strength} → CameraDirector
