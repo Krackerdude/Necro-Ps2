@@ -72,6 +72,46 @@ export const ITEMS = Object.freeze({
     },
   },
 
+  graveMoss: {
+    kind: 'consumable',
+    name: 'Grave Moss',
+    glyph: '❦',
+    stack: 5,
+    description:
+      'Pale moss that only grows where something is buried badly. Bitter, raw — better bound in linen.',
+    use: ({ stats, events }) => {
+      if (stats.health >= stats.maxHealth) return false;
+      stats.heal(10); // raw moss barely helps; combine it
+      events.emit('audio/sfx', { id: 'heal' });
+      return true;
+    },
+  },
+
+  linenStrips: {
+    kind: 'consumable',
+    name: 'Linen Strips',
+    glyph: '≋',
+    stack: 5,
+    description: 'Altar linen torn into bandage widths. Someone else had the same idea once.',
+    use: () => false, // no use alone — combine with moss
+  },
+
+  blessedSalve: {
+    kind: 'consumable',
+    name: 'Blessed Salve',
+    glyph: '✠',
+    stack: 2,
+    description:
+      'Tonic worked into a poultice until it hums. Closes anything that still counts as a wound.',
+    use: ({ stats, events }) => {
+      if (stats.health >= stats.maxHealth) return false;
+      stats.heal(100);
+      events.emit('audio/sfx', { id: 'heal' });
+      events.emit('ui/toast', { text: 'The salve hums against the skin. Whole again.' });
+      return true;
+    },
+  },
+
   blackIronKey: {
     kind: 'key',
     name: 'Black Iron Key',

@@ -16,6 +16,7 @@ export const ACTIONS = Object.freeze([
   { id: 'aim', label: 'Ready Weapon (hold)', category: 'Actions' },
   { id: 'attack', label: 'Attack (while ready)', category: 'Actions' },
   { id: 'inventory', label: 'Inventory', category: 'Actions' },
+  { id: 'map', label: 'Survey Map', category: 'Actions' },
   { id: 'pause', label: 'Pause / Back', category: 'System' },
   { id: 'debugOverlay', label: 'Debug Overlay', category: 'System' },
 ]);

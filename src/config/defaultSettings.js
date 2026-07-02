@@ -66,6 +66,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
     aim: ['KeyQ'],
     attack: ['Space'],
     inventory: ['Tab', 'KeyI'],
+    map: ['KeyM'],
     pause: ['Escape'],
     quickTurn: ['KeyC'],
     debugOverlay: ['F3'],

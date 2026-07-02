@@ -302,6 +302,33 @@ export const SUNKEN_CLOISTER = {
         prompt: 'Take the grave tonic',
         flavor: 'Taken — GRAVE TONIC. The cork is sealed with red wax.',
       }),
+      makeItemPickup(pickupCtx, {
+        id: 'garth-moss',
+        itemId: 'graveMoss',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-3.2, 0.3, 3.2),
+          color: 0x8fae72,
+          emissive: 0x2a3a1a,
+        }),
+        glowColor: 0xb8e0a0,
+        position: new THREE.Vector3(-3.2, 1, 3.2),
+        prompt: 'Gather grave moss',
+        flavor: 'Taken — GRAVE MOSS ×2, fat from the water.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'scriptorium-linen',
+        itemId: 'linenStrips',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-12.2, 0.3, 1.7),
+          color: 0xc9bd9e,
+          emissive: 0x4a4232,
+        }),
+        position: new THREE.Vector3(-12.2, 1, 1.7),
+        prompt: 'Take the folded linen',
+        flavor: 'Taken — LINEN STRIPS ×2, pressed and waiting.',
+      }),
     ]) {
       if (pickup) interactables.push(pickup);
     }
@@ -397,6 +424,18 @@ export const SUNKEN_CLOISTER = {
         regions: [
           { min: [-5.1, -5.1], max: [5.1, 5.1], type: 'water' }, // flooded garth
           { min: [-16, -3], max: [-10, 3], type: 'wood' },       // scriptorium
+        ],
+      },
+      map: {
+        rooms: [
+          { id: 'garth', label: 'Garth', min: [-5, -5], max: [5, 5] },
+          { id: 'scriptorium', label: 'Scriptorium', min: [-16, -3], max: [-10, 3] },
+          { id: 'walks', label: 'Cloister Walk', min: [-10, -10], max: [10, 10] },
+        ],
+        markers: [
+          { type: 'shrine', position: [-15.2, 0] },
+          { type: 'door', position: [8.6, -9.5] },
+          { type: 'door', position: [0, 9.5] },
         ],
       },
     };

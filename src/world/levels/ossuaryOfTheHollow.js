@@ -3,7 +3,7 @@ import { defineCameraZone } from '../CameraZone.js';
 import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
-import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { makeItemPickup, makeTransition, makeItemSocket, makePickupMesh } from './levelHelpers.js';
 import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
@@ -197,26 +197,19 @@ export const OSSUARY_OF_THE_HOLLOW = {
         prompt: 'Read the verger’s last page',
         onInteract: () => readDocument(events, story, 'vergerNote'),
       },
-      {
-        id: 'icon-socket',
-        position: new THREE.Vector3(0, 1, 8.2),
-        radius: 1.4,
-        prompt: () =>
-          story.get('iconSeated') ? 'The icon is seated' : 'Seat the Hollow Icon',
-        canInteract: () => !story.get('iconSeated'),
-        onInteract: () => {
-          if (!inventory?.has('hollowIcon')) {
-            events.emit('ui/toast', {
-              text: 'An empty socket in the altar stone, shaped like a held bird.',
-            });
-            return;
-          }
-          inventory.remove('hollowIcon', 1);
-          story.set('iconSeated', true);
-          events.emit('audio/sfx', { id: 'saveChime' });
-          events.emit('ui/toast', { text: 'The icon settles into the socket. The bell leans in.' });
-        },
-      },
+      // The altar socket — built on the puzzle primitive.
+      makeItemSocket(
+        { story, inventory, events },
+        {
+          id: 'icon-socket',
+          itemId: 'hollowIcon',
+          flag: 'iconSeated',
+          position: new THREE.Vector3(0, 1, 8.2),
+          prompt: 'Seat the Hollow Icon',
+          missingText: 'An empty socket in the altar stone, shaped like a held bird.',
+          placedText: 'The icon settles into the socket. The bell leans in.',
+        }
+      ),
       {
         id: 'the-bell',
         position: new THREE.Vector3(0, 1, 10.5),
@@ -348,6 +341,19 @@ export const OSSUARY_OF_THE_HOLLOW = {
       fog: { color: 0x0c0a10, density: 0.06 },
       ambientTrack: 'ossuary',
       surfaces: { default: 'bone', regions: [] },
+      map: {
+        rooms: [
+          { id: 'antechamber', label: 'Antechamber', min: [-4, -10], max: [4, -4] },
+          { id: 'alcove', label: 'Shrine', min: [4, -9], max: [8, -6] },
+          { id: 'processional', label: 'Processional', min: [-1.2, -4], max: [1.2, 4] },
+          { id: 'chamber', label: 'Bell Chamber', min: [-7, 4], max: [7, 14] },
+        ],
+        markers: [
+          { type: 'shrine', position: [7.2, -7.5] },
+          { type: 'bell', position: [0, 10.5] },
+          { type: 'door', position: [0, -9.5] },
+        ],
+      },
     };
   },
 };

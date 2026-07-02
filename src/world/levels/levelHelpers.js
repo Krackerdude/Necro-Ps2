@@ -39,6 +39,13 @@ export function makeItemPickup(ctx, def) {
     prompt: def.prompt,
     canInteract: () => !ctx.story.get(flag),
     onInteract: () => {
+      // The satchel has a slot cap: a pickup that doesn't fit stays in the
+      // world (beacon and all) until room is made.
+      if (!ctx.inventory.canFit(def.itemId, def.qty ?? 1)) {
+        ctx.events.emit('ui/toast', { text: 'Your satchel is full. The reliquary waits at a shrine.' });
+        ctx.events.emit('audio/sfx', { id: 'uiBack' });
+        return;
+      }
       // Order matters: the story flag fires autosave, so the inventory must
       // already contain the item when the snapshot is taken.
       ctx.inventory.add(def.itemId, def.qty ?? 1);
@@ -105,6 +112,39 @@ export function makeTransition(ctx, def) {
       } else {
         travel();
       }
+    },
+  };
+}
+
+/**
+ * Item socket — the puzzle primitive: a place in the world that accepts one
+ * specific item. Placing it consumes the item and sets `flag` (which fires
+ * autosave and can gate anything else in the level: doors, spawns, further
+ * sockets). Multi-socket puzzles are just several of these whose flags a
+ * final interactable checks.
+ *
+ * @param {{ story: object, inventory: object, events: object }} ctx
+ * @param {{ id: string, itemId: string, flag: string, position: THREE.Vector3,
+ *           radius?: number, prompt: string, missingText: string,
+ *           placedText: string, onPlaced?: () => void }} def
+ */
+export function makeItemSocket(ctx, def) {
+  return {
+    id: def.id,
+    position: def.position,
+    radius: def.radius ?? 1.4,
+    prompt: () => (ctx.story.get(def.flag) ? 'It is seated' : def.prompt),
+    canInteract: () => !ctx.story.get(def.flag),
+    onInteract: () => {
+      if (!ctx.inventory.has(def.itemId)) {
+        ctx.events.emit('ui/toast', { text: def.missingText });
+        return;
+      }
+      ctx.inventory.remove(def.itemId, 1);
+      ctx.story.set(def.flag, true);
+      ctx.events.emit('audio/sfx', { id: 'saveChime' });
+      ctx.events.emit('ui/toast', { text: def.placedText });
+      def.onPlaced?.();
     },
   };
 }

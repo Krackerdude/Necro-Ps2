@@ -3,6 +3,7 @@ import { el } from '../components/dom.js';
 import { ExamineView } from '../components/ExamineView.js';
 import { getItem } from '../../gameplay/inventory/itemCatalog.js';
 import { DOCUMENTS, collectedDocuments } from '../../gameplay/story/documents.js';
+import { isCombinable } from '../../gameplay/inventory/recipes.js';
 
 /**
  * InventoryScreen — the satchel. A tile grid on the left, the selected
@@ -21,6 +22,8 @@ export class InventoryScreen extends Screen {
   #unsub = null;
   #examine = null;
   #examineItemId = null;
+  /** Item id awaiting its combine partner, or null. */
+  #combineFrom = null;
 
   #story;
 
@@ -45,6 +48,7 @@ export class InventoryScreen extends Screen {
           'div.panel-header',
           {},
           el('h2', {}, 'Satchel'),
+          el('div.crumb.inv-slots', {}, ''),
           el('div.crumb', {}, 'TAB / ESC TO CLOSE')
         ),
         el('div.panel-body.inv-body', {}),
@@ -76,6 +80,13 @@ export class InventoryScreen extends Screen {
       case 'Tab':
       case 'KeyI':
         e.preventDefault();
+        if (this.#combineFrom) {
+          // Escape backs out of combine mode before closing the satchel.
+          this.#combineFrom = null;
+          this.#events.emit('audio/sfx', { id: 'uiBack' });
+          this.#render();
+          break;
+        }
         this.#events.emit('audio/sfx', { id: 'uiBack' });
         this.#onClose();
         break;
@@ -99,9 +110,33 @@ export class InventoryScreen extends Screen {
   };
 
   #select(index) {
+    if (this.#combineFrom) {
+      this.#attemptCombine(index);
+      return;
+    }
     if (index !== this.#selected) this.#events.emit('audio/sfx', { id: 'uiMove' });
     this.#selected = index;
     this.#render();
+  }
+
+  #attemptCombine(index) {
+    const target = this.#inventory.stacks[index];
+    const from = this.#combineFrom;
+    this.#combineFrom = null;
+    if (!target || target.id === from) {
+      this.#events.emit('audio/sfx', { id: 'uiBack' });
+      this.#render();
+      return;
+    }
+    const { ok, recipe } = this.#inventory.combine(from, target.id);
+    if (ok) {
+      this.#events.emit('audio/sfx', { id: 'uiConfirm' });
+      this.#events.emit('ui/toast', { text: recipe.flavor });
+    } else {
+      this.#events.emit('audio/sfx', { id: 'uiBack' });
+      this.#events.emit('ui/toast', { text: 'Those want nothing to do with each other.' });
+      this.#render();
+    }
   }
 
   #primaryAction() {
@@ -127,6 +162,11 @@ export class InventoryScreen extends Screen {
     const stacks = this.#inventory.stacks;
     this.#selected = Math.min(this.#selected, Math.max(0, stacks.length - 1));
 
+    const slots = this.element.querySelector('.inv-slots');
+    if (slots && Number.isFinite(this.#inventory.maxSlots)) {
+      slots.textContent = `SLOTS ${this.#inventory.slotsUsed}/${this.#inventory.maxSlots}`;
+    }
+
     if (stacks.length === 0) {
       body.replaceChildren(
         el('div.inv-empty', {}, 'Nothing but lint and church dust.'),
@@ -141,8 +181,9 @@ export class InventoryScreen extends Screen {
       stacks.map((stack, i) => {
         const def = getItem(stack.id);
         const equipped = this.#inventory.equippedWeaponId === stack.id;
+        const combineTarget = this.#combineFrom && stack.id !== this.#combineFrom;
         return el(
-          `button.inv-tile${i === this.#selected ? '.selected' : ''}${equipped ? '.equipped' : ''}`,
+          `button.inv-tile${i === this.#selected ? '.selected' : ''}${equipped ? '.equipped' : ''}${combineTarget ? '.combine-target' : ''}`,
           {
             onclick: () => this.#select(i),
             ondblclick: () => this.#primaryAction(),
@@ -180,9 +221,27 @@ export class InventoryScreen extends Screen {
             `DMG ${def.weapon.damage} ・ ${def.weapon.type === 'ranged' ? `RANGE ${def.weapon.range}m ・ USES ${getItem(def.weapon.usesAmmo).name.toUpperCase()}` : `REACH ${def.weapon.range}m`}`
           )
         : null,
-      actionLabel
-        ? el('div.opt-actions', {}, el('button.text-btn', { onclick: () => this.#primaryAction() }, actionLabel))
-        : el('div.inv-kind', {}, 'Its use will present itself.')
+      el(
+        'div.opt-actions',
+        {},
+        actionLabel
+          ? el('button.text-btn', { onclick: () => this.#primaryAction() }, actionLabel)
+          : null,
+        isCombinable(stack.id)
+          ? el(
+              'button.text-btn',
+              {
+                onclick: () => {
+                  this.#combineFrom = stack.id;
+                  this.#events.emit('audio/sfx', { id: 'uiMove' });
+                  this.#events.emit('ui/toast', { text: 'Combine with what?' });
+                  this.#render();
+                },
+              },
+              this.#combineFrom === stack.id ? 'Choosing…' : 'Combine'
+            )
+          : null
+      )
     );
 
     body.replaceChildren(grid, dossier, this.#buildDocumentsShelf());

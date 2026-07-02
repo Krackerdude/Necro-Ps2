@@ -5,6 +5,32 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 10: Tier 6 — systems depth
+
+- **Combination**: recipes registry (gameplay/inventory/recipes.js);
+  Inventory.combine consumes the pair, yields the result. Satchel gains
+  combine mode (Combine button → pick partner, tiles pulse green, Esc backs
+  out). Chain: graveMoss+linenStrips→mossPoultice; poultice+tonic→
+  blessedSalve (full heal). New gatherables placed: moss (crypt, garth),
+  linen (vestry, scriptorium).
+- **Carry cap + reliquary**: the satchel is 8 STACKS (weapons/keys count).
+  Pickups that don't fit stay in the world (beacon intact, flag unset).
+  Shrines now open a ShrineScreen (Commit to Bone / The Reliquary / Rise);
+  the reliquary is an uncapped Inventory instance shared by all shrines and
+  saved as participants.itemBox. GOTCHA: both inventories emit
+  'inventory/changed' — listeners must read the SATCHEL MODEL, not the
+  payload (the held-weapon visual bug).
+- **Puzzle primitive**: levelHelpers.makeItemSocket (place item → flag →
+  gates anything). The ossuary icon socket is the reference usage.
+- **Survey map** (M): levels author map.rooms/markers; GameplayState flags
+  `mapSeen:<level>:<room>` as you walk (rooms match in order — nested rooms
+  list first). MapScreen draws only walked rooms on canvas, shrine crosses,
+  bell circle, door notches, blood-arrow player marker.
+- Verified headless: combine ok, 8/8 cap blocks pickups without consuming
+  them, reliquary transfer survives the save roundtrip, map renders.
+
+---
+
 ## 2026-07-02 — Session 9: playtest fixes + Tier 5 (dressing density)
 
 **Fixes from playtest:**

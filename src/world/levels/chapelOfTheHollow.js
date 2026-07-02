@@ -288,6 +288,10 @@ export const CHAPEL_OF_THE_HOLLOW = {
         prompt: 'Take the Hollow Icon',
         canInteract: () => story.get('cryptDoorOpen') && !story.get('hasHollowIcon'),
         onInteract: () => {
+          if (inventory && !inventory.canFit('hollowIcon')) {
+            events.emit('ui/toast', { text: 'Your satchel is full. It will not be carried loosely.' });
+            return;
+          }
           // Inventory first — the flag change triggers the autosave.
           inventory?.add('hollowIcon');
           story.set('hasHollowIcon', true);
@@ -383,6 +387,33 @@ export const CHAPEL_OF_THE_HOLLOW = {
         prompt: 'Search the body',
         flavor: 'Taken — TALLOW ROUNDS ×6. He never got to use them.',
       }),
+      makeItemPickup(pickupCtx, {
+        id: 'crypt-moss',
+        itemId: 'graveMoss',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(18.4, 0.25, 6.6),
+          color: 0x8fae72,
+          emissive: 0x2a3a1a,
+        }),
+        glowColor: 0xb8e0a0,
+        position: new THREE.Vector3(18.4, 1, 6.6),
+        prompt: 'Gather grave moss',
+        flavor: 'Taken — GRAVE MOSS ×2, growing thickest over row five.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'vestry-linen',
+        itemId: 'linenStrips',
+        qty: 2,
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-9.6, 0.3, -2.2),
+          color: 0xc9bd9e,
+          emissive: 0x4a4232,
+        }),
+        position: new THREE.Vector3(-9.6, 1, -2.2),
+        prompt: 'Take the altar linen',
+        flavor: 'Taken — LINEN STRIPS ×2, already torn to width.',
+      }),
     ]) {
       if (pickup) interactables.push(pickup);
     }
@@ -470,6 +501,19 @@ export const CHAPEL_OF_THE_HOLLOW = {
         regions: [
           { min: [-12, -7], max: [-6, -1], type: 'wood' }, // vestry
           { min: [16, -2], max: [24, 8], type: 'bone' },   // crypt
+        ],
+      },
+      map: {
+        rooms: [
+          { id: 'vestry', label: 'Vestry', min: [-12, -7], max: [-6, -1] },
+          { id: 'corridor', label: 'Passage', min: [6, 2.5], max: [16, 5.5] },
+          { id: 'crypt', label: 'Crypt', min: [16, -2], max: [24, 8] },
+          { id: 'nave', label: 'Nave', min: [-6, -10], max: [6, 10] },
+        ],
+        markers: [
+          { type: 'shrine', position: [-11.2, -4] },
+          { type: 'door', position: [16, 4] },
+          { type: 'door', position: [22.5, 7] },
         ],
       },
     };
