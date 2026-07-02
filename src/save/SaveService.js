@@ -25,6 +25,8 @@ export class SaveService {
   #events;
   #captureProvider = null;
 
+  #autosavePending = false;
+
   constructor(events) {
     this.#events = events;
     events.on('story/flag-changed', () => this.autosave());
@@ -71,9 +73,19 @@ export class SaveService {
     return true;
   }
 
+  /**
+   * Deferred to the end of the current task so a gameplay beat that mutates
+   * several things (story flag + inventory add + mesh removal) is captured
+   * as a whole. A mid-beat snapshot once saved "item taken" without the
+   * item in the inventory — that class of bug dies here.
+   */
   autosave() {
-    if (!this.#captureProvider) return;
-    this.save(AUTO_SLOT);
+    if (!this.#captureProvider || this.#autosavePending) return;
+    this.#autosavePending = true;
+    queueMicrotask(() => {
+      this.#autosavePending = false;
+      if (this.#captureProvider) this.save(AUTO_SLOT);
+    });
   }
 
   deleteSave(slot) {

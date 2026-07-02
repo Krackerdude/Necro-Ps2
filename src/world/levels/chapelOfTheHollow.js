@@ -202,7 +202,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
     if (story.get('hasHollowIcon')) root.add(trapdoor.object);
 
     // Pickup context shared by the loot below.
-    const pickupCtx = { root, story, inventory, events };
+    const pickupCtx = { root, story, inventory, events, updatables };
 
     /* --------------------------- INTERACTABLES ------------------------- */
     interactables.push(
@@ -272,8 +272,9 @@ export const CHAPEL_OF_THE_HOLLOW = {
         prompt: 'Take the Hollow Icon',
         canInteract: () => story.get('cryptDoorOpen') && !story.get('hasHollowIcon'),
         onInteract: () => {
-          story.set('hasHollowIcon', true);
+          // Inventory first — the flag change triggers the autosave.
           inventory?.add('hollowIcon');
+          story.set('hasHollowIcon', true);
           icon.removeFromParent();
           // Lifting the icon opens the ground: the trapdoor appears.
           root.add(trapdoor.object);

@@ -41,7 +41,7 @@ export const OSSUARY_OF_THE_HOLLOW = {
       colliders.push(...piece.colliders);
       return piece.object;
     };
-    const pickupCtx = { root, story, inventory, events };
+    const pickupCtx = { root, story, inventory, events, updatables };
 
     /* ------------------------- ANTECHAMBER ------------------------------ */
     // x -4..4, z -10..-4. Entrance from the cloister at z=-10.
@@ -49,6 +49,9 @@ export const OSSUARY_OF_THE_HOLLOW = {
     add(kit.slab({ center: [0, -7], size: [8, 6], y: CEIL, texture: 'stoneWall', flip: true }));
     add(kit.wall({ from: [-4, -10], to: [-1, -10], height: CEIL }));
     add(kit.wall({ from: [1, -10], to: [4, -10], height: CEIL }));
+    // The gate you came through — a real door filling the entrance gap so
+    // the passage back reads as a place, not a hole into the void.
+    add(kit.door({ position: [0, -10], width: 2.0, height: 2.3 }));
     add(kit.wall({ from: [-4, -10], to: [-4, -4], height: CEIL }));
     // East wall with shrine alcove gap (z -8.2..-6.8).
     add(kit.wall({ from: [4, -10], to: [4, -8.2], height: CEIL }));

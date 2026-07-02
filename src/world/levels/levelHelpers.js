@@ -1,25 +1,36 @@
 import * as THREE from 'three';
+import { PickupBeacon } from '../effects/PickupBeacon.js';
 
 /**
  * Level-authoring helpers — the shared patterns every level uses:
- * item pickups (with taken-state persistence) and level transitions
- * (with optional key locks). Keeping these here stops each level from
- * re-inventing flag conventions.
+ * item pickups (with taken-state persistence and the shine beacon) and
+ * level transitions (with optional key locks). Keeping these here stops
+ * each level from re-inventing flag conventions.
  */
 
 /**
- * Item pickup. Handles: skip-if-taken on build, story flag on take,
- * inventory add, mesh removal, toast + sfx.
+ * Item pickup. Handles: skip-if-taken on build, shine beacon (spins, bobs,
+ * glints — pass `updatables` in ctx), inventory add THEN story flag (the
+ * flag change triggers autosave, so the item must already be in the bag),
+ * mesh removal, toast + sfx.
  *
- * @param {{ root: THREE.Group, story: object, inventory: object, events: object }} ctx
+ * @param {{ root: THREE.Group, story: object, inventory: object,
+ *           events: object, updatables?: object[] }} ctx
  * @param {{ id: string, itemId: string, qty?: number, mesh: THREE.Object3D | null,
- *           position: THREE.Vector3, prompt: string, flavor?: string }} def
+ *           position: THREE.Vector3, prompt: string, flavor?: string,
+ *           glowColor?: number }} def
  * @returns {object | null} interactable (null if already taken)
  */
 export function makeItemPickup(ctx, def) {
   const flag = `took:${def.id}`;
   if (ctx.story.get(flag)) return null;
-  if (def.mesh) ctx.root.add(def.mesh);
+
+  let beacon = null;
+  if (def.mesh) {
+    beacon = new PickupBeacon(def.mesh, { color: def.glowColor ?? 0xfff2c8 });
+    ctx.root.add(beacon.object);
+    ctx.updatables?.push(beacon);
+  }
 
   return {
     id: def.id,
@@ -28,9 +39,11 @@ export function makeItemPickup(ctx, def) {
     prompt: def.prompt,
     canInteract: () => !ctx.story.get(flag),
     onInteract: () => {
-      ctx.story.set(flag, true);
+      // Order matters: the story flag fires autosave, so the inventory must
+      // already contain the item when the snapshot is taken.
       ctx.inventory.add(def.itemId, def.qty ?? 1);
-      def.mesh?.removeFromParent();
+      ctx.story.set(flag, true);
+      beacon?.vanish();
       ctx.events.emit('audio/sfx', { id: 'pickup' });
       ctx.events.emit('ui/toast', {
         text: def.flavor ?? `Taken — ${def.itemId.toUpperCase()}`,

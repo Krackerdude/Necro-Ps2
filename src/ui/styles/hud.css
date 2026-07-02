@@ -9,6 +9,49 @@
   pointer-events: none;
 }
 
+/* Current objective — top left, a torn strip of intent */
+.hud-objective {
+  position: absolute;
+  top: 4vh;
+  left: 3vw;
+  max-width: 38vw;
+  transform: skewX(-6deg) rotate(-0.8deg);
+}
+
+.hud-objective .tag {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.45em;
+  color: #000;
+  background: var(--blood-bright);
+  padding: 3px 10px 2px 12px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.hud-objective .value {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bone);
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 rgba(158, 22, 22, 0.6);
+  background: linear-gradient(90deg, rgba(8, 6, 10, 0.85), rgba(8, 6, 10, 0.4) 80%, transparent);
+  padding: 5px 22px 6px 12px;
+  clip-path: polygon(0 0, 100% 2px, calc(100% - 12px) 100%, 0 calc(100% - 2px));
+}
+
+.hud-objective.changed {
+  animation: objective-in 380ms steps(4) both;
+}
+
+@keyframes objective-in {
+  0% { transform: skewX(-6deg) rotate(-0.8deg) translateX(-40px); opacity: 0; }
+  60% { transform: skewX(-6deg) rotate(-0.8deg) translateX(6px); opacity: 1; }
+  100% { transform: skewX(-6deg) rotate(-0.8deg) translateX(0); opacity: 1; }
+}
+
 /* Condition readout — bottom left, ECG-adjacent */
 .hud-condition {
   position: absolute;

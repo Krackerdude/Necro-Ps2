@@ -31,7 +31,7 @@ export const SUNKEN_CLOISTER = {
   id: 'sunken-cloister',
   name: 'The Sunken Cloister',
 
-  build({ kit, story, inventory, events, physics }) {
+  build({ kit, story, inventory, events }) {
     const root = new THREE.Group();
     const colliders = [];
     const updatables = [];
@@ -42,7 +42,7 @@ export const SUNKEN_CLOISTER = {
       colliders.push(...piece.colliders);
       return piece.object;
     };
-    const pickupCtx = { root, story, inventory, events };
+    const pickupCtx = { root, story, inventory, events, updatables };
 
     /* ----------------------------- FLOORS ------------------------------ */
     // Walks: stone. Garth: bone-dust mud under standing water.
@@ -119,6 +119,8 @@ export const SUNKEN_CLOISTER = {
     add(kit.corpse({ position: [1.8, 8.6], rotationY: -1.9 }));
     add(kit.corpse({ position: [-6.2, -7.9], rotationY: 0.7 }));
     add(kit.rubble({ position: [8.6, 8.7], seed: 57, count: 7 }));
+    // The door back up to the chapel crypt — a real door, always shut.
+    add(kit.door({ position: [8.6, -9.8], width: 1.6, height: 2.4 }));
 
     /* ----------------------------- LIGHTING ----------------------------- */
     root.add(new THREE.AmbientLight(0x252a38, 2.0));
@@ -151,11 +153,21 @@ export const SUNKEN_CLOISTER = {
     updatables.push(mist);
 
     /* ----------------------- GATE (to the ossuary) ---------------------- */
-    let gate = null;
-    if (!story.get('cloisterGateOpen')) {
-      gate = kit.gate({ position: [0, 10], width: 2.0 });
-      add(gate);
-    }
+    // The gate NEVER opens visually — it's the door you travel "through"
+    // via the fade, RE-style. It always blocks movement so the wall gap
+    // can't leak into the void. Behind it, a black depth plane sells the
+    // descending passage beyond the bars.
+    const gate = kit.gate({ position: [0, 10], width: 2.0 });
+    add(gate);
+    const gateDark = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.2, 3),
+      new THREE.MeshBasicMaterial({ color: 0x000000 })
+    );
+    gateDark.position.set(0, 1.5, 10.4);
+    gateDark.rotation.y = Math.PI;
+    root.add(gateDark);
+    // ...and its collider, since the wall gap is wider than the bars.
+    colliders.push(new THREE.Box3(new THREE.Vector3(-1.2, 0, 10.1), new THREE.Vector3(1.2, 3, 10.6)));
 
     /* --------------------------- INTERACTABLES -------------------------- */
     interactables.push(
@@ -189,14 +201,6 @@ export const SUNKEN_CLOISTER = {
               return;
             }
             story.set('cloisterGateOpen', true);
-            if (gate) {
-              gate.object.removeFromParent();
-              for (const box of gate.colliders) {
-                const i = colliders.indexOf(box);
-                if (i !== -1) colliders.splice(i, 1);
-              }
-              physics.setStaticColliders(colliders);
-            }
             events.emit('audio/sfx', { id: 'doorUnlock' });
             events.emit('ui/toast', { text: 'The verdigris key turns. Something below stops humming.' });
             return;
@@ -237,9 +241,10 @@ export const SUNKEN_CLOISTER = {
         itemId: 'boneRevolver',
         mesh: makePickupMesh(kit, {
           position: new THREE.Vector3(1.8, 0.35, 8.4),
-          color: 0x4a4a52,
-          emissive: 0x22222a,
+          color: 0x8a8a9a,
+          emissive: 0x3a3a52,
         }),
+        glowColor: 0xd0dcff,
         position: new THREE.Vector3(1.8, 1, 8.4),
         prompt: 'Take the revolver from the body',
         flavor: 'Taken — OSSUARY REVOLVER. His hand did not want to give it up.',

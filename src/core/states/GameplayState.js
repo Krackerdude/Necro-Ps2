@@ -99,6 +99,7 @@ export class GameplayState extends GameState {
       events,
       settings: s.get(Services.SETTINGS),
       inventory: this.#inventory,
+      story,
     });
     s.get(Services.UI).setHud(this.#hud);
 
@@ -190,6 +191,7 @@ export class GameplayState extends GameState {
 
     const runtime = world.loadLevel(levelId, { story, inventory: this.#inventory });
     this.#levelId = levelId;
+    if (!story.get(`visited:${levelId}`)) story.set(`visited:${levelId}`, true);
 
     const spawn = (spawnName && runtime.spawnPoints?.[spawnName]) ?? runtime.spawn;
     this.#player.spawnAt(spawn);
