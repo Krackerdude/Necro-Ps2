@@ -143,6 +143,39 @@
   opacity: 0.8;
 }
 
+/* Weapon / ammo readout — bottom right, mirrors the condition tag */
+.hud-weapon {
+  position: absolute;
+  right: 3vw;
+  bottom: 4vh;
+  text-align: right;
+  transform: skewX(-8deg) rotate(1deg);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.hud-weapon .tag {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--bone-dim);
+}
+
+.hud-weapon .value {
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--bone);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.hud-weapon.aiming .tag {
+  color: var(--blood-bright);
+  animation: cond-blink 0.8s steps(2) infinite;
+}
+
+.hud-weapon.aiming .value {
+  color: var(--blood-bright);
+}
+
 /* Damage flash */
 .hud-damage {
   position: absolute;

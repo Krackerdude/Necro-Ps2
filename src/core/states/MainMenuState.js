@@ -23,7 +23,7 @@ export class MainMenuState extends GameState {
     const save = this.services.get(Services.SAVE);
     const story = this.services.get(Services.STORY);
 
-    const runtime = world.loadLevel('menu-vista', story);
+    const runtime = world.loadLevel('menu-vista', { story });
     this.#menuCamera = runtime.menuCamera;
     this.#cameraTime = 0;
     cameraDirector.setMode('manual');

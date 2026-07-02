@@ -27,6 +27,9 @@ Deploys on **Vercel** with zero config (auto-detected Vite static build).
 | Run | `Shift` |
 | Quick turn (180°) | `C` |
 | Interact / confirm | `E` |
+| Ready weapon (hold) | `Q` |
+| Attack (while ready) | `Space` |
+| Inventory | `Tab` / `I` |
 | Pause | `Esc` |
 | Debug overlay | `F3` |
 
@@ -34,9 +37,22 @@ Deploys on **Vercel** with zero config (auto-detected Vite static build).
 
 - **Main menu** — 3D graveyard vista with a slow camera push-in, stylized 2D overlay
   (New Game / Load Game / Options).
-- **Chapel of the Hollow** — the first level: nave, vestry save room, corridor, crypt.
-  A short progression loop: find the warden's note → take the Black Iron Key →
-  unlock the crypt → survive the Wraith → claim the Hollow Icon.
+- **Three levels, one arc** — *Chapel of the Hollow* (note → Black Iron Key →
+  crypt → Hollow Icon) opens a trapdoor to *The Sunken Cloister* (flooded garth,
+  husks on the walks, the Verdigris Key in the black water), which unlocks
+  *Ossuary of the Hollow* (bone corridors, the Bell Chamber, and the finale:
+  seat the icon, ring the hour). Level transitions fade through black and
+  autosave on arrival; keys and progress carry across levels.
+- **Inventory** — a data-driven item catalog (weapons, ammo, consumables, key
+  items) behind a stylized satchel screen (`Tab`): examine, use, equip. Loot is
+  placed in the world and stays taken across saves.
+- **Weapons & combat** — hold `Q` to plant your feet and ready the equipped
+  weapon, `Space` to attack. Rust-Eaten Machete (melee arc) and Ossuary
+  Revolver (hitscan with line-of-sight, consumes Tallow Rounds). Muzzle flash,
+  hit flashes, synthesized gunshots.
+- **Enemies** — Husks (slow, relentless shamblers with long memories) and
+  Wraiths (fast pursuit hazards, now killable at a price). Deaths persist per
+  spawn; some spawns are story-gated (open the crypt and something wanders up).
 - **Fixed camera direction** — authored shots per room volume: high corner
   surveillance, low dutch angles, one-point corridor perspective, with camera roll
   and per-shot FOV.

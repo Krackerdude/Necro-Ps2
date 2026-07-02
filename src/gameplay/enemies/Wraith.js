@@ -1,21 +1,28 @@
 import * as THREE from 'three';
 import { PursuitBehavior } from '../../ai/PursuitBehavior.js';
+import { EnemyHealth } from '../combat/EnemyHealth.js';
 
 /**
  * Wraith — the crypt's tenant. A shrouded drifting figure that pursues on
- * sight and damages on contact. Body here, brain in ai/PursuitBehavior.
+ * sight and damages on contact. Body here, brain in ai/PursuitBehavior,
+ * mortality in combat/EnemyHealth.
  *
  * Speeds are tuned so a walking player gets caught and a running player
- * escapes — the classic pressure valve.
+ * escapes — the classic pressure valve. It takes most of a revolver's worth
+ * of rounds to put one down; running remains the honest option.
  */
 const SPEED = { haunt: 0.7, pursue: 2.6, return: 1.2 };
 const CONTACT_RANGE = 0.65;
 const CONTACT_DAMAGE = 18;
 const CONTACT_COOLDOWN = 1.2;
+const HP = 150;
 
 export class Wraith {
   /** @type {THREE.Group} */
   object = new THREE.Group();
+  radius = 0.3;
+  /** @type {EnemyHealth} */
+  health;
 
   #behavior;
   #physics;
@@ -51,6 +58,8 @@ export class Wraith {
     this.object.traverse((n) => (n.castShadow = true));
     this.object.position.copy(spawn.position);
 
+    this.health = new EnemyHealth(events, { hp: HP, root: this.object });
+
     this.#behavior = new PursuitBehavior({
       home: spawn.position,
       homeRadius: spawn.homeRadius ?? 5,
@@ -60,7 +69,23 @@ export class Wraith {
     });
   }
 
+  get alive() {
+    return this.health.alive;
+  }
+
+  takeHit(damage) {
+    this.health.takeHit(damage);
+  }
+
   update(dt) {
+    const deathProgress = this.health.update(dt);
+    if (!this.health.alive) {
+      // The shroud deflates and sinks into the ground.
+      this.object.scale.setScalar(1 - deathProgress * 0.4);
+      this.object.position.y = 0.08 - deathProgress * 1.2;
+      return;
+    }
+
     const dir = this.#behavior.update(this.object.position, this.#playerObject.position, dt);
     const speed = SPEED[this.#behavior.state] ?? SPEED.haunt;
     this.#physics.moveCircle(this.object.position, dir.x * speed * dt, dir.z * speed * dt, 0.3);
@@ -92,10 +117,11 @@ export class Wraith {
   /* Save participant interface (positions restored on load). */
   captureState() {
     const { x, y, z } = this.object.position;
-    return { position: [x, y, z], state: this.#behavior.state };
+    return { position: [x, y, z], hp: this.health.hp };
   }
 
   restoreState(state) {
     if (state?.position) this.object.position.set(...state.position);
+    if (typeof state?.hp === 'number') this.health.hp = state.hp;
   }
 }

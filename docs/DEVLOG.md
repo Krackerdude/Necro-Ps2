@@ -5,6 +5,51 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 2: inventory, combat, enemies, levels 2 & 3
+
+**State: full three-level arc playable.** Chapel → (icon opens trapdoor) →
+Sunken Cloister → (Verdigris Key opens gate) → Ossuary → seat icon → ring
+bell → demo end. Inventory (Tab), machete + revolver combat (hold Q, Space),
+Husks + killable Wraiths, level transitions with fade + arrival autosave.
+Combat verified numerically headless (revolver 150→74 over 2 shots, machete
+70→48, ammo drain correct); save snapshots carry inventory.
+
+### New systems (where things live)
+- `gameplay/inventory/` — itemCatalog (ALL items are data), Inventory model.
+- `gameplay/combat/` — WeaponSystem (aim/attack, cone+LOS targeting),
+  EnemyHealth (hp/flash/dying/dead), MuzzleFlash.
+- `gameplay/enemies/EnemyRoster.js` — ENEMY_TYPES registry, onlyIf-gated
+  spawns (re-checked on flag changes), death flags, save capture.
+- `world/levels/levelHelpers.js` — makeItemPickup / makeTransition /
+  makePickupMesh. USE THESE in levels; don't hand-roll flags.
+- `ui/screens/InventoryScreen.js` + satchel CSS; HUD weapon/ammo readout.
+- `ui/components/FadeOverlay.js` — 'ui/fade' event, constructed in Engine.
+
+### Decisions
+- Aiming plants feet (turn-only), attack while ready: era grammar.
+- No reload mechanic — revolver draws straight from the ammo pool. TODO if
+  wanted later: chamber capacity + reload beat.
+- Wraith hp 150 (≈4 rounds), husk 70 (2 rounds / 4 swings). Running still
+  beats fighting for wraiths — keep that pressure economy.
+- Old saves: crypt door accepts `inventory.has('blackIronKey') ||
+  story.get('hasCryptKey')` (v1 saves stored the key as a flag).
+- Dev handle: `window.__necroSession` (DEV builds only) exposes player,
+  inventory, story, roster, gotoLevel — used by smoke tests; never ship
+  logic on it.
+
+### Rough edges / next candidates
+- [ ] Enemy attack animations (contact damage is instant with cooldown).
+- [ ] Wraith/husk pathing is straight-line + wall-slide; a nav mesh or
+      corner-steering pass will matter in more complex rooms.
+- [ ] Bell doesn't visually swing on the finale toll (hook exists: `bell`).
+- [ ] Inventory has no discard/combine; tiles use glyphs (icon art seam is
+      the tile renderer in InventoryScreen).
+- [ ] Ammo economy untuned beyond first pass (20 rounds + 2 wraiths + 6
+      husks in the full arc — deliberately tight, revisit with playtests).
+- [ ] Cloister water is a flat plane; no wading SFX/slowdown in the garth.
+
+---
+
 ## 2026-07-01 — Session 1: engine + first playable
 
 **State: playable end-to-end.** Title → New Game → chapel → note → key →

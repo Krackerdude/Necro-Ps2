@@ -52,10 +52,17 @@ export class PlayerRig {
     });
   }
 
+  #aiming = false;
+
   /** @param {boolean} moving @param {boolean} running */
   setMoving(moving, running = false) {
     this.#moveBlend = moving ? 1 : this.#moveBlend * 0.8;
     this.#runFactor = running ? 1.7 : 1;
+  }
+
+  /** Aiming pose: right arm raised level, left arm still. */
+  setAiming(aiming) {
+    this.#aiming = aiming;
   }
 
   update(dt) {
@@ -64,7 +71,8 @@ export class PlayerRig {
     this.#limbs.legL.rotation.x = swing;
     this.#limbs.legR.rotation.x = -swing;
     this.#limbs.armL.rotation.x = -swing * 0.7;
-    this.#limbs.armR.rotation.x = swing * 0.7;
+    // Aiming overrides the right arm swing with a raised, level pose.
+    this.#limbs.armR.rotation.x = this.#aiming ? -Math.PI / 2 : swing * 0.7;
     // Subtle body bob sells the cycle.
     this.object.position.y = Math.abs(Math.sin(this.#walkPhase)) * 0.03 * this.#moveBlend;
   }
