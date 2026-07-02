@@ -23,5 +23,9 @@ export class ModalUiState extends GameState {
 
   exit() {
     this.services.get(Services.UI).remove(this.#screen);
+    // The key that dismissed the screen must not leak into gameplay as a
+    // fresh action press (Tab would instantly reopen the inventory, Esc
+    // would open the pause menu, E would re-trigger the interactable).
+    this.services.get(Services.INPUT).clearPressed();
   }
 }

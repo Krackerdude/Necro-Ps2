@@ -2,6 +2,7 @@ import { Screen } from '../Screen.js';
 import { el } from '../components/dom.js';
 import { formatKeyCode } from '../../input/keyLabels.js';
 import { getItem } from '../../gameplay/inventory/itemCatalog.js';
+import { getCurrentObjective } from '../../gameplay/story/objectives.js';
 
 /**
  * HudOverlay — minimal in-game readout: condition tag, weapon/ammo tag,
@@ -12,15 +13,18 @@ export class HudOverlay extends Screen {
   #events;
   #settings;
   #inventory;
+  #story;
   #unsubs = [];
   #lastHealth = Infinity;
   #aiming = false;
+  #objectiveId = null;
 
-  constructor({ events, settings, inventory = null }) {
+  constructor({ events, settings, inventory = null, story = null }) {
     super();
     this.#events = events;
     this.#settings = settings;
     this.#inventory = inventory;
+    this.#story = story;
   }
 
   build() {
@@ -28,6 +32,7 @@ export class HudOverlay extends Screen {
       'div.hud',
       {},
       el('div.hud-damage', {}),
+      el('div.hud-objective', { style: 'display:none' }),
       el(
         'div.hud-condition',
         {},
@@ -62,7 +67,11 @@ export class HudOverlay extends Screen {
         );
       }),
       this.#events.on('ui/toast', ({ text }) => this.#toast(text)),
-      this.#events.on('inventory/changed', () => this.#renderWeapon()),
+      this.#events.on('inventory/changed', () => {
+        this.#renderWeapon();
+        this.#renderObjective();
+      }),
+      this.#events.on('story/flag-changed', () => this.#renderObjective()),
       this.#events.on('combat/aim-changed', ({ aiming }) => {
         this.#aiming = aiming;
         this.#renderWeapon();
@@ -73,6 +82,24 @@ export class HudOverlay extends Screen {
       }),
     ];
     this.#renderWeapon();
+    this.#renderObjective();
+  }
+
+  #renderObjective() {
+    const node = this.element?.querySelector('.hud-objective');
+    if (!node || !this.#story) return;
+    const objective = getCurrentObjective({ story: this.#story, inventory: this.#inventory });
+    if (objective.id === this.#objectiveId) return;
+    this.#objectiveId = objective.id;
+    node.style.display = '';
+    node.replaceChildren(
+      el('div.tag', {}, 'OBJECTIVE'),
+      el('div.value', {}, objective.text)
+    );
+    // Restart the slash-in animation on every change.
+    node.classList.remove('changed');
+    void node.offsetWidth;
+    node.classList.add('changed');
   }
 
   onHide() {

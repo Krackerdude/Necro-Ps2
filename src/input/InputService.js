@@ -53,6 +53,15 @@ export class InputService {
   }
 
   /**
+   * Discard buffered presses immediately. UI screens call this when closing
+   * so the keypress that closed them (Tab/Esc/E) isn't re-delivered to
+   * gameplay as a fresh action on the next fixed step.
+   */
+  clearPressed() {
+    this.#pressed.clear();
+  }
+
+  /**
    * Rebind capture: while enabled, the next physical key is reported via
    * 'input/raw-key' and normal action dispatch is suppressed.
    */

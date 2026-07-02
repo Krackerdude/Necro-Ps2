@@ -5,6 +5,37 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 3: playtest fixes (first user feedback pass)
+
+All five reported issues fixed and regression-tested headless:
+
+1. **Modal key leak** — closing a modal (Tab/Esc/E) re-delivered the same
+   press to gameplay next tick (inventory reopened, pause opened, notes
+   re-triggered interact). Fix: `InputService.clearPressed()`, called from
+   `ModalUiState.exit()`. RULE: any new modal path must go through
+   ModalUiState or call clearPressed on close.
+2. **Autosave lost items** — pickups set the story flag BEFORE adding the
+   item; the flag triggered autosave mid-beat → saves had `took:` flags with
+   no item. Fix: inventory.add before story.set in levelHelpers + chapel
+   icon, AND autosave is now microtask-debounced so a whole beat is captured
+   atomically. RULE: mutate inventory before flags in any pickup-like beat.
+3. **Void doors** — the cloister gate used to be removed on unlock (open gap
+   into the void); it now stays closed forever (fade transition "through"
+   it) with a black depth plane behind the bars + explicit collider. The
+   ossuary entrance gap got a real door. RULE: every level-transition gap
+   needs a physical door/gate mesh that never opens.
+4. **Objective tracker** — `gameplay/story/objectives.js` (ordered chain of
+   flag predicates; first not-done wins) + a stylized top-left HUD strip
+   that slashes in on change. `visited:<levelId>` flags are set by
+   GameplayState.#enterLevel and drive the "go there" steps. Extend the
+   CHAIN when adding beats — nothing else needs wiring.
+5. **Pickup visibility** — `world/effects/PickupBeacon.js`: spin + bob +
+   additive breathing glow + periodic four-point star glint (RPG shine).
+   Wired automatically by makeItemPickup (pass `updatables` in pickupCtx).
+   Revolver mesh also brightened (was near-black).
+
+---
+
 ## 2026-07-02 — Session 2: inventory, combat, enemies, levels 2 & 3
 
 **State: full three-level arc playable.** Chapel → (icon opens trapdoor) →
