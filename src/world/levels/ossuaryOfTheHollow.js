@@ -209,6 +209,7 @@ export const OSSUARY_OF_THE_HOLLOW = {
           }
           story.set('bellRung', true);
           events.emit('audio/sfx', { id: 'bellToll' });
+          events.emit('camera/impulse', { strength: 1.0 }); // the toll rocks the room
           events.emit('ui/show-note', {
             title: 'THE HOUR IS TOLD',
             body:

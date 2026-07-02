@@ -9,6 +9,7 @@ import { InteractionSystem } from '../../gameplay/interaction/InteractionSystem.
 import { Inventory } from '../../gameplay/inventory/Inventory.js';
 import { WeaponSystem } from '../../gameplay/combat/WeaponSystem.js';
 import { GunFx } from '../../gameplay/combat/GunFx.js';
+import { BloodFx } from '../../gameplay/combat/BloodFx.js';
 import { EnemyRoster } from '../../gameplay/enemies/EnemyRoster.js';
 import { HudOverlay } from '../../ui/screens/HudOverlay.js';
 import { NoteScreen } from '../../ui/screens/NoteScreen.js';
@@ -36,6 +37,7 @@ export class GameplayState extends GameState {
   #inventory = null;
   #weapons = null;
   #gunFx = null;
+  #bloodFx = null;
   #roster = null;
   #interaction = null;
   #hud = null;
@@ -95,6 +97,7 @@ export class GameplayState extends GameState {
       getEnemies: () => this.#roster.living(),
     });
     this.#gunFx = new GunFx(events);
+    this.#bloodFx = new BloodFx(events);
 
     this.#interaction = new InteractionSystem(events, s.get(Services.INPUT));
 
@@ -198,6 +201,8 @@ export class GameplayState extends GameState {
     this.#roster.dispose();
     this.#player.object.removeFromParent();
     this.#gunFx.object.removeFromParent();
+    this.#bloodFx.reset();
+    this.#bloodFx.object.removeFromParent();
 
     const runtime = world.loadLevel(levelId, { story, inventory: this.#inventory });
     this.#levelId = levelId;
@@ -205,7 +210,7 @@ export class GameplayState extends GameState {
 
     const spawn = (spawnName && runtime.spawnPoints?.[spawnName]) ?? runtime.spawn;
     this.#player.spawnAt(spawn);
-    world.scene.add(this.#player.object, this.#gunFx.object);
+    world.scene.add(this.#player.object, this.#gunFx.object, this.#bloodFx.object);
 
     this.#roster.populate(
       runtime.enemySpawns,

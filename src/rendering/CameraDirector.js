@@ -16,8 +16,19 @@ import * as THREE from 'three';
  *   'zones'  — gameplay; driven by zones + target.
  *   'manual' — cutscenes / main menu; external code positions the camera.
  *
+ * Impulse ("trauma") system: anything may emit 'camera/impulse'
+ * { strength } — gunshots, taking a hit, the bell. Trauma accumulates,
+ * decays, and drives a rotational shake applied ON TOP of the authored
+ * framing (the base orientation is kept, so cameras return to their exact
+ * shot). Squared falloff: big impacts rock the frame, small ones whisper.
+ *
  * Emits: 'camera/zone-changed' { id } on every cut.
  */
+const TRAUMA_DECAY = 1.6; // per second
+const SHAKE_PITCH = 0.048;
+const SHAKE_YAW = 0.042;
+const SHAKE_ROLL = 0.06;
+
 export class CameraDirector {
   /** @type {THREE.PerspectiveCamera} */
   camera;
@@ -29,6 +40,11 @@ export class CameraDirector {
   #activeZone = null;
   #mode = 'manual';
   #lookTarget = new THREE.Vector3();
+  #trauma = 0;
+  #shakeTime = 0;
+  #baseQuat = new THREE.Quaternion();
+  #shakeEuler = new THREE.Euler();
+  #shakeQuat = new THREE.Quaternion();
 
   constructor(events, settings) {
     this.#events = events;
@@ -37,6 +53,9 @@ export class CameraDirector {
 
     events.on('settings/changed', ({ path }) => {
       if (path === 'display.fov') this.#applyFov();
+    });
+    events.on('camera/impulse', ({ strength = 0.3 }) => {
+      this.#trauma = Math.min(1, this.#trauma + strength);
     });
   }
 
@@ -57,7 +76,10 @@ export class CameraDirector {
   }
 
   update(dt) {
-    if (this.#mode !== 'zones' || !this.#target) return;
+    if (this.#mode !== 'zones' || !this.#target) {
+      this.#trauma = 0;
+      return;
+    }
 
     const zone = this.#pickZone(this.#target.position);
     if (zone && zone !== this.#activeZone) {
@@ -75,13 +97,34 @@ export class CameraDirector {
       this.#lookTarget.lerp(this.#target.position, Math.min(1, stiffness * dt));
       this.#frame();
     }
+
+    this.#applyShake(dt);
   }
 
-  /** Aim at the look target, then apply the zone's dutch-angle roll. */
+  /** Aim at the look target, apply the zone's roll, remember the base pose. */
   #frame() {
     this.camera.lookAt(this.#lookTarget);
     const roll = this.#activeZone?.rollDeg ?? 0;
     if (roll !== 0) this.camera.rotateZ(THREE.MathUtils.degToRad(roll));
+    this.#baseQuat.copy(this.camera.quaternion);
+  }
+
+  #applyShake(dt) {
+    if (this.#trauma <= 0) return;
+    this.#trauma = Math.max(0, this.#trauma - TRAUMA_DECAY * dt);
+    this.#shakeTime += dt;
+
+    const shake = this.#trauma * this.#trauma;
+    const t = this.#shakeTime;
+    // Incommensurate frequencies read as chaos, not wobble.
+    this.#shakeEuler.set(
+      Math.sin(t * 31.7) * SHAKE_PITCH * shake,
+      Math.sin(t * 27.1 + 1.3) * SHAKE_YAW * shake,
+      Math.sin(t * 37.3 + 2.1) * SHAKE_ROLL * shake
+    );
+    this.#shakeQuat.setFromEuler(this.#shakeEuler);
+    this.camera.quaternion.copy(this.#baseQuat).multiply(this.#shakeQuat);
+    if (this.#trauma === 0) this.camera.quaternion.copy(this.#baseQuat);
   }
 
   /** Current shot's forward direction projected to the ground plane — the

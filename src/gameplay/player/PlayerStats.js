@@ -7,11 +7,17 @@
  *
  * Emits 'player/stats-changed' { health, maxHealth, condition } and
  * 'player/died' via the EventBus.
+ *
+ * Post-hit invulnerability (~0.9 s): without it, an adjacent enemy chains
+ * contact damage into a stun-lock — era games all had these i-frames.
  */
+const IFRAME_MS = 900;
+
 export class PlayerStats {
   #events;
   #health;
   #maxHealth;
+  #lastDamageAt = -Infinity;
 
   constructor(events, { maxHealth = 100 } = {}) {
     this.#events = events;
@@ -35,11 +41,15 @@ export class PlayerStats {
     return 'DEAD';
   }
 
+  /** @returns {boolean} true if the damage landed (not absorbed by i-frames) */
   damage(amount) {
-    if (this.#health <= 0) return;
+    if (this.#health <= 0) return false;
+    if (performance.now() - this.#lastDamageAt < IFRAME_MS) return false;
+    this.#lastDamageAt = performance.now();
     this.#health = Math.max(0, this.#health - amount);
     this.#emit();
     if (this.#health === 0) this.#events.emit('player/died');
+    return true;
   }
 
   heal(amount) {

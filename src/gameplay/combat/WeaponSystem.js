@@ -29,6 +29,8 @@ export class WeaponSystem {
   #getEnemies;
   #aiming = false;
   #cooldown = 0;
+  /** Attack pressed while committed (flinch/swing) fires on recovery. */
+  #bufferedAttack = 0;
 
   #forward = new THREE.Vector3();
   #toEnemy = new THREE.Vector3();
@@ -59,12 +61,20 @@ export class WeaponSystem {
       if (wantAim) this.#events.emit('audio/sfx', { id: 'weaponReady' });
     }
 
+    // Buffer the press: a swing input during a flinch or recovery isn't
+    // eaten — it fires the moment the body is free (up to 0.4 s later).
+    this.#bufferedAttack = Math.max(0, this.#bufferedAttack - dt);
+    if (this.#aiming && this.#input.wasPressed('attack')) {
+      this.#bufferedAttack = 0.4;
+    }
+
     if (
       this.#aiming &&
+      this.#bufferedAttack > 0 &&
       this.#cooldown === 0 &&
-      !this.#player.rig.isActing &&
-      this.#input.wasPressed('attack')
+      !this.#player.rig.isActing
     ) {
+      this.#bufferedAttack = 0;
       this.#attack(weapon.weapon);
     }
   }
@@ -90,6 +100,7 @@ export class WeaponSystem {
           this.#events.emit('audio/sfx', { id: 'gunshot' });
           this.#muzzle.copy(this.#player.object.position).y = 1.35;
           this.#events.emit('combat/fired', { position: this.#muzzle.clone(), ranged: true });
+          this.#events.emit('camera/impulse', { strength: 0.24 });
           const target = this.#findTarget(stats.range, RANGED_CONE_DEG, true);
           if (target) {
             target.takeHit(stats.damage);
@@ -120,6 +131,7 @@ export class WeaponSystem {
                 target.takeHit(stats.damage);
                 this.#events.emit('audio/sfx', { id: 'macheteHit' });
                 this.#events.emit('time/hitstop', { duration: 0.075 });
+                this.#events.emit('camera/impulse', { strength: 0.35 });
               }
               break;
             }

@@ -5,6 +5,32 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 6: Tier 2 — camera impulse, blood, combat fairness
+
+- **Camera impulse ("trauma")**: 'camera/impulse' {strength} → CameraDirector
+  accumulates trauma, decays 1.6/s, squared falloff drives rotational shake
+  over the authored base pose (base quaternion preserved — shots settle back
+  EXACTLY). Emitters: gunshot 0.24, melee hit 0.35, player hurt 0.42, bell
+  toll 1.0. Manual (menu) mode never shakes.
+- **BloodFx**: era-style flat floor splats (spray on 'enemy/damaged', pool
+  on 'enemy/died' — EnemyHealth now emits positions — 'blood/splat' for the
+  player). FIFO cap 48/level, reset() on transitions. Wall sprays via
+  DecalFactory remain a TODO.
+- **Combat fairness fixes found by testing** (important design rules):
+  1. Player i-frames: 0.9 s post-hit invulnerability in PlayerStats.damage
+     (returns boolean; enemies only emit 'player/damaged' when it LANDS).
+     Without this, adjacent enemies stun-lock.
+  2. Attack input buffering: presses during flinch/recovery hold for 0.4 s
+     and fire on recovery instead of being eaten (WeaponSystem).
+  3. **Attacks are committed**: hurtFlinch must NOT play while rig.isActing —
+     AnimationPlayer.play() REPLACES the current clip, which silently
+     dropped the swing's pending 'hit' frame. Rule: never play a reaction
+     clip over an attack clip; gate on rig.isActing.
+  Verified: fair-spacing machete duel kills a husk in 4 swings while the
+  player trades ~36 hp at knife range. That economy is intentional.
+
+---
+
 ## 2026-07-02 — Session 5: weapon models
 
 - `src/assets/models/weaponModels.js` — detailed low-poly procedural models

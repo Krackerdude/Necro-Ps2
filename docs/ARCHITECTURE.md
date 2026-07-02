@@ -86,6 +86,8 @@ Add new events here when you introduce them.
 | `enemy/died` / `enemy/damaged` | `{}` | EnemyHealth | (future: score/FX) |
 | `player/damaged` | `{from: Vector3}` | enemies | PlayerController (flinch/knockback/stun) |
 | `time/hitstop` | `{duration}` | WeaponSystem (impacts) | Engine → GameLoop |
+| `camera/impulse` | `{strength}` | weapons, hurt, bell | CameraDirector (trauma shake) |
+| `blood/splat` | `{position,size?}` | PlayerController | BloodFx |
 | `level/transition` | `{levelId,spawn}` | level interactables | GameplayState |
 | `ui/fade` | `{opacity,duration}` | anyone | FadeOverlay |
 | `ui/toast` | `{text}` | anyone | HUD |
