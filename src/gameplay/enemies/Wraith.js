@@ -69,12 +69,19 @@ export class Wraith {
     });
   }
 
+  #flickerRemaining = 0;
+  #basePosition = new THREE.Vector3();
+
   get alive() {
     return this.health.alive;
   }
 
   takeHit(damage) {
     this.health.takeHit(damage);
+    // Wraiths don't stagger — they DISTORT: position jitter + shroud
+    // flicker for a beat, and the pursuit loses a step.
+    this.#flickerRemaining = 0.28;
+    this.#basePosition.copy(this.object.position);
   }
 
   update(dt) {
@@ -83,6 +90,22 @@ export class Wraith {
       // The shroud deflates and sinks into the ground.
       this.object.scale.setScalar(1 - deathProgress * 0.4);
       this.object.position.y = 0.08 - deathProgress * 1.2;
+      return;
+    }
+
+    if (this.#flickerRemaining > 0) {
+      this.#flickerRemaining -= dt;
+      // Teleport-jitter around the held position; visibility strobes.
+      this.object.position.set(
+        this.#basePosition.x + (Math.random() - 0.5) * 0.24,
+        this.#basePosition.y,
+        this.#basePosition.z + (Math.random() - 0.5) * 0.24
+      );
+      this.object.visible = Math.random() > 0.3;
+      if (this.#flickerRemaining <= 0) {
+        this.object.position.copy(this.#basePosition);
+        this.object.visible = true;
+      }
       return;
     }
 
@@ -108,6 +131,7 @@ export class Wraith {
       const d = this.object.position.distanceTo(this.#playerObject.position);
       if (d < CONTACT_RANGE + 0.32) {
         this.#playerStats.damage(CONTACT_DAMAGE);
+        this.#events.emit('player/damaged', { from: this.object.position });
         this.#events.emit('audio/sfx', { id: 'hurt' });
         this.#cooldown = CONTACT_COOLDOWN;
       }

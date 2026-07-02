@@ -5,6 +5,57 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-02 — Session 4: Tier 1 combat feel (animation layer)
+
+**The "weight" pass.** Everything verified headless: melee damage lands on
+the strike frame (not button press), knockdown/rise cycle observed, DANGER
+limp measured at 0.62× walk speed, zero console errors.
+
+### New systems
+- `src/animation/AnimationPlayer.js` — THE animation layer. Clips are plain
+  data: keyed Euler tracks per named joint + frame events, smoothstep
+  between keys, short fade-in blend, `isActing` lock. Deliberately not
+  three's AnimationMixer (pivot-group rigs, frame events first-class).
+- `GameLoop.hitstop(s)` + `'time/hitstop'` event — freezes simulation, not
+  rendering. Melee contact 75 ms, gunshot hit 35 ms.
+- Clips live in `gameplay/animation/` (playerClips.js, huskClips.js).
+  AUTHORING RULE: clips return to the rig's BASE pose (husk torso 0.35,
+  arms -0.5), not to zero.
+
+### How attacks flow now
+WeaponSystem no longer resolves damage on input. It plays a clip and
+resolves on frame events: machete = 'windup' (swing sfx) → 'lunge'
+(forward shove) → 'hit' at 0.37 s (target find + damage + hitstop);
+revolver = 'fire' at 0.02 s (ammo, sfx, GunFx, hit + hitstop). Cooldown
+covers clip duration. Player input is locked while `rig.isActing`.
+
+### Rigs
+Both PlayerRig and Husk restructured: torso is a waist pivot carrying head
++ arm pivots (lean/coil moves everything above), legs on the root. Joints
+map + clip names are the contract future GLTF models must honor.
+
+### Reactions
+- Player: 'player/damaged' {from} (emitted by enemies alongside
+  stats.damage) → hurtFlinch clip + knockback shove + 0.3 s stun.
+  DANGER = 0.6× speed + asymmetric limp gait; CAUTION = 0.85×.
+- Husk: any hit → directional stagger (whipped away from shooter, arms
+  wide, balance step). Heavy hit (≥30 dmg) → 50% knockdown: root-motion
+  fall backwards → 1.6 s down → rise clip (it gets back up, slow and
+  wrong). No movement/damage while reacting.
+- Wraith: hits cause a 0.28 s distortion — position jitter + visibility
+  strobe + pursuit pause. Wraiths don't stagger; they glitch.
+- GunFx (replaces MuzzleFlash): star flash sprite + light pop, ejected
+  brass casing (gravity, bounce, 'casing' tick sfx), drifting smoke wisp.
+
+### Notes / next
+- [ ] Aim raise is a lerp (10/s) — feels right; revisit with viewmodel art.
+- [ ] Knockdown chance is flat 0.5 on heavy hits; consider guaranteeing on
+      crossing 50% hp for predictability.
+- [ ] Tier 2 next: camera impulse service, blood decals (DecalFactory is
+      still dormant), bodies persisting.
+
+---
+
 ## 2026-07-02 — Session 3: playtest fixes (first user feedback pass)
 
 All five reported issues fixed and regression-tested headless:

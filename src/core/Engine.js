@@ -80,6 +80,9 @@ export class Engine {
     this.stateMachine = new GameStateMachine(events);
     this.services.register(Services.STATE_MACHINE, this.stateMachine);
 
+    // Impact frames: anything may request a simulation freeze for weight.
+    events.on('time/hitstop', ({ duration }) => this.#loop.hitstop(duration));
+
     this.#loop.onUpdate((dt) => {
       this.stateMachine.update(dt);
       this.#input.endFrame();

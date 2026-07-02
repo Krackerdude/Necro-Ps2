@@ -29,12 +29,45 @@ export class PlayerController {
   #quickTurnRemaining = 0;
   #footstepTimer = 0;
 
+  #shove = new THREE.Vector3();
+  #stunRemaining = 0;
+  #speedMultiplier = 1;
+
   constructor({ events, input, physics, rig }) {
     this.#events = events;
     this.#input = input;
     this.#physics = physics;
     this.#rig = rig;
     this.object.add(rig.object);
+
+    // Getting hit is physical: flinch clip, knockback away from the
+    // attacker, and a beat of lost control.
+    events.on('player/damaged', ({ from }) => {
+      if (from) {
+        this.#shove
+          .set(this.object.position.x - from.x, 0, this.object.position.z - from.z)
+          .normalize()
+          .multiplyScalar(3.2);
+      }
+      this.#stunRemaining = 0.3;
+      this.#rig.play('hurtFlinch');
+    });
+  }
+
+  /** The rig, for systems that drive attack clips (WeaponSystem). */
+  get rig() {
+    return this.#rig;
+  }
+
+  /** Condition-driven pace (limp). GameplayState feeds this from stats. */
+  setSpeedMultiplier(multiplier) {
+    this.#speedMultiplier = multiplier;
+    this.#rig.setLimping(multiplier < 0.7);
+  }
+
+  /** External impulse (melee lunge, hurt knockback). Decays on its own. */
+  applyShove(direction, strength) {
+    this.#shove.copy(direction).setY(0).normalize().multiplyScalar(strength);
   }
 
   #aiming = false;
@@ -61,6 +94,26 @@ export class PlayerController {
   }
 
   update(dt) {
+    // Decaying external impulse (knockback / lunge) applies regardless of
+    // control state — you can't cancel physics by being stunned.
+    if (this.#shove.lengthSq() > 1e-4) {
+      this.#physics.moveCircle(
+        this.object.position,
+        this.#shove.x * dt,
+        this.#shove.z * dt,
+        RADIUS
+      );
+      this.#shove.multiplyScalar(Math.max(0, 1 - 9 * dt));
+    }
+
+    // Stunned or mid-attack: the body is committed; input is ignored.
+    if (this.#stunRemaining > 0 || this.#rig.isActing) {
+      this.#stunRemaining = Math.max(0, this.#stunRemaining - dt);
+      this.#rig.setMoving(false);
+      this.#rig.update(dt);
+      return;
+    }
+
     // Quick turn (180°) animates over ~0.25s and locks other input.
     if (this.#quickTurnRemaining > 0) {
       const step = Math.min(this.#quickTurnRemaining, Math.PI * 4 * dt);
@@ -85,6 +138,7 @@ export class PlayerController {
     let speed = 0;
     if (forward) speed = running ? RUN_SPEED : WALK_SPEED;
     else if (backward) speed = -BACK_SPEED;
+    speed *= this.#speedMultiplier;
 
     if (speed !== 0) {
       const dx = Math.sin(this.#rotationY) * speed * dt;

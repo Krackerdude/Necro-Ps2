@@ -59,11 +59,21 @@ export class WeaponSystem {
       if (wantAim) this.#events.emit('audio/sfx', { id: 'weaponReady' });
     }
 
-    if (this.#aiming && this.#cooldown === 0 && this.#input.wasPressed('attack')) {
+    if (
+      this.#aiming &&
+      this.#cooldown === 0 &&
+      !this.#player.rig.isActing &&
+      this.#input.wasPressed('attack')
+    ) {
       this.#attack(weapon.weapon);
     }
   }
 
+  /**
+   * Attacks are animation-driven: the clip plays and damage resolves on the
+   * clip's frame events ('hit' / 'fire'), never on button press. Weight
+   * comes from that commitment plus hitstop on contact.
+   */
   #attack(stats) {
     if (stats.type === 'ranged') {
       if (this.#inventory.count(stats.usesAmmo) === 0) {
@@ -72,22 +82,51 @@ export class WeaponSystem {
         this.#cooldown = 0.4;
         return;
       }
-      this.#inventory.remove(stats.usesAmmo, 1);
       this.#cooldown = stats.fireTime;
-      this.#events.emit('audio/sfx', { id: 'gunshot' });
-      this.#muzzle.copy(this.#player.object.position).y = 1.35;
-      this.#events.emit('combat/fired', { position: this.#muzzle.clone(), ranged: true });
-      const target = this.#findTarget(stats.range, RANGED_CONE_DEG, true);
-      target?.takeHit(stats.damage);
+      this.#player.rig.play('revolverFire', {
+        onEvent: (id) => {
+          if (id !== 'fire') return;
+          this.#inventory.remove(stats.usesAmmo, 1);
+          this.#events.emit('audio/sfx', { id: 'gunshot' });
+          this.#muzzle.copy(this.#player.object.position).y = 1.35;
+          this.#events.emit('combat/fired', { position: this.#muzzle.clone(), ranged: true });
+          const target = this.#findTarget(stats.range, RANGED_CONE_DEG, true);
+          if (target) {
+            target.takeHit(stats.damage);
+            this.#events.emit('time/hitstop', { duration: 0.035 });
+          }
+        },
+      });
     } else {
-      this.#cooldown = stats.swingTime;
-      this.#events.emit('audio/sfx', { id: 'macheteSwing' });
-      this.#events.emit('combat/fired', { position: this.#player.object.position.clone(), ranged: false });
-      const target = this.#findTarget(stats.range, stats.arcDeg, false);
-      if (target) {
-        target.takeHit(stats.damage);
-        this.#events.emit('audio/sfx', { id: 'macheteHit' });
-      }
+      this.#cooldown = stats.swingTime + 0.4; // full swing + recovery
+      this.#player.getForward(this.#forward);
+      const lungeDir = this.#forward.clone();
+      this.#player.rig.play('macheteSwing', {
+        onEvent: (id) => {
+          switch (id) {
+            case 'windup':
+              this.#events.emit('audio/sfx', { id: 'macheteSwing' });
+              break;
+            case 'lunge':
+              this.#player.applyShove(lungeDir, 2.4);
+              break;
+            case 'hit': {
+              const target = this.#findTarget(stats.range, stats.arcDeg, false);
+              this.#events.emit('combat/fired', {
+                position: this.#player.object.position.clone(),
+                ranged: false,
+              });
+              if (target) {
+                target.takeHit(stats.damage);
+                this.#events.emit('audio/sfx', { id: 'macheteHit' });
+                this.#events.emit('time/hitstop', { duration: 0.075 });
+              }
+              break;
+            }
+            default:
+          }
+        },
+      });
     }
   }
 

@@ -84,6 +84,8 @@ Add new events here when you introduce them.
 | `combat/aim-changed` | `{aiming}` | WeaponSystem | HUD |
 | `combat/fired` | `{position,ranged}` | WeaponSystem | MuzzleFlash |
 | `enemy/died` / `enemy/damaged` | `{}` | EnemyHealth | (future: score/FX) |
+| `player/damaged` | `{from: Vector3}` | enemies | PlayerController (flinch/knockback/stun) |
+| `time/hitstop` | `{duration}` | WeaponSystem (impacts) | Engine → GameLoop |
 | `level/transition` | `{levelId,spawn}` | level interactables | GameplayState |
 | `ui/fade` | `{opacity,duration}` | anyone | FadeOverlay |
 | `ui/toast` | `{text}` | anyone | HUD |
