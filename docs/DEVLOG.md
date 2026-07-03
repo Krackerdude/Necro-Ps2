@@ -5,6 +5,60 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 18: Church Phase 2 — THE BELL TOWER WING (♠)
+
+First full wing: 13 rooms + boss arena + optional clock room, one
+continuous map (bellTower.js), entered through the church's west transept
+(real transition now; its temp stone is gone — the Stone of the Hour is
+earned at the carillon).
+
+**Regional mechanic — SOUND.** New husk variant `listener`: blind
+(detect 0.9, bandaged eyes) but hears everything; running is dinner,
+walking is survival — the inverse of the town chase. Bell-pulls emit
+`noise/emitted` AT the remote bell (the choir pull lures the Choir of
+Ears' listeners into the refectory — enemies as puzzle pieces). Chime
+clusters are noise tripwires: the level subscribes to footstep noise
+(small radius) and re-emits an 11 m ring at the cluster (`chime: true`
+guards recursion). Levels can now return `dispose()` — WorldService.unload
+calls it (event-subscription cleanup).
+
+**THE TOLLTAKER** (gameplay/enemies/Tolltaker.js, roster type
+'tolltaker'): deaf giant wearing the cracked third casting of the Great
+Bell. Armored ×0.12 until 'bell/great' (arena rope-pulls, shared 9 s
+cooldown) stuns it kneeling for 5.5 s — full damage window; it returns
+briefly enraged. Contact 26. Death sets `tolltakerFelled` (watcher opens
+the warden door north). Intro cinematic on first arena entry.
+
+**Generic level beats**: runtime.cinematics = [{when: flag, seen, script}]
+and runtime.roomComments = {flag: toast} — GameplayState fires them off
+story/flag-changed; mapSeen flags make room-entry triggers free. Used for
+ALDERS_SCRIPT, TOLLTAKER_SCRIPT, CARILLON_SCRIPT + three "the church is
+growing" player comments.
+
+**Mother Alders** — the bell-widow, knitting rope out of donated hair in
+the parlor the tower grew for her in '61. Dialogue evolves (pre-boss hint:
+the bell is the one thing he feels; post-boss: carillon hints; post-stone:
+a word for the key). A joy. Deeply wrong.
+
+**Puzzles**: the CARILLON (ring 4 bells in the hymn's order — the hymn is
+nailed up upside down, the two Quarrels are disambiguated by their cast
+years on the plaques; wrong ring resets loudly) → Stone of the Hour.
+CLOCK ROOM (optional, ♠-locked — Spade Key sits at the refectory's head
+seat): cycle the hour hand, strike III (clockPlaque + verger lore); wrong
+strikes emit a 40 m noise that tells every listener where you are; right
+opens a sealed vault alcove (Warden's Draught + tonic). GOTCHA: vault loot
+must live INSIDE the walled alcove — a door mesh alone gates nothing.
+
+5 documents (ringersRoll, foundryNote, wardensRestLog, hymnOfHours,
+clockPlaque), shrine save room, 8 pickups, 15 camera zones, `tower`
+ambient (wind + the bell's ghost partial). Verified headless end to end:
+transition, key, clock flow (sealed→III→open), both auto-cinematics,
+boss death chain, wrong-order rejection, carillon → stone in satchel.
+NOTE for wing phases 3–4: headless E-presses need ≥350 ms spacing under
+SwiftShader or inputs land in the same frame.
+
+---
+
 ## 2026-07-03 — Session 17: Church expansion Phase 1 — the Crossing & the Cage
 
 The RE4-style restructure begins: the Black Iron Key is no longer loose on

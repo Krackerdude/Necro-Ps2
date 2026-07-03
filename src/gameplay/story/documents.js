@@ -47,6 +47,55 @@ export const DOCUMENTS = {
       'Seat all three and the cage will open, and God forgive whoever ' +
       'needs it to.',
   },
+  ringersRoll: {
+    title: 'THE RINGERS’ ROLL',
+    body:
+      'Bell-ringers of the parish, in perpetuity:\n\n' +
+      'ALDERS, F. — the Dirge, forty years. Retired into the south wall.\n' +
+      'COLE, M. — the Mercy. Retired into the south wall.\n' +
+      'BRECHT, A. & BRECHT, O. — the Quarrels, cast for the brothers so ' +
+      'they would stop fighting over one rope. It did not work.\n\n' +
+      'NOTE: ringers are interred with their hands cast in bronze, mid-pull. ' +
+      'The tower likes to keep the option open.',
+  },
+  foundryNote: {
+    title: 'THE FOUNDER’S SLATE',
+    body:
+      'Great Bell recast THRICE. Cracks every time, always the same seam.\n\n' +
+      'The bronze is not at fault. The bell cracks the night before every ' +
+      'thanksgiving, like a throat clearing itself.\n\n' +
+      'The big lad asked to keep the third casting. He wears it. I did not ' +
+      'argue. You do not argue with the Tolltaker about bells.',
+  },
+  wardensRestLog: {
+    title: 'THE GUEST LOG, WARDEN’S REST',
+    body:
+      'One cot, kept made. One bottle, kept full. The tower insists.\n\n' +
+      'Guests this century: two.\n\n' +
+      'The first slept one night and went up to the carillon whistling. ' +
+      'The tower kept the whistle. You can hear it in the chimes on quiet ' +
+      'nights, still going up.',
+  },
+  hymnOfHours: {
+    title: 'THE HYMN OF HOURS (NAILED UP, UPSIDE DOWN)',
+    body:
+      'As sung on thanksgiving, descending:\n\n' +
+      'MERCY last of all,\n' +
+      'the younger quarrel third,\n' +
+      'the elder quarrel second,\n' +
+      'and FIRST — always first — the low dark Dirge.\n\n' +
+      '(A later hand: the tower nails this page up wrong way round because ' +
+      'it thinks that is funny. It is a LITTLE funny. — M.A.)',
+  },
+  clockPlaque: {
+    title: 'THE HOROLOGIST’S PLAQUE',
+    body:
+      'This movement keeps GRAVEN TIME, which is not the same thing.\n\n' +
+      'Strike no hour idly. The wing has ears, and the works announce ' +
+      'mistakes at full voice.\n\n' +
+      'If you must wake the vault: the verger wrote that the ground sleeps ' +
+      'deepest at the THIRD hour. Strike it softly and take what is yours.',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:

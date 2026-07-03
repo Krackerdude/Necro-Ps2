@@ -169,6 +169,23 @@ export class GameplayState extends GameState {
       }),
       // A key whose every lock is open leaves the satchel on its own.
       events.on('story/flag-changed', () => this.#discardSpentKeys()),
+      // Levels declare their own story-driven scenes and room comments:
+      // runtime.cinematics = [{ when: <flag>, seen: <once-flag>, script }]
+      // runtime.roomComments = { '<flag>': 'toast text' } (mapSeen flags
+      // fire exactly once, so comments self-limit).
+      events.on('story/flag-changed', ({ flag, value }) => {
+        if (!value) return;
+        const runtime = s.get(Services.WORLD).runtime;
+        if (!runtime) return;
+        for (const cine of runtime.cinematics ?? []) {
+          if (cine.when === flag && !story.get(cine.seen)) {
+            story.set(cine.seen, true);
+            this.#playScene(cine.script);
+          }
+        }
+        const comment = runtime.roomComments?.[flag];
+        if (comment) events.emit('ui/toast', { text: comment });
+      }),
       // The third stone seats: the cage gives up the key, on camera.
       events.on('story/flag-changed', ({ flag, value }) => {
         if (flag !== 'stonesSeated' || !value) return;

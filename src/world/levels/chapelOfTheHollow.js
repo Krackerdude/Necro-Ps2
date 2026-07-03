@@ -279,10 +279,29 @@ export const CHAPEL_OF_THE_HOLLOW = {
         onInteract: () => events.emit('ui/toast', { text: toastText }),
       });
     };
-    wingDoor(
-      'spade', [-12.8, -14], Math.PI / 2, [-11.6, -14], [-12.7, -14], Math.PI / 2,
-      'The passage to the bell tower has collapsed. Behind the stone: wind, and one patient bell.'
-    );
+    // The Spade Wing is OPEN (phase 2): a real door into the bell tower.
+    {
+      const mark = buildEmblem(kit, 'spade');
+      mark.position.set(-12.7, 3.6, -14);
+      mark.rotation.y = Math.PI / 2;
+      root.add(mark);
+      const spadeLeaf = kit.door({ position: [-12.8, -14], rotationY: Math.PI / 2, width: 1.8, height: 3.0 });
+      root.add(spadeLeaf.object); // leaf only — the transition owns passage
+      interactables.push(
+        makeTransition(
+          { story, inventory, events },
+          {
+            id: 'to-bell-tower',
+            position: new THREE.Vector3(-12.2, 1, -14),
+            radius: 1.7,
+            prompt: 'Enter the Bell Tower — the Spade Wing',
+            targetLevel: 'bell-tower',
+            targetSpawn: 'fromChurch',
+            door: spadeLeaf.object,
+          }
+        )
+      );
+    }
     wingDoor(
       'diamond', [12.8, -14], -Math.PI / 2, [11.6, -14], [12.7, -14], -Math.PI / 2,
       'The passage to the scriptorium has collapsed. Behind the stone: paper settling, or being settled.'
@@ -622,18 +641,6 @@ export const CHAPEL_OF_THE_HOLLOW = {
       // the rubble of its collapsed door so the cage stays openable in this
       // build. The wing phases move these to the far end of their wings.
       makeItemPickup(pickupCtx, {
-        id: 'temp-stone-hour',
-        itemId: 'stoneOfTheHour',
-        mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(-10.2, 0.45, -16.0),
-          color: 0xc9c2a8,
-          emissive: 0x4a4632,
-        }),
-        position: new THREE.Vector3(-10.2, 1, -16.0),
-        prompt: 'Pull the stone from the rubble',
-        flavor: 'Taken — STONE OF THE HOUR, shaken loose by the collapse.',
-      }),
-      makeItemPickup(pickupCtx, {
         id: 'temp-stone-word',
         itemId: 'stoneOfTheWord',
         mesh: makePickupMesh(kit, {
@@ -833,6 +840,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
       spawn: { position: new THREE.Vector3(0, 0, 8), rotationY: Math.PI },
       spawnPoints: {
         fromCloister: { position: new THREE.Vector3(21.5, 0, 6.2), rotationY: -Math.PI / 2 },
+        fromBellTower: { position: new THREE.Vector3(-11.2, 0, -14), rotationY: Math.PI / 2 },
       },
       enemySpawns: [
         { type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 },

@@ -53,6 +53,16 @@ const VARIANTS = {
   watcher: { hp: 70, speed: { haunt: 0.4, pursue: 1.25, investigate: 1.0, return: 0.6 }, detect: 4.5, dormant: true, wakeRadius: 2.7 },
   crawler: { hp: 55, speed: { haunt: 0.3, pursue: 0.62, investigate: 0.5, return: 0.4 }, detect: 3.5, crawl: true },
   twitcher: { hp: 60, speed: { haunt: 0.5, pursue: 1.38, investigate: 1.1, return: 0.7 }, detect: 5.0 },
+  // Bell-tower residents: functionally blind (bandaged eyes), but every
+  // noise in the wing goes straight to their feet. Walking is the stealth
+  // option; the wing's bell-pulls are the leash.
+  listener: {
+    hp: 65,
+    speed: { haunt: 0.5, pursue: 2.05, investigate: 1.5, return: 0.7 },
+    detect: 0.9,
+    lose: 12,
+    blindfold: true,
+  },
   // The neighbors. Scripted-chase only: they know where you are (no LOS
   // check, town-sized senses), they are nearly as fast as a running player,
   // and they do not go home. Never spawn these outside a chase beat.
@@ -165,6 +175,16 @@ export class Husk {
     this.object.add(torso);
     this.object.traverse((n) => (n.castShadow = true));
     this.object.position.copy(spawn.position);
+
+    if (this.#cfg.blindfold) {
+      const band = new THREE.Mesh(
+        new THREE.BoxGeometry(0.22, 0.07, 0.24),
+        ps2.patch(new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 1 }))
+      );
+      band.position.set(0, 0.62, 0.17);
+      band.rotation.x = 0.5;
+      torso.add(band);
+    }
 
     this.joints = { torso, armL, armR };
     if (legL) this.joints.legL = legL;
