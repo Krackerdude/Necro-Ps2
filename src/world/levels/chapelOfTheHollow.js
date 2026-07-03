@@ -302,10 +302,29 @@ export const CHAPEL_OF_THE_HOLLOW = {
         )
       );
     }
-    wingDoor(
-      'diamond', [12.8, -14], -Math.PI / 2, [11.6, -14], [12.7, -14], -Math.PI / 2,
-      'The passage to the scriptorium has collapsed. Behind the stone: paper settling, or being settled.'
-    );
+    // The Diamond Wing is OPEN (phase 3): a real door into the scriptorium.
+    {
+      const mark = buildEmblem(kit, 'diamond');
+      mark.position.set(12.7, 3.6, -14);
+      mark.rotation.y = -Math.PI / 2;
+      root.add(mark);
+      const diamondLeaf = kit.door({ position: [12.8, -14], rotationY: -Math.PI / 2, width: 1.8, height: 3.0 });
+      root.add(diamondLeaf.object);
+      interactables.push(
+        makeTransition(
+          { story, inventory, events },
+          {
+            id: 'to-scriptorium',
+            position: new THREE.Vector3(12.2, 1, -14),
+            radius: 1.7,
+            prompt: 'Enter the Scriptorium — the Diamond Wing',
+            targetLevel: 'scriptorium',
+            targetSpawn: 'fromChurch',
+            door: diamondLeaf.object,
+          }
+        )
+      );
+    }
     wingDoor(
       'clover', [0, -23.8], 0, [0, -22.6], [0, -23.7], 0,
       'The stair to the undercroft has collapsed. Behind the stone: the smell of the garth, but closer.'
@@ -641,18 +660,6 @@ export const CHAPEL_OF_THE_HOLLOW = {
       // the rubble of its collapsed door so the cage stays openable in this
       // build. The wing phases move these to the far end of their wings.
       makeItemPickup(pickupCtx, {
-        id: 'temp-stone-word',
-        itemId: 'stoneOfTheWord',
-        mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(10.2, 0.45, -16.0),
-          color: 0x8aa4c9,
-          emissive: 0x2a3a52,
-        }),
-        position: new THREE.Vector3(10.2, 1, -16.0),
-        prompt: 'Pull the stone from the rubble',
-        flavor: 'Taken — STONE OF THE WORD, shaken loose by the collapse.',
-      }),
-      makeItemPickup(pickupCtx, {
         id: 'temp-stone-ground',
         itemId: 'stoneOfTheGround',
         mesh: makePickupMesh(kit, {
@@ -841,6 +848,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
       spawnPoints: {
         fromCloister: { position: new THREE.Vector3(21.5, 0, 6.2), rotationY: -Math.PI / 2 },
         fromBellTower: { position: new THREE.Vector3(-11.2, 0, -14), rotationY: Math.PI / 2 },
+        fromScriptorium: { position: new THREE.Vector3(11.2, 0, -14), rotationY: -Math.PI / 2 },
       },
       enemySpawns: [
         { type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 },

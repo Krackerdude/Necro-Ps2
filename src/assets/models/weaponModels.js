@@ -18,6 +18,7 @@ import { getTexture } from '../textures/proceduralTextures.js';
 const BUILDERS = {
   rustMachete: buildMachete,
   boneRevolver: buildRevolver,
+  proofingPistol: buildProofingPiece,
 };
 
 /**
@@ -52,6 +53,7 @@ const HOLD_TRANSFORMS = {
   // the swing instead of slapping flat.
   rustMachete: { position: [0, -0.02, 0.01], rotation: [0, Math.PI / 2, 0], scale: 1.45 },
   boneRevolver: { position: [0, -0.1, 0.03], rotation: [-0.15, 0, 0], scale: 2.1 },
+  proofingPistol: { position: [0, -0.08, 0.03], rotation: [-0.15, 0, 0], scale: 2.1 },
 };
 
 export function getHoldTransform(itemId) {
@@ -133,6 +135,50 @@ function buildMachete(ps2) {
 /*  fluted cylinder ringed with carved bone "teeth", drooping wood     */
 /*  grip, hammer spur, trigger guard, front blade sight.               */
 /* ------------------------------------------------------------------ */
+/** The Proofing Piece: a boxy single-shot scrivener's pistol. Same -Y
+ *  muzzle convention as the revolver (+Z is up in the aim pose). */
+function buildProofingPiece(ps2) {
+  const group = new THREE.Group();
+  const steel = mat(ps2, 'gunMetal', { metalness: 0.55, roughness: 0.5 });
+  const brass = mat(ps2, 'ironDark', { color: 0x8a7434, metalness: 0.7, roughness: 0.4 });
+  const wood = mat(ps2, 'woodPlanks', { color: 0x4a3220, repeat: [0.5, 0.5] });
+
+  // Slab-sided barrel block along -Y; muzzle at y = -0.15.
+  const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.13, 0.024), steel);
+  barrel.position.y = -0.085;
+  group.add(barrel);
+  const bore = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.004, 6),
+    mat(ps2, 'ironDark', { color: 0x0a0a0a }));
+  bore.position.y = -0.1505;
+  group.add(bore);
+  // Proofing stamp plate on the flat of the barrel (+Z, faces up when aimed).
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.03, 0.004), brass);
+  plate.position.set(0, -0.09, 0.014);
+  group.add(plate);
+  // Breech block + hammer spur.
+  const breech = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.045, 0.034), steel);
+  breech.position.set(0, -0.005, 0);
+  group.add(breech);
+  const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.02, 0.018), brass);
+  hammer.position.set(0, 0.016, 0.02);
+  hammer.rotation.x = -0.5;
+  group.add(hammer);
+  // Bag-shaped grip below (-Z), canted back.
+  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.055, 0.03), wood);
+  grip.position.set(0, 0.028, -0.024);
+  grip.rotation.x = 0.55;
+  group.add(grip);
+  const gripCap = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.012, 0.032), brass);
+  gripCap.position.set(0, 0.055, -0.038);
+  gripCap.rotation.x = 0.55;
+  group.add(gripCap);
+  // Sliver of trigger guard.
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.03, 0.004), steel);
+  guard.position.set(0, 0.006, -0.018);
+  group.add(guard);
+  return group;
+}
+
 function buildRevolver(ps2) {
   const group = new THREE.Group();
   const steel = mat(ps2, 'gunMetal', { metalness: 0.6, roughness: 0.45 });

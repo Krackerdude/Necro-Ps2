@@ -5,6 +5,52 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 19: Church Phase 3 — THE SCRIPTORIUM WING (♦)
+
+Second wing, through the east transept: 14 rooms + boss + ♦-locked
+optional + finale = 17 spaces (scriptorium.js). More story, more optional
+content than the tower, per user.
+
+**Regional mechanic — OBSERVATION.** Husk variant `blank` (paper-pale,
+faceless): moves ONLY while the player is not facing it (dot of player
+forward vs to-enemy > 0.25 → full freeze: no walk, no lunge, no scrape).
+Walking backwards out of a room is the intended nightmare. Also THE
+SHIFTING STACKS: a catalogue lever toggles `stacksShifted`; two shelf
+walls swap visibility+colliders live (Edition One opens the shortcut,
+Edition Two the alcove).
+
+**THE CENSOR** (enemies/Censor.js, type 'censor'): ink vestments, brass
+seal face. Armored ×0.1; the Bindery's four SEAL PRESSES slam 0.9 s after
+their lever ('press/slammed' {position}) — if it's under the plate, it's
+STAMPED (6 s pin, full damage). Positional baiting vs the Tolltaker's
+timing. Death opens the office + palimpsest doors.
+
+**Firearm**: PROOFING PIECE (proofingPistol) — 22 dmg / range 11 /
+fireTime 1.05, same tallow rounds; model + hold transform added. Found on
+the proofing-room bench, well before the crypt's revolver.
+
+**People**: BROTHER LEDGER, the Counting Man (reading room; TWO cutscenes
+— intro + breaking into the office post-boss to un-count the struck
+words). His dialogue teaches blanks, the press delay, and the colophon
+syllable counts. PILGRIM MOTH — SIDE QUEST: NINE silk bookmarks hidden
+UNMARKED across the wing (no beacons, radius 0.9, several inside optional
+rooms / behind the shift / post-boss). 9/9 → Warden's Draught + Blessed
+Salve; `mothQuestDone` lets the key-sweep collect her sisters with
+flavor. Her dialogue live-counts inventory.
+
+**Finale — THE COLOPHON**: three word-wheels (subject/verb/object) +
+commitment lectern. THE GROUND / IS OWED / A GUEST — assembled from
+catechismOfTheGround (redacted answer), censorsLedger (item 41, five
+letters), ledgersCount ("the household, plus one"), palimpsest mural.
+Wrong sentence sets `indexMistake` (a blank rises near the colophon,
+once). Right → wordSolved → cutscene → Stone of the Word.
+
+9 documents, ♦ key on the Censor's blotter, forbidden stack (draught +
+salve), ink-cellar wading ('water' region), scriptorium ambient, 17 camera
+zones. Verified headless in one pass: everything above, zero errors.
+
+---
+
 ## 2026-07-03 — Session 18: Church Phase 2 — THE BELL TOWER WING (♠)
 
 First full wing: 13 rooms + boss arena + optional clock room, one

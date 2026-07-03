@@ -35,6 +35,15 @@ export const ITEMS = Object.freeze({
     weapon: { type: 'ranged', damage: 38, range: 15, usesAmmo: 'boneShells', fireTime: 0.6 },
   },
 
+  proofingPistol: {
+    kind: 'weapon',
+    name: 'Proofing Piece',
+    glyph: '⌐⌖',
+    description:
+      'A scrivener’s single-shot pistol, used to test-fire tallow rounds before binding them into ledgers of account. Kicks like an apology; better than nothing by exactly one shot at a time.',
+    weapon: { type: 'ranged', damage: 22, range: 11, usesAmmo: 'boneShells', fireTime: 1.05 },
+  },
+
   boneShells: {
     kind: 'ammo',
     name: 'Tallow Rounds',
@@ -166,6 +175,17 @@ export const ITEMS = Object.freeze({
       'Warm, damp, and very slightly breathing. You carry it the way you would carry an apology.',
     spentWhen: (story) => Boolean(story.get('cageOpened')),
     discardFlavor: 'The Stone of the Ground stays with the cage. The ground accepts.',
+  },
+
+  silkBookmark: {
+    kind: 'key',
+    name: 'Silk Bookmark',
+    glyph: '~',
+    stack: 9,
+    description:
+      'A ribbon of red silk, warm as a pulse. Moth calls them her sisters. There are nine, she says. There were ten, she doesn’t say.',
+    spentWhen: (story) => Boolean(story.get('mothQuestDone')),
+    discardFlavor: 'The bookmarks are with Moth now. All her sisters, home.',
   },
 
   spadeKey: {

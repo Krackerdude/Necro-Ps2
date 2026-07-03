@@ -145,6 +145,46 @@ export const CARILLON_SCRIPT = [
   { caption: { text: 'Something far above nods. The Stone of the Hour rises like it was only ever waiting to be asked politely.', duration: 4.4 } },
 ];
 
+/** Brother Ledger — first entry to the reading room (scriptorium). */
+export const LEDGER_SCRIPT = [
+  { camera: { from: [-1.4, 1.8, -12.4], to: [0.4, 1.4, -13.6], lookAt: [2.2, 1.0, -15.6], duration: 4.2 } },
+  { caption: { text: 'A man sits behind a fortress of ledgers, running a dry pen down a column of nothing.', duration: 4.2 } },
+  { camera: { from: [0.4, 1.4, -13.6], to: [1.2, 1.2, -14.2], lookAt: [2.2, 1.1, -15.8], duration: 3.8 } },
+  { caption: { text: '“One,” he says, without looking up. Then he looks up, and his whole face becomes a holiday. “ONE. One VISITOR.”', duration: 4.8 } },
+  { caption: { text: '“Stay exactly where I can count you.”', duration: 3.4 } },
+];
+
+/** The Censor — first entry to the Bindery (scriptorium boss). */
+export const CENSOR_SCRIPT = [
+  { camera: { from: [0, 1.4, -27.5], to: [0, 2.2, -29], lookAt: [0, 1.8, -33], duration: 4.4 } },
+  { caption: { text: 'The Bindery. Four presses. A floor stained black in the shape of a very large signature.', duration: 4.4 } },
+  { sfx: { id: 'huskGroan' } },
+  { camera: { from: [0, 2.2, -29], to: [1.6, 1.2, -30.2], lookAt: [0, 1.8, -34], duration: 4.0 } },
+  { caption: { text: 'Something unfolds from behind the far press — ink-black vestments, hands stained past the elbow, a brass seal where a face should be.', duration: 5.0 } },
+  { sfx: { id: 'wraithShriek' } },
+  { impulse: { strength: 0.4 } },
+  { camera: { from: [1.6, 1.2, -30.2], to: [-1.4, 1.4, -29.4], lookAt: [0, 2.0, -33], duration: 3.6 } },
+  { caption: { text: 'THE CENSOR. It does not care if you look. It only kneels to its own instrument — BAIT IT UNDER A PRESS.', duration: 4.8 } },
+];
+
+/** Ledger again — he has let himself into the Censor's office to recount. */
+export const RECOUNT_SCRIPT = [
+  { camera: { from: [8.6, 1.6, -30.6], to: [9.6, 1.3, -32], lookAt: [11.5, 1.0, -34.5], duration: 4.0 } },
+  { caption: { text: 'Brother Ledger is already in the office, somehow, holding the Censor’s pen at arm’s length like a dead snake.', duration: 4.6 } },
+  { caption: { text: '“Eleven thousand and forty-one words struck,” he says. “I am UN-counting them. It will take me the rest of my life. I have never been happier.”', duration: 5.2 } },
+  { caption: { text: '“The key is on the blotter. He kept it square in the middle. Tidy to the end. I HATE that I respect it.”', duration: 4.6 } },
+];
+
+/** The Colophon accepts the sentence — the Stone of the Word rises. */
+export const COLOPHON_SCRIPT = [
+  { sfx: { id: 'saveChime' } },
+  { camera: { from: [-3, 1.8, -50], to: [-1, 1.5, -52.5], lookAt: [0, 1.1, -55], duration: 4.0 } },
+  { caption: { text: 'THE GROUND IS OWED A GUEST. The room takes the sentence and files it somewhere that sighs.', duration: 4.4 } },
+  { impulse: { strength: 0.35 } },
+  { camera: { from: [-1, 1.5, -52.5], to: [0, 1.3, -53.6], lookAt: [0, 1.2, -55], duration: 3.6 } },
+  { caption: { text: 'Every book in the wing turns one page, together. The Stone of the Word rises — the library’s full stop, on loan.', duration: 4.8 } },
+];
+
 /** Retired opening (pre-town builds); kept for the Phase D/E night stitch. */
 export const OPENING_SCRIPT = [
   { fade: { opacity: 0, duration: 1.2 } },
