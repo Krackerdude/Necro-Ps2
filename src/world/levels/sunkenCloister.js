@@ -220,7 +220,7 @@ export const SUNKEN_CLOISTER = {
           if (!story.get('cloisterGateOpen')) {
             if (!inventory?.has('verdigrisKey')) {
               events.emit('ui/toast', {
-                text: 'Barred. Green bronze, older than the chapel above. The keyhole weeps.',
+                text: 'Barred. Green bronze, older than the church above — older than Graven. The keyhole weeps.',
               });
               return;
             }

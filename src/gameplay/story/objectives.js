@@ -79,7 +79,7 @@ const CHAIN = [
   /* ---------------------- ACT II: BELOW THE TOWN --------------------- */
   {
     id: 'find-key',
-    text: 'Search the chapel for a way into the crypt',
+    text: 'The doors hold — for now. Search the church for a way down',
     done: ({ story, inventory }) =>
       Boolean(inventory?.has('blackIronKey') || story.get('hasCryptKey') || story.get('cryptDoorOpen')),
   },
@@ -111,7 +111,7 @@ const CHAIN = [
   },
   {
     id: 'reach-bell',
-    text: 'Go below — find the bell the verger wrote of',
+    text: 'Go below — the true bell the verger wrote of. Mike is down there somewhere',
     done: ({ story }) => Boolean(story.get('visited:ossuary-of-the-hollow')),
   },
   {
@@ -126,7 +126,7 @@ const CHAIN = [
   },
   {
     id: 'rest',
-    text: 'It is done. The ground sleeps. (End of this build)',
+    text: 'It is done. The ground sleeps, and Graven with it. (End of this build)',
     done: () => false,
   },
 ];

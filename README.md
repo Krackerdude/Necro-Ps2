@@ -44,7 +44,9 @@ Deploys on **Vercel** with zero config (auto-detected Vite static build).
   typewriter dialogue; a photo-quest chain (baker → innkeeper → harbormaster
   → lighthouse keeper → priest) that ends with a room at the inn. Daytime is
   pure exploration — no combat, minimal HUD.
-- **Three levels below, one arc** — *Chapel of the Hollow* (note → Black Iron Key →
+- **Act II: below the church** — the chase ends with the doors barred behind
+  you, inside the church Mike photographed. Three levels, one arc —
+  *Graven Church* (note → Black Iron Key →
   crypt → Hollow Icon) opens a trapdoor to *The Sunken Cloister* (flooded garth,
   husks on the walks, the Verdigris Key in the black water), which unlocks
   *Ossuary of the Hollow* (bone corridors, the Bell Chamber, and the finale:

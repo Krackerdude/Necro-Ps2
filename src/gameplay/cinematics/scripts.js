@@ -119,10 +119,13 @@ export const OPENING_SCRIPT = [
 export const END_NOTE = {
   title: 'THE HOUR IS TOLD',
   body:
-    'The toll moves through the floor, up the bone walls, out into the ' +
-    'drowned garth and the nave above.\n\n' +
-    'Everything that was standing lies down.\n\n' +
-    'The ground, satisfied, remembers it is only ground.\n\n' +
+    'The toll moves through the floor, up the bone walls, out through the ' +
+    'drowned garth, the nave, the doors your bar still holds.\n\n' +
+    'Out there, in the streets of Graven, everything that was standing ' +
+    'lies down. The singing stops mid-note. The ground, satisfied, ' +
+    'remembers it is only ground.\n\n' +
+    'Somewhere below row nine, a camera strap. You will come back for him ' +
+    'when it is light. It will be light now. It has been a long time coming.\n\n' +
     '— END OF THIS BUILD OF GRAVEN. Your saves will carry forward. —',
 };
 

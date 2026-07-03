@@ -5,6 +5,29 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 15: GRAVEN Phase E — the retcon pass
+
+Act II's text now belongs to the same story as the town above. No ids,
+flags, or geometry changed — writing only:
+- **Warden's note**: the warden preceded Callum; he nailed the doors when
+  he understood what the thanksgiving feeds; the pit is the apology.
+- **Planting ledger**: gains Row 9 in an unpracticed hand — "the visitor
+  with the camera... He is still seeing." (Mike's fate, implied, never
+  stated.)
+- **Verger's page**: the tower's dusk bell is the ECHO; the ossuary bell
+  is the true one; ringing it puts the whole hungry arrangement to sleep.
+- **Chapel**: display name → 'Graven Church' (id stays
+  `chapel-of-the-hollow` — saves carry it); entrance door is now YOUR bar
+  ("palms, flat and patient. No knocking anymore").
+- **Objectives**: find-key/reach-bell/rest reworded into the frame;
+  cloister gate toast says "church above — older than Graven".
+- **END_NOTE**: the toll reaches the streets, the singing stops mid-note,
+  and "somewhere below row nine, a camera strap."
+Verified in-game: new objective text on church arrival, door toast, warden
+note contains Graven/Callum/thanksgiving/pit. Zero errors.
+
+---
+
 ## 2026-07-03 — Session 14: character designs + GRAVEN Phase D — the night
 
 **Characters.** Townsfolk v2: defs now carry `hair` (short/long/bun/bald/
