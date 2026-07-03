@@ -53,6 +53,18 @@ const VARIANTS = {
   watcher: { hp: 70, speed: { haunt: 0.4, pursue: 1.25, investigate: 1.0, return: 0.6 }, detect: 4.5, dormant: true, wakeRadius: 2.7 },
   crawler: { hp: 55, speed: { haunt: 0.3, pursue: 0.62, investigate: 0.5, return: 0.4 }, detect: 3.5, crawl: true },
   twitcher: { hp: 60, speed: { haunt: 0.5, pursue: 1.38, investigate: 1.1, return: 0.7 }, detect: 5.0 },
+  // Scriptorium residents: pages nobody wrote. Faceless, paper-pale, and
+  // bound by the weeping-page rule — they move ONLY while unobserved.
+  // Turning your back is how they close distance; walking backwards out of
+  // a room while three of them stand mid-stride is the intended nightmare.
+  blank: {
+    hp: 55,
+    speed: { haunt: 0.55, pursue: 1.95, investigate: 1.4, return: 0.7 },
+    detect: 6,
+    lose: 14,
+    freezeWhenSeen: true,
+    paper: true,
+  },
   // Bell-tower residents: functionally blind (bandaged eyes), but every
   // noise in the wing goes straight to their feet. Walking is the stealth
   // option; the wing's bell-pulls are the leash.
@@ -128,10 +140,16 @@ export class Husk {
           Math.abs(Math.floor(spawn.position.x * 7 + spawn.position.z * 13)) % NEIGHBOR_COATS.length
         ]
       : 0x4a4038;
+    const paper = this.#cfg.paper;
     const rotSkin = ps2.patch(
-      new THREE.MeshStandardMaterial({ color: dressed ? 0x9a9284 : 0x7a8560, roughness: 1 })
+      new THREE.MeshStandardMaterial({
+        color: paper ? 0xd8d2c2 : dressed ? 0x9a9284 : 0x7a8560,
+        roughness: 1,
+      })
     );
-    const rags = ps2.patch(new THREE.MeshStandardMaterial({ color: coat, roughness: 1 }));
+    const rags = ps2.patch(
+      new THREE.MeshStandardMaterial({ color: paper ? 0xcac2ae : coat, roughness: 1 })
+    );
 
     // Torso pivot at the waist (carries head + arms); legs on the root.
     const torso = new THREE.Group();
@@ -294,6 +312,18 @@ export class Husk {
       return;
     }
     if (this.#anim.isActing) return; // staggering: no walk, no damage
+
+    // The weeping-page rule: a blank freezes mid-stride the moment the
+    // player faces it. No walk, no lunge, no scrape — a statue with intent.
+    if (this.#cfg.freezeWhenSeen) {
+      const toSelf = new THREE.Vector3()
+        .subVectors(this.object.position, this.#playerObject.position)
+        .setY(0)
+        .normalize();
+      const facingX = Math.sin(this.#playerObject.rotation.y);
+      const facingZ = Math.cos(this.#playerObject.rotation.y);
+      if (facingX * toSelf.x + facingZ * toSelf.z > 0.25) return;
+    }
 
     const dir = this.#behavior.update(this.object.position, this.#playerObject.position, dt);
     const speed = this.#cfg.speed[this.#behavior.state] ?? this.#cfg.speed.haunt;

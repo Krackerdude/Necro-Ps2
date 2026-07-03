@@ -96,6 +96,202 @@ export const DOCUMENTS = {
       'If you must wake the vault: the verger wrote that the ground sleeps ' +
       'deepest at the THIRD hour. Strike it softly and take what is yours.',
   },
+  stacksMemo: {
+    title: 'SHELVING MEMO (EDITION TWO)',
+    body:
+      'To all copyists:\n\n' +
+      'The stacks now REARRANGE by catalogue lever. Edition One favors the ' +
+      'west passage; Edition Two opens the reading alcove and closes the ' +
+      'shortcut — the library cannot bear both truths at once.\n\n' +
+      'Do not be in the stacks during a shift. Brother Emmett was in the ' +
+      'stacks during a shift. Brother Emmett is now referenced in three ' +
+      'places at once.',
+  },
+  illuminatorsNote: {
+    title: 'THE ILLUMINATOR’S NOTE',
+    body:
+      'They asked me to paint the thanksgiving for the great catechism. ' +
+      'Gold leaf for the bell, lampblack for the pit, and for the crowd, ' +
+      'the good red.\n\n' +
+      'I asked what pigment for the guest. The prior said the guest is not ' +
+      'PAINTED, the guest is IMPLIED — you show the circle of the crowd ' +
+      'and let the eye fill the middle.\n\n' +
+      'I have painted forty-one thanksgivings. I cannot stop filling the ' +
+      'middle.',
+  },
+  misprintConfession: {
+    title: 'SCRATCHED INTO THE CELL WALL',
+    body:
+      'I set one word wrong. ONE.\n\n' +
+      'The catechism asks WHAT IS THE GROUND OWED and I set the answer as ' +
+      'A REST. It should have been — I will not write it, they scrape the ' +
+      'walls here.\n\n' +
+      'Forty-one copies went out with my mistake. Forty-one households ' +
+      'said A REST at dusk for a season. The ground noticed the shortfall. ' +
+      'The census the next spring noticed it too.',
+  },
+  mothMarginalia: {
+    title: 'THE MARGINALIA (a small quick hand)',
+    body:
+      'notes from the margin walk, in red:\n\n' +
+      '— the pale ones cannot read. this is the saddest thing i know.\n' +
+      '— sister four sleeps where the scratching man stopped.\n' +
+      '— sister seven drowned dry, above the black.\n' +
+      '— the counting man is kind. the counted man was kinder.\n' +
+      '— when the library breathes in, be a bookmark: thin, patient, ' +
+      'exactly where you were left.',
+  },
+  catechismOfTheGround: {
+    title: 'THE CATECHISM OF THE GROUND',
+    body:
+      'Q. What is beneath the town?\nA. The ground.\n\n' +
+      'Q. What is beneath the ground?\nA. The patience of the ground.\n\n' +
+      'Q. What does the ground do at the third hour?\nA. It sleeps, and ' +
+      'must not be woken idly.\n\n' +
+      'Q. What is the ground owed?\nA. ███████\n\n' +
+      '(The answer is struck out in every copy. The strike is two words. ' +
+      'The first is short. The Censor’s ledger will know the rest.)',
+  },
+  proofingManual: {
+    title: 'THE PROOFING MANUAL',
+    body:
+      'Every tallow round is PROOFED before it is bound into the ledgers ' +
+      'of account: one test firing against the dummy, one stamp.\n\n' +
+      'The proofing piece takes a single round. Respect the reload: it is ' +
+      'a comma, not a period. The ossuary pattern revolver takes six and ' +
+      'is a better argument, but the crypt keeps that one.\n\n' +
+      'Do not proof rounds during a shelving shift. Do not proof rounds ' +
+      'at the pale ones while they are watched — the round passes clean ' +
+      'through a page nobody wrote. Wait for them to move.',
+  },
+  censorsLedger: {
+    title: 'THE CENSOR’S LEDGER OF STRUCK WORDS',
+    body:
+      'Words struck from the record, this century: 11,041.\n\n' +
+      'Item 40: the name of the town before it was Graven. (Filed under ' +
+      'MERCY.)\n\n' +
+      'Item 41: the catechism’s fourth answer. Two words. Struck from ' +
+      'forty-one copies, forty-one households, and one baker’s hymnal.\n' +
+      'The strike reads: A █████. Five letters. It stays at every table ' +
+      'until it is called for. It is always, eventually, called for.\n\n' +
+      '(Below, in a different, very neat hand: “I un-struck this one. ' +
+      'Count the places set at any table in this town. — B.L.”)',
+  },
+  palimpsestReading: {
+    title: 'READING THE SCRAPED WALL',
+    body:
+      'Under the lamp, at an angle, the old mural ghosts through:\n\n' +
+      'A first layer: the town, the sea, a sun. Painted joyfully, by ' +
+      'someone who had seen all three.\n\n' +
+      'A second layer: the same town, the same sea, no sun — a bell where ' +
+      'the sun was.\n\n' +
+      'The current layer: a circle of figures around a dark middle, and ' +
+      'the words THE GROUND IS OWED — the rest scraped down to stone by ' +
+      'someone in a hurry to agree.',
+  },
+  ledgersCount: {
+    title: 'BROTHER LEDGER’S OPEN TALLY',
+    body:
+      'Things counted this week:\n\n' +
+      'Pages: all of them. Again.\n' +
+      'The pale ones: nine, but they hold still when I look, which is ' +
+      'polite of them.\n' +
+      'Presses: four. Delay between lever and slam: one breath, held.\n' +
+      'Visitors: ONE (1). (!!!)\n' +
+      'Places set at every table in Graven, always, no matter how many ' +
+      'live in the house: the household, plus one.\n\n' +
+      'Plus one. Plus ONE. I keep counting it. It keeps being there.',
+  },
+  rootAlmanac: {
+    title: 'THE CELLAR ALMANAC',
+    body:
+      'Plant shallow. Harvest patient. And KEEP TO THE PAVING.\n\n' +
+      'The soft rows belong to the planted — they swim it like eels and ' +
+      'nothing you own will bite them through it. On stone they must come ' +
+      'up for air, and up for air they are only parishioners again.\n\n' +
+      'The paths are swept every night. Nobody sweeps them. Think about ' +
+      'who that leaves.',
+  },
+  wellRubbing: {
+    title: 'A RUBBING FROM THE OLD WELL',
+    body:
+      'The well predates the church. The church predates the town. The ' +
+      'carving on the well predates the language it is in.\n\n' +
+      'Best rendering: HERE THE GROUND FIRST ASKED. HERE WE FIRST SAID YES.\n\n' +
+      'Below that, much newer, much smaller: two names and a date, ' +
+      'sweethearts’ work. People will carve anything on anything.',
+  },
+  tithingTable: {
+    title: 'THE TITHING TABLE',
+    body:
+      'WEIGHTS AND MEASURES OF THE THANKSGIVING:\n\n' +
+      'A fair gift is TWELVE STONE — the weight of a guest, no more, no ' +
+      'less. The ground counts a light pan as theft.\n\n' +
+      'And it counts a heavy pan as MOCKERY, which is worse. Greed reads ' +
+      'as appetite, and the ground answers appetite with appetite.\n\n' +
+      'Relics for the weighing are kept in the scale room, marked in ' +
+      'stone-units. All but one. Some weights the church prefers not to ' +
+      'write down.',
+  },
+  mouldsSermon: {
+    title: 'MOULD’S PINNED SERMON (delivered annually, from the bed)',
+    body:
+      'Friends. Neighbors. Rows.\n\n' +
+      'They call it being buried. I call it being PLANTED, and the ' +
+      'difference is everything: buried things are finished, planted ' +
+      'things are EXPECTED.\n\n' +
+      'The ground is not our enemy. The ground is a landlord. The rent is ' +
+      'strange but the tenancy is long, and I have never once been cold.\n\n' +
+      '(annotation, Wren’s hand: he waters himself. we’ve stopped arguing.)',
+  },
+  plantingCalendar: {
+    title: 'THE PLANTING CALENDAR',
+    body:
+      'SPRING: turn the rows. The Gardener does this. Do not help.\n' +
+      'SUMMER: the rows settle. Walk the paving only.\n' +
+      'AUTUMN: thanksgiving. The Gardener digs the year’s bed the night ' +
+      'before, always the right size. Nobody tells him the size.\n' +
+      'WINTER: he stands in the hall with his spade and waits. If you ' +
+      'must pass in winter, remember: he marks the ground where he will ' +
+      'rise. He has never once risen anywhere else. He is very proud of ' +
+      'that.',
+  },
+  seedManifest: {
+    title: 'THE SEED VAULT MANIFEST',
+    body:
+      'Jarred and shelved, per the warden:\n\n' +
+      'BARLEY, WINTER — 12 jars.\nRYE, PATIENT — 9 jars.\n' +
+      'SEEDS, IRON (tallow rounds) — 2 jars. Everything is a seed if you ' +
+      'plant it in the right thing.\n' +
+      'KEY, CLOVER, ONE — 1 jar. For the warden’s plot. If you are ' +
+      'reading this and you are not the warden, he is past minding.\n\n' +
+      'GUESTS — see PLANTING HALL. We do not jar the guests.',
+  },
+  wormworksNote: {
+    title: 'THE TUNNELER’S NOTE',
+    body:
+      'The tunnels under the hall are not dug. Dug tunnels have tool ' +
+      'marks. These have RIBS.\n\n' +
+      'I mapped them for the warden: they run from the planting hall down ' +
+      'and DOWN, past where my lamp gives up, toward the sunken places. ' +
+      'Every tunnel the same shape. Every tunnel a throat.\n\n' +
+      'The warden read my map, thanked me, and burned it. “The church ' +
+      'grew a gullet,” he said. “Better nobody knows which way it ' +
+      'swallows.”',
+  },
+  wardensPlot: {
+    title: 'THE WARDEN’S PLOT LEDGER',
+    body:
+      'My own garden. My own rules. Behind my own key.\n\n' +
+      'Row one: draughts. You bury a vial of the deep vintage and the ' +
+      'plot does not grow it — it CONCENTRATES it. The ground tithes ' +
+      'everything, even medicine. I take my cut anyway.\n\n' +
+      'Row two: salve cuttings. Do not ask the rootstock.\n\n' +
+      'Row three is empty. Row three is MINE. A man who caged the key ' +
+      'should keep one bed made, in case the ground ever calls his ' +
+      'arrangement mockery.\n\n' +
+      '(The soil of row three is turned. Recently.)',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:

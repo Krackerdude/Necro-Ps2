@@ -35,6 +35,15 @@ export const ITEMS = Object.freeze({
     weapon: { type: 'ranged', damage: 38, range: 15, usesAmmo: 'boneShells', fireTime: 0.6 },
   },
 
+  proofingPistol: {
+    kind: 'weapon',
+    name: 'Proofing Piece',
+    glyph: '⌐⌖',
+    description:
+      'A scrivener’s single-shot pistol, used to test-fire tallow rounds before binding them into ledgers of account. Kicks like an apology; better than nothing by exactly one shot at a time.',
+    weapon: { type: 'ranged', damage: 22, range: 11, usesAmmo: 'boneShells', fireTime: 1.05 },
+  },
+
   boneShells: {
     kind: 'ammo',
     name: 'Tallow Rounds',
@@ -166,6 +175,37 @@ export const ITEMS = Object.freeze({
       'Warm, damp, and very slightly breathing. You carry it the way you would carry an apology.',
     spentWhen: (story) => Boolean(story.get('cageOpened')),
     discardFlavor: 'The Stone of the Ground stays with the cage. The ground accepts.',
+  },
+
+  silkBookmark: {
+    kind: 'key',
+    name: 'Silk Bookmark',
+    glyph: '~',
+    stack: 9,
+    description:
+      'A ribbon of red silk, warm as a pulse. Moth calls them her sisters. There are nine, she says. There were ten, she doesn’t say.',
+    spentWhen: (story) => Boolean(story.get('mothQuestDone')),
+    discardFlavor: 'The bookmarks are with Moth now. All her sisters, home.',
+  },
+
+  mouldsFlask: {
+    kind: 'key',
+    name: 'Mould’s Cup',
+    glyph: 'u',
+    description:
+      'A tin flask gone green with sixty years of patience. Deacon Mould would like it filled with the good black water, please and thank you.',
+    spentWhen: (story) => Boolean(story.get('mouldQuestDone')),
+    discardFlavor: 'The cup stays with its deacon, where cups belong.',
+  },
+
+  mouldsFlaskFull: {
+    kind: 'key',
+    name: 'Mould’s Cup (full)',
+    glyph: 'ū',
+    description:
+      'The good black, heavier than water has any right to be. It shifts against the tin like it is reading you.',
+    spentWhen: (story) => Boolean(story.get('mouldQuestDone')),
+    discardFlavor: 'Drunk to the dregs by a very happy deacon.',
   },
 
   spadeKey: {
