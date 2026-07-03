@@ -79,7 +79,7 @@ const CHAIN = [
   /* ---------------------- ACT II: BELOW THE TOWN --------------------- */
   {
     id: 'find-key',
-    text: 'The doors hold — for now. Search the church for a way down',
+    text: 'The key is caged on the altar — three stones open the Warden’s Cage',
     done: ({ story, inventory }) =>
       Boolean(inventory?.has('blackIronKey') || story.get('hasCryptKey') || story.get('cryptDoorOpen')),
   },

@@ -37,6 +37,16 @@ export const DOCUMENTS = {
       'If someone finds this: the pictures are with the one person here ' +
       'who told me to burn them.',
   },
+  cagePlaque: {
+    title: 'THE CAGE, ITS RUBRIC',
+    body:
+      'THREE STONES, THREE WITNESSES:\n\n' +
+      'The HOUR, from the tower wing, which counts what the town owes.\n' +
+      'The WORD, from the scriptorium wing, which records who agreed.\n' +
+      'The GROUND, from the undercroft wing, which collects.\n\n' +
+      'Seat all three and the cage will open, and God forgive whoever ' +
+      'needs it to.',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:
@@ -63,7 +73,9 @@ export const DOCUMENTS = {
       'no further. I was Graven’s warden before Callum wore the collar. ' +
       'I nailed these doors myself, from this side, the year I understood ' +
       'what the thanksgiving feeds.\n\n' +
-      'I keep the black key upon the altar, where He can watch it.\n\n' +
+      'I keep the black key upon the altar, caged. The hours, the words, and ' +
+      'the ground must all agree before it moves again — I quarried a stone ' +
+      'from each wing to make sure they never would.\n\n' +
       'Do not go below. The thing we buried under the garth does not know ' +
       'it is dead, and the icon it clutches is the only thing keeping the ' +
       'ground closed. The town above sings to it once a year so it will ' +

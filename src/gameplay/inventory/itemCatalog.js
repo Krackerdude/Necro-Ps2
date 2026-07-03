@@ -138,6 +138,72 @@ export const ITEMS = Object.freeze({
       'that the corners have gone soft.',
   },
 
+  stoneOfTheHour: {
+    kind: 'key',
+    name: 'Stone of the Hour',
+    glyph: '♠',
+    description:
+      'Heavy as a held breath. Faint tolling from inside it, on no schedule you can trust.',
+    spentWhen: (story) => Boolean(story.get('cageOpened')),
+    discardFlavor: 'The Stone of the Hour stays with the cage. Its watch is over.',
+  },
+
+  stoneOfTheWord: {
+    kind: 'key',
+    name: 'Stone of the Word',
+    glyph: '♦',
+    description:
+      'Covered in script too small to read. It rearranges when you are not looking, and sometimes when you are.',
+    spentWhen: (story) => Boolean(story.get('cageOpened')),
+    discardFlavor: 'The Stone of the Word stays with the cage. It has said its piece.',
+  },
+
+  stoneOfTheGround: {
+    kind: 'key',
+    name: 'Stone of the Ground',
+    glyph: '♣',
+    description:
+      'Warm, damp, and very slightly breathing. You carry it the way you would carry an apology.',
+    spentWhen: (story) => Boolean(story.get('cageOpened')),
+    discardFlavor: 'The Stone of the Ground stays with the cage. The ground accepts.',
+  },
+
+  spadeKey: {
+    kind: 'key',
+    name: 'Spade Key',
+    glyph: '♤',
+    description: 'Black iron, bow shaped like a grave-spade. It opens every door that digs.',
+  },
+
+  diamondKey: {
+    kind: 'key',
+    name: 'Diamond Key',
+    glyph: '♢',
+    description: 'Cold glass over colder iron. It opens every door that reads.',
+  },
+
+  cloverKey: {
+    kind: 'key',
+    name: 'Clover Key',
+    glyph: '♧',
+    description: 'Green bronze, three-lobed bow. It opens every door that grows.',
+  },
+
+  wardensDraught: {
+    kind: 'consumable',
+    name: 'Warden’s Draught',
+    glyph: '♥',
+    stack: 3,
+    description:
+      'A sealed vial from the warden’s own stores. Whatever it costs, it is paid by someone else.',
+    use: ({ stats, events }) => {
+      stats.increaseMaxHealth(25);
+      events.emit('audio/sfx', { id: 'saveChime' });
+      events.emit('ui/toast', { text: 'Your blood learns a new depth. MAX CONDITION UP.' });
+      return true;
+    },
+  },
+
   blackIronKey: {
     kind: 'key',
     name: 'Black Iron Key',

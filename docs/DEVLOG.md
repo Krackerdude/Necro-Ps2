@@ -5,6 +5,41 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 17: Church expansion Phase 1 — the Crossing & the Cage
+
+The RE4-style restructure begins: the Black Iron Key is no longer loose on
+the altar — it sits in THE WARDEN'S CAGE, opened only by three stones from
+three wings. Wings ship in phases 2–4 (spade=bell tower, diamond=
+scriptorium, clover=undercroft), each a full loop (combat+puzzle+lore+
+locked doors+a resident lunatic) with only a flavor lean, per user.
+
+- **Remodel** (chapelOfTheHollow): nave's north wall opens into a CROSSING
+  (columns, candelabra, banners, interior stained glass — always the wrong
+  red), WEST/EAST TRANSEPT arms, and an APSE. Each ends in a sealed wing
+  door: heavy door + solid rubble + glowing motif emblem (buildEmblem:
+  spade/diamond/clover). New camera zones (crossing track, one-point arm
+  shots, tight apse) + map rooms + FlickerLights (crossing warm, arm ends
+  red, apse green).
+- **The Cage**: iron bar cage on the altar, key rotating inside, three
+  socket pedestals at the altar's foot (makeItemSocket, flags
+  stoneSeated:hour/word/ground). Third seat → `stonesSeated` →
+  GameplayState plays CAGE_SCRIPT → `cageOpened` → a watcher updatable
+  removes the cage front live → take key (sets took:chapel-key, same flag
+  as ever — crypt flow unchanged). Legacy saves (key held/spent) build the
+  cage open and empty.
+- **Items**: stoneOfTheHour/Word/Ground (♠♦♣, spentWhen cageOpened),
+  spade/diamond/cloverKey (shape-lock keys, spawned by wing phases),
+  wardensDraught (+25 MAX HEALTH — PlayerStats.increaseMaxHealth, already
+  save-persisted). Docs: cagePlaque; warden's note now explains the cage.
+- **TEMPORARY**: each wing's stone lies in the rubble of its collapsed door
+  so the game stays completable this build. Wing phases relocate them.
+  GOTCHA: keep temp pickups OUTSIDE the wing-door interactable's radius —
+  the interaction system picks the nearest prompt.
+- Verified headless: gather 3 → seat 3 → cage cinematic → cageOpened →
+  stones auto-discard → key → crypt unlocks. Zero errors.
+
+---
+
 ## 2026-07-03 — Session 16: playtest fixes (user pass #2) + the inn interior
 
 Six user-reported issues, all fixed and verified:

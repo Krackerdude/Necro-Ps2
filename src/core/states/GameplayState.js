@@ -24,7 +24,7 @@ import { MainMenuState } from './MainMenuState.js';
 import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
 import { ITEMS } from '../../gameplay/inventory/itemCatalog.js';
 import { CinematicState } from './CinematicState.js';
-import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT } from '../../gameplay/cinematics/scripts.js';
+import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT, CAGE_SCRIPT } from '../../gameplay/cinematics/scripts.js';
 import { DoorTransitionScene } from '../../world/effects/DoorTransitionScene.js';
 
 /**
@@ -169,6 +169,14 @@ export class GameplayState extends GameState {
       }),
       // A key whose every lock is open leaves the satchel on its own.
       events.on('story/flag-changed', () => this.#discardSpentKeys()),
+      // The third stone seats: the cage gives up the key, on camera.
+      events.on('story/flag-changed', ({ flag, value }) => {
+        if (flag !== 'stonesSeated' || !value) return;
+        this.#playScene(CAGE_SCRIPT, () => {
+          const story = s.get(Services.STORY);
+          if (!story.get('cageOpened')) story.set('cageOpened', true);
+        });
+      }),
       // The hour is told: the ambient bed dies, everything standing lies
       // down, and the toll plays as a directed scene ending on the note.
       events.on('story/flag-changed', ({ flag, value }) => {

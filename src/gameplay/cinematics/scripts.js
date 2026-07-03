@@ -96,6 +96,23 @@ export const BAR_DOORS_SCRIPT = [
   { caption: { text: 'Outside: the singing. Inside: a church nobody has prayed in for a very long time.', duration: 4.4 } },
 ];
 
+/**
+ * The Warden's Cage opens — plays over the church the moment the third
+ * stone seats. Coordinates are the altar/crossing of chapel-of-the-hollow.
+ */
+export const CAGE_SCRIPT = [
+  { sfx: { id: 'saveChime' } },
+  { camera: { from: [1.8, 1.4, -5.6], to: [0.8, 1.3, -6.6], lookAt: [0, 1.3, -8], duration: 3.2 } },
+  { caption: { text: 'The three stones speak to each other in agreement.', duration: 3.0 } },
+  { impulse: { strength: 0.5 } },
+  { sfx: { id: 'doorUnlock' } },
+  { camera: { from: [0.8, 1.3, -6.6], to: [0.2, 1.5, -7.1], lookAt: [0, 1.35, -8], duration: 3.4 } },
+  { caption: { text: 'The cage does not unlock so much as give up.', duration: 3.0 } },
+  { impulse: { strength: 0.3 } },
+  { camera: { from: [0.2, 1.5, -7.1], to: [-1.6, 1.2, -5.8], lookAt: [0, 1.5, -8], duration: 3.2 } },
+  { caption: { text: 'The Black Iron Key lies in the open, colder than ever, and somewhere below, something adjusts its grip.', duration: 4.2 } },
+];
+
 /** Retired opening (pre-town builds); kept for the Phase D/E night stitch. */
 export const OPENING_SCRIPT = [
   { fade: { opacity: 0, duration: 1.2 } },
