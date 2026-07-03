@@ -8,10 +8,78 @@
  *
  * When new story beats are added, extend this list (and nothing else).
  */
+// The town act ends when you sleep; legacy saves (which predate the town)
+// already carry the chapel's visited flag, so every town step also counts
+// itself done for them.
+const townOver = (story) =>
+  Boolean(story.get('sleptAtInn') || story.get('visited:chapel-of-the-hollow'));
+
 const CHAIN = [
+  /* ------------------------- ACT I: THE TOWN ------------------------- */
+  {
+    id: 'car-things',
+    text: 'Collect your things from the car',
+    done: ({ story, inventory }) =>
+      Boolean(inventory?.has('mikesPhotograph') || story.get('took:car-photograph')) ||
+      townOver(story),
+  },
+  {
+    id: 'ask-around',
+    text: 'Show Mike’s photograph around town',
+    done: ({ story }) => Boolean(story.get('quest:rosa')) || townOver(story),
+  },
+  {
+    id: 'ask-inn',
+    text: 'Ask at the inn — Rosa says Mike took a room there',
+    done: ({ story }) => Boolean(story.get('quest:inn')) || townOver(story),
+  },
+  {
+    id: 'ask-harbor',
+    text: 'Find the harbormaster — Mike never boarded a boat out',
+    done: ({ story }) => Boolean(story.get('quest:harbor')) || townOver(story),
+  },
+  {
+    id: 'ask-lighthouse',
+    text: 'Walk out to the lighthouse and ask the keeper',
+    done: ({ story }) => Boolean(story.get('quest:lighthouse')) || townOver(story),
+  },
+  {
+    id: 'ask-priest',
+    text: 'Climb to the church — the keeper says Mike watched it for days',
+    done: ({ story }) => Boolean(story.get('quest:priest')) || townOver(story),
+  },
+  {
+    id: 'rest-inn',
+    text: 'Dusk is falling. Take your room at the inn',
+    done: ({ story }) => townOver(story),
+  },
+
+  /* ------------------------ THE NIGHT OF GRAVEN ----------------------- */
+  // These only surface after 'nightfall' (everything above is done by then)
+  // and complete themselves for saves that are already below.
+  {
+    id: 'night-anyone',
+    text: 'The town is empty. Find anyone',
+    done: ({ story }) =>
+      Boolean(story.get('mikeSeen') || story.get('chaseStarted')) ||
+      Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+  {
+    id: 'night-church',
+    text: 'He was pointing at the church',
+    done: ({ story }) =>
+      Boolean(story.get('chaseStarted')) || Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+  {
+    id: 'night-run',
+    text: 'RUN — THE CHURCH DOORS',
+    done: ({ story }) => Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+
+  /* ---------------------- ACT II: BELOW THE TOWN --------------------- */
   {
     id: 'find-key',
-    text: 'Search the chapel for a way into the crypt',
+    text: 'The doors hold — for now. Search the church for a way down',
     done: ({ story, inventory }) =>
       Boolean(inventory?.has('blackIronKey') || story.get('hasCryptKey') || story.get('cryptDoorOpen')),
   },
@@ -43,7 +111,7 @@ const CHAIN = [
   },
   {
     id: 'reach-bell',
-    text: 'Go below — find the bell the verger wrote of',
+    text: 'Go below — the true bell the verger wrote of. Mike is down there somewhere',
     done: ({ story }) => Boolean(story.get('visited:ossuary-of-the-hollow')),
   },
   {
@@ -58,7 +126,7 @@ const CHAIN = [
   },
   {
     id: 'rest',
-    text: 'It is done. The ground sleeps. (End of this build)',
+    text: 'It is done. The ground sleeps, and Graven with it. (End of this build)',
     done: () => false,
   },
 ];

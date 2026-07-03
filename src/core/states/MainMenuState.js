@@ -4,7 +4,7 @@ import { MainMenuScreen } from '../../ui/screens/MainMenuScreen.js';
 import { OptionsScreen } from '../../ui/screens/OptionsScreen.js';
 import { SaveLoadScreen } from '../../ui/screens/SaveLoadScreen.js';
 import { CinematicState } from './CinematicState.js';
-import { OPENING_SCRIPT } from '../../gameplay/cinematics/scripts.js';
+import { DRIVE_SCRIPT } from '../../gameplay/cinematics/scripts.js';
 
 /**
  * MainMenuState — 3D graveyard vista + the title UI.
@@ -90,10 +90,14 @@ export class MainMenuState extends GameState {
     const { GameplayState } = await import('./GameplayState.js');
     const machine = this.services.get(Services.STATE_MACHINE);
     if (params.newGame) {
-      // The opening plays over the graveyard vista before the chapel loads.
+      // The drive: two minutes of coast road (skippable) before the town.
+      const world = this.services.get(Services.WORLD);
+      const story = this.services.get(Services.STORY);
+      const runtime = world.loadLevel('coast-road', { story });
+      this.services.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
       machine.replace(
         new CinematicState(this.services, {
-          script: OPENING_SCRIPT,
+          script: DRIVE_SCRIPT,
           onComplete: () => machine.replace(new GameplayState(this.services), params),
         })
       );

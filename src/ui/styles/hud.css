@@ -298,3 +298,78 @@
   0% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+/* Exploration mode: the survival readouts vanish; the world is enough. */
+.hud.hud-minimal .hud-condition,
+.hud.hud-minimal .hud-weapon {
+  display: none !important;
+}
+
+/* Dialogue box */
+.dialogue-screen {
+  background: transparent;
+  pointer-events: auto;
+}
+
+.dialogue-box {
+  position: absolute;
+  left: 50%;
+  bottom: 6vh;
+  transform: translateX(-50%) rotate(-0.4deg);
+  width: min(760px, 88vw);
+  min-height: 110px;
+  padding: 16px 26px 20px;
+}
+
+/* The panel lives on ::before so its clip-path can't clip the name plate,
+   which overhangs the top edge. The box's transform creates the stacking
+   context that keeps z-index:-1 inside the element. */
+.dialogue-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--ink-soft);
+  border: 2px solid var(--bone);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  box-shadow: 8px 8px 0 rgba(158, 22, 22, 0.3);
+}
+
+.dialogue-name {
+  position: absolute;
+  top: -16px;
+  left: 18px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone);
+  background: var(--blood);
+  padding: 3px 16px;
+  transform: skewX(-8deg);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  text-shadow: 1px 1px 0 #000;
+}
+
+.dialogue-text {
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--bone);
+  letter-spacing: 0.02em;
+  min-height: 54px;
+}
+
+.dialogue-more {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  color: var(--blood-bright);
+  font-size: 16px;
+  opacity: 0;
+}
+
+.dialogue-more.ready {
+  opacity: 1;
+  animation: cond-blink 0.9s steps(2) infinite;
+}

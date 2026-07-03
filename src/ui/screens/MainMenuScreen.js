@@ -36,8 +36,8 @@ export class MainMenuScreen extends Screen {
         'div.title-block',
         {},
         el('div.over', {}, 'THE GROUND REMEMBERS'),
-        el('h1', {}, 'NECRO'),
-        el('div.under', {}, 'A CHAPEL ・ A KEY ・ A THING BELOW')
+        el('h1', {}, 'GRAVEN'),
+        el('div.under', {}, 'A LETTER ・ A TOWN ・ A THING BELOW')
       ),
       this.#menu.element,
       el('div.menu-hint', {}, '↑↓ SELECT ・ ENTER CONFIRM')

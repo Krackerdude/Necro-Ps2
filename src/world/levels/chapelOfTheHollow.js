@@ -34,8 +34,8 @@ const WALL_H = 5;
 const ROOM_H = 3;
 
 export const CHAPEL_OF_THE_HOLLOW = {
-  id: 'chapel-of-the-hollow',
-  name: 'Chapel of the Hollow',
+  id: 'chapel-of-the-hollow', // historical id — saves carry it
+  name: 'Graven Church',
 
   build({ kit, story, inventory, events, physics }) {
     const root = new THREE.Group();
@@ -237,9 +237,11 @@ export const CHAPEL_OF_THE_HOLLOW = {
         id: 'entrance-door',
         position: new THREE.Vector3(0, 1, 9.4),
         radius: 1.4,
-        prompt: 'Try the door',
+        prompt: 'The barred doors',
         onInteract: () => {
-          events.emit('ui/toast', { text: 'It will not move. Something bars it from the other side.' });
+          events.emit('ui/toast', {
+            text: 'Your bar holds. Against the far side of the wood: palms, flat and patient. No knocking anymore.',
+          });
         },
       },
       {

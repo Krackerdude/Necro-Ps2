@@ -1,7 +1,7 @@
 {
-  "name": "necro-ps2",
+  "name": "graven",
   "version": "0.1.0",
-  "description": "NECRO — a PS2-era survival horror game built on Three.js. Fixed cameras, vertex snapping, dread.",
+  "description": "GRAVEN — a PS2-era survival horror game built on Three.js. Fixed cameras, vertex snapping, dread.",
   "type": "module",
   "private": true,
   "scripts": {

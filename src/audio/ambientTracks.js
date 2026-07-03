@@ -125,6 +125,89 @@ const TRACKS = {
     };
   },
 
+  /** The drive: engine drone, road rumble, wind through a cracked window. */
+  coastDrive: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 55, type: 'sawtooth', gain: 0.014 }),
+      drone(ctx, out, { freq: 110, type: 'sawtooth', gain: 0.008 }),
+      drone(ctx, out, { freq: 36, type: 'sine', gain: 0.03 }),
+      ...breathNoise(ctx, out, { cutoff: 700, gain: 0.035, lfoRate: 0.18 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
+  /** Town by day: breeze, water hush, distant gulls. The only kind track. */
+  townDay: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 3);
+    out.connect(bus);
+    const nodes = [
+      // A warm, consonant fifth — barely there, more sunlight than sound.
+      drone(ctx, out, { freq: 110, type: 'sine', gain: 0.014 }),
+      drone(ctx, out, { freq: 165, type: 'sine', gain: 0.009 }),
+      // Sea breeze: brighter noise than the dungeons, slow swell.
+      ...breathNoise(ctx, out, { cutoff: 900, gain: 0.028, lfoRate: 0.09 }),
+    ];
+    // Gulls, far off, irregular.
+    const gulls = setInterval(() => {
+      if (Math.random() < 0.35) return;
+      const t = ctx.currentTime;
+      const cries = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < cries; i++) {
+        const start = t + i * (0.28 + Math.random() * 0.1);
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1150 + Math.random() * 250, start);
+        osc.frequency.exponentialRampToValueAtTime(720, start + 0.22);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, start);
+        g.gain.linearRampToValueAtTime(0.012, start + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
+        osc.connect(g).connect(out);
+        osc.start(start);
+        osc.stop(start + 0.35);
+      }
+    }, 9000 + Math.random() * 5000);
+    return {
+      stop() {
+        clearInterval(gulls);
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
+  /** The town after the bell: the kind track's corpse. Cold, hollow, close. */
+  townNight: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 38, type: 'sine', gain: 0.07 }),
+      drone(ctx, out, { freq: 38, detune: 12, type: 'sine', gain: 0.05 }),
+      drone(ctx, out, { freq: 57, type: 'triangle', gain: 0.012 }),
+      // The same sea breeze as the day track, drained of warmth.
+      ...breathNoise(ctx, out, { cutoff: 320, gain: 0.03, lfoRate: 0.06 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
   /** Chapel: lower, closer, with a slow dissonant beat between drones. */
   chapel: (ctx, bus) => {
     const out = ctx.createGain();

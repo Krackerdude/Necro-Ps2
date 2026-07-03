@@ -68,6 +68,9 @@ export class HudOverlay extends Screen {
         );
       }),
       this.#events.on('ui/toast', ({ text }) => this.#toast(text)),
+      this.#events.on('hud/mode', ({ minimal }) => {
+        this.element.classList.toggle('hud-minimal', Boolean(minimal));
+      }),
       this.#events.on('grab/started', () => {
         const node = this.element.querySelector('.hud-grab');
         if (node) node.style.display = '';

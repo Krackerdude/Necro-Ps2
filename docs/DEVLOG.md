@@ -5,6 +5,177 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 15: GRAVEN Phase E — the retcon pass
+
+Act II's text now belongs to the same story as the town above. No ids,
+flags, or geometry changed — writing only:
+- **Warden's note**: the warden preceded Callum; he nailed the doors when
+  he understood what the thanksgiving feeds; the pit is the apology.
+- **Planting ledger**: gains Row 9 in an unpracticed hand — "the visitor
+  with the camera... He is still seeing." (Mike's fate, implied, never
+  stated.)
+- **Verger's page**: the tower's dusk bell is the ECHO; the ossuary bell
+  is the true one; ringing it puts the whole hungry arrangement to sleep.
+- **Chapel**: display name → 'Graven Church' (id stays
+  `chapel-of-the-hollow` — saves carry it); entrance door is now YOUR bar
+  ("palms, flat and patient. No knocking anymore").
+- **Objectives**: find-key/reach-bell/rest reworded into the frame;
+  cloister gate toast says "church above — older than Graven".
+- **END_NOTE**: the toll reaches the streets, the singing stops mid-note,
+  and "somewhere below row nine, a camera strap."
+Verified in-game: new objective text on church arrival, door toast, warden
+note contains Graven/Callum/thanksgiving/pit. Zero errors.
+
+---
+
+## 2026-07-03 — Session 14: character designs + GRAVEN Phase D — the night
+
+**Characters.** Townsfolk v2: defs now carry `hair` (short/long/bun/bald/
+cap/hat), `beard`, `outfit` (coat/dress/robe), `apron`, `vest`, `build`
+(girth), extended palette (hair/skirt/apron/vest/hat/beard). All 14 town
+NPCs have unique looks. Townsfolk exposes `get head()` (night beats bolt
+things onto it) and `pointAt(pos)` (raises the right arm — Mike's beat).
+PlayerRig: dark hair, open collar, cross-body satchel + bag, belt.
+Phase C interiors were DEFERRED by the user — jumped straight to D.
+
+**The night.** `graven-town` builds from `story.get('nightfall')` — one
+map, two truths. TownKit takes `{ windowsLit, lampsLit }` so the whole
+vocabulary goes dark in one place. Night: cold moon key, dead lamps, dark
+windows, church lancets glowing a low wrong red (the only guide light),
+fog 0x090b12 @ 0.026, `townNight` ambient (the day track's corpse), FULL
+hud (hudMinimal only by day), no NPCs.
+
+Sequence (all flags, all autosaved):
+1. Sleep at the inn → `sleptAtInn` + `nightfall` → transition to the same
+   level, night build.
+2. WINDOW_SCRIPT auto-plays on night entry until `windowSceneSeen`
+   (GameplayState #enterLevel hook → #playScene). The churchyard has a pit
+   that wasn't there + 12 congregation Townsfolk + torch FlickerLights,
+   built only while the flag is unset; the onComplete re-transition clears
+   the set.
+3. Mike: translucent flickering Townsfolk in the square (interact '— Mike?'
+   → pointAt(church) → captions → vanish → `mikeSeen`).
+4. Rosa at the church-path mouth, back turned ('…Rosa?', gated on
+   mikeSeen) → turns → split-jaw mesh bolted to her head + wraithShriek +
+   impulse + '"You looked."' → `chaseStarted`.
+5. THE CHASE: husk variant `neighbor` — speed 3.0 (run is 4.2 — walking
+   dies), `detect 200`, `lose 400`, `xray: true` (hasLineOfSight stubbed
+   true), `dressed: true` (keeps dusk coat colors, deterministic per
+   post). NINE spawn across the districts `onlyIf: 'chaseStarted'` — the
+   roster's live onlyIf re-check is what releases them mid-level. NEVER
+   use `neighbor` outside a scripted chase.
+6. Church doors (night + chaseStarted) → `doorsBarred` → transition to the
+   chapel; BAR_DOORS_SCRIPT plays over the arrival once (`barSceneSeen`)
+   — the chapel entrance "barred from the other side" is now barred by YOU.
+   Retcon of chapel text is Phase E.
+7. Death during the chase reloads the autosave anchored at nightfall (the
+   inn door), per design: caught = retry from waking.
+
+Night objectives inserted between Act I and Act II (self-complete for
+saves already below). Verified headless end to end: sleep → window scene →
+mike → reveal → swarm converging on screenshot → doors → bar cinematic →
+chapel with 'Search the chapel…' objective. Zero page errors.
+
+---
+
+## 2026-07-03 — Session 13: GRAVEN Phase B — the town, the drive, Act I
+
+New Game is now: title → 2-minute drive cinematic → the town of Graven at
+dusk → photo quest across six districts → sleep at the inn → wake in the
+chapel (stitch; Phase D replaces it with the night sequence).
+
+- **TownKit** (world/builders/TownKit.js): the daytime vocabulary — houses
+  (plaster body + solid attic prism closing the gables + overhanging plank
+  panels + dusk-lit shuttered windows), market stalls, crates, boats,
+  street lamps (`lit` adds a real point light — budget ~6/level, unlit ones
+  glow by emissive), trees, fences, notice board, bollards, the lighthouse,
+  and the car (returns `wheels` for the cinematic). Same `{object,
+  colliders}` convention as ArchitectureKit; borrows its material cache.
+  GOTCHA (user-caught): roof panels alone leave the gable triangles open —
+  the attic prism (ExtrudeGeometry triangle) is what closes them.
+- **gravenTown.js**: gate road (parked car = photograph pickup + letter
+  document), square (fountain, stalls, notice board, bakery), boardwalk +
+  two piers (rails, boats, harbor shack + ledger), main street (5 houses),
+  the inn, church path + churchyard (lancet windows, 10 m tower, graves),
+  east lane + lighthouse point. 15 camera zones, postcard grammar (high,
+  warm, wide — deliberately kinder than the chapel's). `hudMinimal`, no
+  enemySpawns ever. Surfaces: piers are wood.
+- **The quest chain**: `dialogue/open` defs may pass `lines: () => [...]`
+  (evaluated at open) + `onComplete` (fires on every FULL read — keep it
+  idempotent). Chain flags: quest:rosa → quest:inn → quest:harbor →
+  quest:lighthouse → quest:priest → sleptAtInn. Each key NPC gates on the
+  previous flag (and Rosa on holding the photograph) and falls back to
+  flavor lines otherwise. Objectives CHAIN got an Act I block; every town
+  step also counts done for legacy saves via `visited:chapel-of-the-hollow`.
+- **14 NPCs**: 5 quest (Rosa, Tobias, Aldous, Edda, Father Callum) + 9
+  texture (Maren, Petr, Signe, Ilsa, Brammel, Yuri, Wren, kids Ana & Piet —
+  Townsfolk now takes `scale`). All dialogue carries the same undertow:
+  thanksgiving, generosity, nobody leaves, be indoors when the bell rings.
+- **The drive** (coastRoad.js + DRIVE_SCRIPT): a treadmill set — the car
+  never moves, guardrail posts/fences/trees/rocks flow past and wrap
+  (band 90 m, 9 m/s), wheels spin via `rotateY` (local axle), body bobs.
+  Every shot is authored around the origin. CinematicState now calls
+  `world.update(dt)` so level updatables run under cinematics everywhere
+  (fog drifts during the bell toll too; gameplay actors stay frozen).
+  ~2 min of letter monologue, skippable. MainMenuState loads `coast-road`
+  + `coastDrive` ambient before pushing the script.
+- **STARTING_LEVEL_ID = graven-town.** Old saves keep working (they carry
+  their own level id). Items: freshBread (heal 30), mikesPhotograph (key).
+  Documents: mikesLetter, townNotice, harborLedger.
+- Verified headless end-to-end: cinematic → skip → arrival objective →
+  photograph pickup → all five quest flags in order → inn prompt flips to
+  “Turn in for the night” → sleptAtInn → chapel loads with survival HUD
+  back on. Zero page errors.
+- Camera-authoring note: never place a zone camera near a house footprint —
+  roofs now overhang 0.3+ m and eat the frame. High-over-the-sea-wall and
+  street-mouth positions are the safe spots.
+
+---
+
+## 2026-07-02 — Session 12: GRAVEN Phase A — retitle, dialogue, townsfolk
+
+The game is now **GRAVEN**. Big story restructure incoming (see plan): a
+pre-chapel intro — drive-in cinematic, a cozy dusk harbor town you explore
+for 30–60 min, 12–15 NPCs, inn sleep, night flip, full-town chase to the
+chapel doors. Phases: A systems (this session) → B town by day → C
+interiors/dialogue → D night+chase → E retcon existing levels.
+
+- **Retitle**: MainMenuScreen h1, index.html, package.json, END_NOTE,
+  README. Storage keys (`necro.saves.v1`/`necro.settings.v1`) deliberately
+  unchanged so existing saves survive.
+- **Dialogue system**: DialogueScreen (paged typewriter, 44 cps,
+  `dialogueTick` sfx; E/Enter/Space/click = reveal-full then advance; Esc
+  closes with NO credit). GameplayState listens for `'dialogue/open'
+  {npc, def}` → modal push; sets `talked:<def.id>` ONLY on full completion,
+  so required conversations can't be skimmed. NPC `faceToward(player)` on
+  open, `faceRest()` on close.
+- **Townsfolk entity** (gameplay/npcs/Townsfolk.js): palette-varied
+  humanoid on the same skeleton family as the husks (deliberate — night
+  makes the silhouette a threat). Idle breathe/sway/glance. `makeNpc()` in
+  levelHelpers builds entity + collider + Talk interactable; ctx needs
+  `{root, ps2: kit.ps2, events, updatables, colliders}`.
+- **HUD minimal mode**: levels may return `hudMinimal: true`; GameplayState
+  emits `'hud/mode' {minimal}` on every level entry; HudOverlay toggles
+  `.hud-minimal` (hides condition + weapon readouts). Daytime GRAVEN is
+  pure exploration — no combat, no enemySpawns, ever.
+- **Town shell** (world/levels/gravenTown.js, id `graven-town`): one square
+  + fountain + facades + sea wall + 3 NPCs (Rosa the baker, Aldous the
+  harbormaster, Maren), warm dusk lighting (sun 0xffc27d, warm fog
+  0xc9a075 @ 0.012), `townDay` ambient (breeze + gulls — the only kind
+  track). Registered but NOT the starting level; it's the Phase B proving
+  ground and will be replaced by the full town.
+- **Gotcha — dialogue box CSS**: `clip-path` on a parent clips absolutely
+  positioned children; the panel chrome lives on `.dialogue-box::before`
+  (z-index:-1 inside the transform's stacking context) so the overhanging
+  name plate isn't clipped.
+- Verified headless: hud-minimal on in town, prompt → typewriter →
+  `talked:baker` true on completion; Esc bail leaves `talked:harbormaster`
+  unset AND doesn't leak into pause.
+- Known placeholder: objective strip still shows chapel text in town —
+  town objectives are Phase B; retcon of objectives/documents is Phase E.
+
+---
+
 ## 2026-07-02 — Session 11: key auto-discard + Tier 7 (presentation)
 
 - **Spent keys discard themselves**: key defs carry `spentWhen(story)` +

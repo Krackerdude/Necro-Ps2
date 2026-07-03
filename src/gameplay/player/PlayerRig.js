@@ -64,6 +64,37 @@ export class PlayerRig {
     head.add(headMesh);
     torso.add(head);
 
+    // The protagonist reads as HIM from any fixed camera: dark short-back
+    // hair, an open collar, a satchel strap, a belt. City clothes, one long
+    // drive old.
+    const hairMat = ps2.patch(new THREE.MeshStandardMaterial({ color: 0x2c221a, roughness: 0.95 }));
+    const hairCrown = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.1, 0.23), hairMat);
+    hairCrown.position.set(0, 0.19, -0.01);
+    head.add(hairCrown);
+    const hairBack = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.12, 0.05), hairMat);
+    hairBack.position.set(0, 0.08, -0.11);
+    head.add(hairBack);
+
+    const shirt = ps2.patch(new THREE.MeshStandardMaterial({ color: 0xcfc4a4, roughness: 0.85 }));
+    const collar = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.03), shirt);
+    collar.position.set(0, 0.27, 0.12);
+    torsoMesh.add(collar);
+
+    const leather = ps2.patch(new THREE.MeshStandardMaterial({ color: 0x3e2c1c, roughness: 0.9 }));
+    const strap = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.62, 0.02), leather);
+    strap.position.set(0.03, 0.02, 0.125);
+    strap.rotation.z = 0.55;
+    torsoMesh.add(strap);
+    const strapBack = strap.clone();
+    strapBack.position.z = -0.125;
+    torsoMesh.add(strapBack);
+    const satchel = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.22, 0.3), leather);
+    satchel.position.set(-0.26, -0.28, 0);
+    torsoMesh.add(satchel);
+    const belt = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.06, 0.26), leather);
+    belt.position.y = 0.01;
+    torso.add(belt);
+
     const mkLimb = (w, h, material, parent, x, y) => {
       const pivot = new THREE.Group();
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), material);

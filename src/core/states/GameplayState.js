@@ -17,13 +17,14 @@ import { SaveLoadScreen } from '../../ui/screens/SaveLoadScreen.js';
 import { ShrineScreen } from '../../ui/screens/ShrineScreen.js';
 import { ItemBoxScreen } from '../../ui/screens/ItemBoxScreen.js';
 import { MapScreen } from '../../ui/screens/MapScreen.js';
+import { DialogueScreen } from '../../ui/screens/DialogueScreen.js';
 import { InventoryScreen } from '../../ui/screens/InventoryScreen.js';
 import { GameOverScreen } from '../../ui/screens/GameOverScreen.js';
 import { MainMenuState } from './MainMenuState.js';
 import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
 import { ITEMS } from '../../gameplay/inventory/itemCatalog.js';
 import { CinematicState } from './CinematicState.js';
-import { BELL_SCRIPT, END_NOTE } from '../../gameplay/cinematics/scripts.js';
+import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT } from '../../gameplay/cinematics/scripts.js';
 import { DoorTransitionScene } from '../../world/effects/DoorTransitionScene.js';
 
 /**
@@ -144,6 +145,7 @@ export class GameplayState extends GameState {
     // --- session event wiring ----------------------------------------------
     this.#unsubs = [
       events.on('ui/show-note', ({ title, body }) => this.#openNote(title, body)),
+      events.on('dialogue/open', ({ npc, def }) => this.#openDialogue(npc, def)),
       events.on('ui/open-save-menu', () => this.#openShrine()),
       events.on('player/died', () => this.#onDeath()),
       // Condition is physical: DANGER means a limp, a muffled world, and a
@@ -341,9 +343,39 @@ export class GameplayState extends GameState {
       snapshot?.participants.enemies
     );
     this.#interaction.bind(runtime.interactables, this.#player.object);
+    // Exploration levels (the town by day) hide the survival readouts.
+    this.services.get(Services.EVENTS).emit('hud/mode', { minimal: Boolean(runtime.hudMinimal) });
     cameraDirector.setZones(runtime.cameraZones, this.#player.object);
     renderer.setCamera(cameraDirector.camera);
     s.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
+
+    // Story beats that own the camera the moment a level opens.
+    const events = s.get(Services.EVENTS);
+    if (levelId === 'graven-town' && story.get('nightfall') && !story.get('windowSceneSeen')) {
+      // The window: what the corner room saw. The crowd set is built only
+      // while the flag is unset; the re-transition clears it away.
+      this.#playScene(WINDOW_SCRIPT, () => {
+        story.set('windowSceneSeen', true);
+        events.emit('level/transition', { levelId: 'graven-town', spawn: 'innDoor' });
+      });
+    }
+    if (levelId === 'chapel-of-the-hollow' && story.get('doorsBarred') && !story.get('barSceneSeen')) {
+      this.#playScene(BAR_DOORS_SCRIPT, () => story.set('barSceneSeen', true));
+    }
+  }
+
+  /** Push a cinematic over gameplay; `then` runs after it pops. */
+  #playScene(script, then) {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    machine.push(
+      new CinematicState(this.services, {
+        script,
+        onComplete: () => {
+          machine.pop();
+          then?.();
+        },
+      })
+    );
   }
 
   /** The iconic beat: darkness, a door swings open, the next room. */
@@ -402,6 +434,33 @@ export class GameplayState extends GameState {
       ps2: this.services.get(Services.RENDERER).ps2Materials,
       story: this.services.get(Services.STORY),
       onClose: () => machine.pop(),
+    });
+    machine.push(new ModalUiState(this.services, screen));
+  }
+
+  /** A conversation: NPC turns to you, the box opens, the flag only sets
+   *  when the LAST page is read (Esc closes without credit). `def.lines`
+   *  may be a function (evaluated at open — quest NPCs change what they say
+   *  as flags move) and `def.onComplete` fires on every full read-through
+   *  (levels use it to advance quest flags; make it idempotent). */
+  #openDialogue(npc, def) {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    const events = this.services.get(Services.EVENTS);
+    const story = this.services.get(Services.STORY);
+    npc.faceToward(this.#player.object.position);
+    const lines = typeof def.lines === 'function' ? def.lines() : def.lines;
+    const screen = new DialogueScreen({
+      name: def.name,
+      lines,
+      events,
+      onClose: (completed) => {
+        machine.pop();
+        npc.faceRest();
+        if (completed) {
+          if (!story.get(`talked:${def.id}`)) story.set(`talked:${def.id}`, true);
+          def.onComplete?.();
+        }
+      },
     });
     machine.push(new ModalUiState(this.services, screen));
   }

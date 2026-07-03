@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PickupBeacon } from '../effects/PickupBeacon.js';
+import { Townsfolk } from '../../gameplay/npcs/Townsfolk.js';
 
 /**
  * Level-authoring helpers — the shared patterns every level uses:
@@ -145,6 +146,40 @@ export function makeItemSocket(ctx, def) {
       ctx.events.emit('audio/sfx', { id: 'saveChime' });
       ctx.events.emit('ui/toast', { text: def.placedText });
       def.onPlaced?.();
+    },
+  };
+}
+
+/**
+ * A talkable townsperson. Builds the Townsfolk entity, registers its idle
+ * updatable and body collider, and returns the "Talk" interactable, which
+ * routes through the 'dialogue/open' event (GameplayState owns the modal
+ * and sets `talked:<id>` on FULL completion — required conversations can't
+ * be skimmed with Esc).
+ *
+ * @param {{ root: THREE.Group, ps2: object, events: object,
+ *           updatables: object[], colliders: THREE.Box3[] }} ctx
+ * @param {{ id: string, name: string, position: THREE.Vector3, facing?: number,
+ *           palette?: object, lines: string[] }} def
+ */
+export function makeNpc(ctx, def) {
+  const npc = new Townsfolk(ctx.ps2, def);
+  ctx.root.add(npc.object);
+  ctx.updatables.push(npc);
+  const p = def.position;
+  ctx.colliders.push(
+    new THREE.Box3(
+      new THREE.Vector3(p.x - npc.radius, 0, p.z - npc.radius),
+      new THREE.Vector3(p.x + npc.radius, 1.7 * (def.scale ?? 1), p.z + npc.radius)
+    )
+  );
+  return {
+    id: `npc-${def.id}`,
+    position: def.position,
+    radius: 1.5,
+    prompt: `Talk — ${def.name}`,
+    onInteract: () => {
+      ctx.events.emit('dialogue/open', { npc, def });
     },
   };
 }
