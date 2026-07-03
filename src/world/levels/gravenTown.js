@@ -321,7 +321,11 @@ export const GRAVEN_TOWN = {
         name: 'Rosa, the baker',
         position: new THREE.Vector3(-4.8, 0, 2.6),
         facing: Math.PI * 0.85,
-        palette: { coat: 0xc9b78a, skin: 0xd0a888, legs: 0x6a4a3a },
+        outfit: 'dress',
+        apron: true,
+        hair: 'bun',
+        build: 1.12,
+        palette: { coat: 0xc9b78a, skin: 0xd0a888, skirt: 0x8a5a48, apron: 0xe8e0cc, hair: 0x6a5644 },
         lines: () => {
           if (q('quest:rosa'))
             return [
@@ -350,7 +354,11 @@ export const GRAVEN_TOWN = {
         name: 'Tobias, the innkeeper',
         position: new THREE.Vector3(1.8, 0, -26.4),
         facing: Math.PI,
-        palette: { coat: 0x5a3a2e, skin: 0xc9a082, legs: 0x3a3028 },
+        hair: 'bald',
+        beard: true,
+        vest: true,
+        build: 1.18,
+        palette: { coat: 0x8a7458, skin: 0xc9a082, legs: 0x3a3028, vest: 0x5c2c30, beard: 0x9a9088 },
         lines: () => {
           if (q('quest:priest'))
             return [
@@ -382,7 +390,9 @@ export const GRAVEN_TOWN = {
         name: 'Aldous, harbormaster',
         position: new THREE.Vector3(5, 0, 31.5),
         facing: Math.PI,
-        palette: { coat: 0x3a4a5c, skin: 0xb89878, legs: 0x2a2a30 },
+        hair: 'hat',
+        beard: true,
+        palette: { coat: 0x3a4a5c, skin: 0xb89878, legs: 0x2a2a30, hat: 0x1e222a, beard: 0xb0a898 },
         lines: () => {
           if (q('quest:harbor'))
             return [
@@ -409,7 +419,10 @@ export const GRAVEN_TOWN = {
         name: 'Edda, the keeper',
         position: new THREE.Vector3(36.8, 0, 17.6),
         facing: -Math.PI / 2,
-        palette: { coat: 0x8a8296, skin: 0xcaa88c, legs: 0x4a4a52 },
+        outfit: 'dress',
+        hair: 'long',
+        build: 0.94,
+        palette: { coat: 0x8a8296, skin: 0xcaa88c, skirt: 0x5a5a6c, hair: 0xb8b4ac },
         lines: () => {
           if (q('quest:lighthouse'))
             return [
@@ -437,7 +450,10 @@ export const GRAVEN_TOWN = {
         name: 'Father Callum',
         position: new THREE.Vector3(19.8, 0, -23.6),
         facing: -Math.PI / 2,
-        palette: { coat: 0x2e2a30, skin: 0xd8b494, legs: 0x2e2a30 },
+        outfit: 'robe',
+        hair: 'bald',
+        build: 0.88,
+        palette: { coat: 0x26222a, skin: 0xd8b494 },
         lines: () => {
           if (q('quest:priest'))
             return [
@@ -468,7 +484,10 @@ export const GRAVEN_TOWN = {
         name: 'Maren',
         position: new THREE.Vector3(-3.2, 0, 12.2),
         facing: -0.5,
-        palette: { coat: 0x4a3a4c, skin: 0xc9a68a, legs: 0x3a3a44 },
+        outfit: 'dress',
+        hair: 'bun',
+        build: 0.92,
+        palette: { coat: 0x4a3a4c, skin: 0xc9a68a, skirt: 0x3c3040, hair: 0xa8a4a0 },
         lines: [
           'I sit here every evening. My husband is in the churchyard, my son is — my son is with the church. There’s a difference. You’ll learn it.',
           'The fountain used to run clear as glass. Now look. Every year the water remembers a little less about being water.',
@@ -479,7 +498,10 @@ export const GRAVEN_TOWN = {
         name: 'Petr, fisherman',
         position: new THREE.Vector3(5.6, 0, 38),
         facing: Math.PI,
-        palette: { coat: 0x6a6a52, skin: 0xb89070, legs: 0x3a4048 },
+        hair: 'cap',
+        beard: true,
+        build: 1.08,
+        palette: { coat: 0x6a6a52, skin: 0xb89070, legs: 0x3a4048, hat: 0x3a3e34, beard: 0x5a4634 },
         lines: [
           'Caught nothing all week. Doesn’t worry me. The fish come back after the thanksgiving — fat, too. Always do.',
           'Funny thing, the sea here. Never takes a boat, never takes a swimmer. Like it’s been told we’re spoken for.',
@@ -490,7 +512,9 @@ export const GRAVEN_TOWN = {
         name: 'Signe',
         position: new THREE.Vector3(-6, 0, 31.5),
         facing: 0.4,
-        palette: { coat: 0x7a4a52, skin: 0xd0a888, legs: 0x4a4a52 },
+        outfit: 'dress',
+        hair: 'long',
+        palette: { coat: 0x7a4a52, skin: 0xd0a888, skirt: 0x5c3a40, hair: 0x2e2620 },
         lines: [
           'Mending nets, always mending. The holes come back bigger every season and nobody asks what makes them.',
           'You’re staying the night? Good. The inn’s the warmest roof in town. Shut the shutters anyway. For the draught, I mean. The draught.',
@@ -501,7 +525,10 @@ export const GRAVEN_TOWN = {
         name: 'Ilsa, at the stall',
         position: new THREE.Vector3(5.8, 0, 13.2),
         facing: -2.4,
-        palette: { coat: 0x8a6a3c, skin: 0xc9a68a, legs: 0x5a4a3a },
+        outfit: 'dress',
+        apron: true,
+        hair: 'bun',
+        palette: { coat: 0x8a6a3c, skin: 0xc9a68a, skirt: 0x6a5230, apron: 0x4a6a52, hair: 0x38302a },
         lines: [
           'Preserves, candles, wool. Everything a body needs to be comfortable, and comfort is the whole art of living here.',
           'Take a candle for your room, no charge. The inn’s lamps are fine but a flame you lit yourself is better company. My mother used to say that. Everyone’s mother here used to say that.',
@@ -512,7 +539,11 @@ export const GRAVEN_TOWN = {
         name: 'Old Brammel',
         position: new THREE.Vector3(3.2, 0, -9.4),
         facing: -Math.PI / 2,
-        palette: { coat: 0x4a4438, skin: 0xb89878, legs: 0x3a352c },
+        hair: 'cap',
+        beard: true,
+        vest: true,
+        build: 0.86,
+        palette: { coat: 0x4a4438, skin: 0xb89878, legs: 0x3a352c, hat: 0x4c463c, vest: 0x3a3428, beard: 0xd8d4cc },
         lines: [
           'Eighty-one years in this town, boy. Eighty-one thanksgivings. You know what I’ve learned? Gratitude keeps you. Gratitude keeps you a long, long time.',
           'My father made it to a hundred and four. His father, older still. Good ground here. Good, generous ground. It only asks the once a year.',
@@ -523,7 +554,10 @@ export const GRAVEN_TOWN = {
         name: 'Yuri, dockhand',
         position: new THREE.Vector3(9.6, 0, 24.8),
         facing: -1.2,
-        palette: { coat: 0x3c4a3e, skin: 0xc0a080, legs: 0x2e2e34 },
+        hair: 'cap',
+        vest: true,
+        build: 1.16,
+        palette: { coat: 0x3c4a3e, skin: 0xc0a080, legs: 0x2e2e34, hat: 0x2a2e2a, vest: 0x50423a },
         lines: [
           'Crates in, crates in, never crates out. Town eats well for a place that sells nothing to anybody.',
           'Don’t lift with your back. And don’t be out past the bell — the boss docks pay for it. Everyone docks something for it.',
@@ -534,7 +568,9 @@ export const GRAVEN_TOWN = {
         name: 'Wren, the sexton',
         position: new THREE.Vector3(26, 0, -15.8),
         facing: Math.PI,
-        palette: { coat: 0x38342e, skin: 0xb8987c, legs: 0x2c2a26 },
+        hair: 'hat',
+        build: 0.88,
+        palette: { coat: 0x38342e, skin: 0xb8987c, legs: 0x2c2a26, hat: 0x1c1a16 },
         lines: [
           'Mind the plots. Fresh-turned, some of them. We plant shallow in Graven — old custom. The ground prefers it.',
           'You’ll notice the stones only carry birth years. Saves carving. Around here the other date is more of a... communal arrangement.',
@@ -546,7 +582,9 @@ export const GRAVEN_TOWN = {
         position: new THREE.Vector3(1.6, 0, 7.6),
         facing: 2.6,
         scale: 0.62,
-        palette: { coat: 0xa85a4c, skin: 0xd8b494, legs: 0x5a5a6a },
+        outfit: 'dress',
+        hair: 'long',
+        palette: { coat: 0xa85a4c, skin: 0xd8b494, skirt: 0x8a4038, hair: 0x2e2018 },
         lines: [
           'We’re playing bell. I ring, and Piet has to lie down in the grass and be thankful. Then it’s my turn to be thankful.',
           'You can play too if you want! Everyone plays on thanksgiving. Even the grown-ups. ESPECIALLY the grown-ups.',
@@ -558,7 +596,8 @@ export const GRAVEN_TOWN = {
         position: new THREE.Vector3(3.2, 0, 8.4),
         facing: -2.8,
         scale: 0.58,
-        palette: { coat: 0x4a5a7c, skin: 0xd0a888, legs: 0x4a4a52 },
+        hair: 'short',
+        palette: { coat: 0x4a5a7c, skin: 0xd0a888, legs: 0x4a4a52, hair: 0xc9b070 },
         lines: [
           'I’m ALWAYS thankful, that’s why I’m best at the game. Ana peeks. You’re not supposed to peek when the bell rings.',
           'Grandma says if you peek, the church notices you. I want to be noticed! Ana says I don’t. Ana peeked once and cried.',
