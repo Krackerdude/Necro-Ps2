@@ -22,6 +22,21 @@ export const DOCUMENTS = {
       'you have to come. Come before I stop writing letters.\n\n' +
       '\u2014 M.',
   },
+  mikesJournal: {
+    title: 'MIKE’S JOURNAL — THE LAST PAGE',
+    body:
+      'Developed the churchyard roll in the washbasin. Sixty-one went up ' +
+      'the hill at the bell. I counted them in from the point. I counted ' +
+      'them out. Sixty.\n\n' +
+      'Did it again the next dusk. Sixty out, fifty-nine home. The town is ' +
+      'a tide that always comes in one short, and nobody on the pier ever ' +
+      'mentions the sea.\n\n' +
+      'Callum watched me photograph the doors today. He was very kind ' +
+      'about it. He is very kind about everything. That is the thing I ' +
+      'cannot get past anymore.\n\n' +
+      'If someone finds this: the pictures are with the one person here ' +
+      'who told me to burn them.',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:

@@ -5,6 +5,45 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 16: playtest fixes (user pass #2) + the inn interior
+
+Six user-reported issues, all fixed and verified:
+- **SOFT LOCK after the sleep cutscene** (door-swing loop + errors + frozen
+  player). Root cause: #enterLevel pushed the window cinematic MID
+  door-transition, and its onComplete fired a second level/transition that
+  #beginTransition silently DROPPED if still in flight. Fixes, all three:
+  (1) cinematics queued by #enterLevel land in `#pendingScene` and are
+  flushed only after the transition settles (or after enter() on load);
+  (2) transitions requested while one is in flight are QUEUED and run
+  after, never dropped; (3) the window scene no longer re-transitions at
+  all — the night level wraps the congregation in one group and a watcher
+  updatable removes it when `windowSceneSeen` lands. RULE: never push a
+  state from inside #enterLevel; queue it.
+- **The inn is explorable by day** (levels/innInterior.js, id
+  'inn-interior'): common room (hearth that takes no wood, bar, tables,
+  beams) + "upstairs" as a same-level region at +40x reached by a stairs
+  door transition. Tobias moved inside behind his bar (quest unchanged);
+  new flavor NPCs Henrik and Greta; Mike's boxed things + journal page
+  (doc `mikesJournal` — the count that comes back one short). THE BED is
+  now the Act I sleep trigger (gated on quest:priest); the town's inn door
+  just transitions inside by day, stays locked at night. `hearth` ambient.
+- **Gothic church**: TownKit.church() — buttresses, steep slate roof,
+  stained-glass lancets (amber/red/blue by day, all wrong-red at night),
+  rose window, pointed-arch door, attached bell tower + needle spire.
+  Replaces the house-form church in town; colliders from body+tower.
+- **Main menu vista** now shows the same gothic church (night mood) — it
+  IS the building the game bars you inside; the old chapel-facade mock is
+  gone.
+- **Z-fighting**: overlapping ground slabs get layered heights (yards
+  0.008, bakery strip 0.012, churchyard 0.014, inn court 0.016, path
+  0.02). RULE: any slab that overlaps another gets its own y.
+- **Lighthouse cameras**: the base up-shot zone was deleted (tower ate the
+  frame); the point shot moved to the SE corner, high, tower on the left.
+Verified headless: inn quest flow inside, journal, gated bed, sleep →
+window scene → skip → PLAYER MOVES (1.68 m) — no soft lock, no errors.
+
+---
+
 ## 2026-07-03 — Session 15: GRAVEN Phase E — the retcon pass
 
 Act II's text now belongs to the same story as the town above. No ids,

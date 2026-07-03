@@ -187,6 +187,26 @@ const TRACKS = {
     };
   },
 
+  /** Indoors at the inn: fire-warm hush, wood settling, low comfort. */
+  hearth: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 82, type: 'sine', gain: 0.014 }),
+      drone(ctx, out, { freq: 123, type: 'triangle', gain: 0.007 }),
+      // Fire-adjacent noise: warm, low, slowly breathing.
+      ...breathNoise(ctx, out, { cutoff: 480, gain: 0.03, lfoRate: 0.22 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
   /** The town after the bell: the kind track's corpse. Cold, hollow, close. */
   townNight: (ctx, bus) => {
     const out = ctx.createGain();

@@ -461,6 +461,177 @@ export class TownKit {
     return { object: group, colliders: [new THREE.Box3().setFromObject(base)] };
   }
 
+  /**
+   * The church of Graven — proper gothic, nothing house-shaped about it:
+   * buttressed stone walls, a steep slate roof, stained lancets down both
+   * flanks, a rose window in the front gable over a pointed-arch door, and
+   * an attached bell tower with a needle spire.
+   *
+   * Front is local +z. By day the glass glows warm amber/red/blue; at night
+   * (mood `windowsLit: false`) every pane burns the same low wrong red.
+   */
+  church({ position, rotationY = 0, width = 9.5, depth = 14, height = 6.5 }) {
+    const group = new THREE.Group();
+    const stone = this.material('stoneWall', { repeat: [4, 3] });
+    const slate = this.material('woodPlanks', { color: 0x38343c, repeat: [4, 1] });
+    const darkWood = this.material('woodPlanks', { color: 0x3a2c20 });
+
+    const w = width;
+    const d = depth;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, height, d), stone);
+    body.position.y = height / 2;
+    body.castShadow = body.receiveShadow = true;
+    group.add(body);
+
+    // Steep gothic pitch — reads cathedral, not cottage.
+    const roofH = w * 0.62;
+    const gable = new THREE.Shape();
+    gable.moveTo(-w / 2, 0);
+    gable.lineTo(w / 2, 0);
+    gable.lineTo(0, roofH);
+    gable.closePath();
+    const attic = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(gable, { depth: d - 0.04, bevelEnabled: false }),
+      stone
+    );
+    attic.position.set(0, height, -(d - 0.04) / 2);
+    attic.castShadow = attic.receiveShadow = true;
+    group.add(attic);
+    const slope = Math.hypot(w / 2, roofH) + 0.55;
+    const pitch = Math.atan2(roofH, w / 2);
+    for (const side of [-1, 1]) {
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(slope, 0.16, d + 0.7), slate);
+      panel.rotation.z = side * pitch;
+      panel.position.set((-side * w) / 4, height + roofH / 2 - 0.03, 0);
+      panel.castShadow = panel.receiveShadow = true;
+      group.add(panel);
+    }
+    const ridgeCross = new THREE.Group();
+    const crossMat = this.material('ironDark');
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.1, 0.1), crossMat);
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.1), crossMat);
+    crossH.position.y = 0.22;
+    ridgeCross.add(crossV, crossH);
+    ridgeCross.position.set(0, height + roofH + 0.55, d / 2 - 0.6);
+    group.add(ridgeCross);
+
+    // Buttresses stepping down the flanks.
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 4; i++) {
+        const z = -d / 2 + (i + 0.5) * (d / 4);
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.6, height * 0.55, 0.7), stone);
+        foot.position.set(side * (w / 2 + 0.3), height * 0.275, z);
+        foot.castShadow = true;
+        group.add(foot);
+        const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.45, height * 0.35, 0.55), stone);
+        shoulder.position.set(side * (w / 2 + 0.22), height * 0.72, z);
+        shoulder.rotation.z = side * -0.18;
+        shoulder.castShadow = true;
+        group.add(shoulder);
+      }
+    }
+
+    // Stained glass: stacked color panes in a pointed frame.
+    const lit = this.#windowsLit;
+    const paneColors = lit ? [0xd98d3a, 0x9c3a30, 0x3a5a9c] : [0x7a1812, 0x7a1812, 0x7a1812];
+    const paneMat = paneColors.map((c) =>
+      this.ps2.patch(
+        new THREE.MeshStandardMaterial({
+          color: 0x1a140e,
+          roughness: 0.3,
+          emissive: c,
+          emissiveIntensity: lit ? 1.0 : 1.3,
+        })
+      )
+    );
+    const lancet = (parent, x, y, z, ry = 0, scale = 1) => {
+      const g = new THREE.Group();
+      for (let i = 0; i < 3; i++) {
+        const pane = new THREE.Mesh(new THREE.BoxGeometry(0.5 * scale, 0.72 * scale, 0.07), paneMat[i]);
+        pane.position.y = i * 0.72 * scale;
+        g.add(pane);
+      }
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.3 * scale, 0.5 * scale, 4), paneMat[0]);
+      tip.rotation.y = Math.PI / 4;
+      tip.position.y = 2.36 * scale;
+      g.add(tip);
+      g.position.set(x, y, z);
+      g.rotation.y = ry;
+      parent.add(g);
+    };
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        lancet(group, side * (w / 2 + 0.05), 2.1, -d / 2 + (i + 1) * (d / 4), side * (Math.PI / 2), 0.9);
+      }
+    }
+    lancet(group, -w / 4, 2.0, d / 2 + 0.06, 0, 0.8);
+    lancet(group, w / 4, 2.0, d / 2 + 0.06, 0, 0.8);
+
+    // Rose window in the front gable.
+    const rose = new THREE.Mesh(new THREE.CircleGeometry(1.05, 12), paneMat[1]);
+    rose.position.set(0, height + roofH * 0.42, d / 2 + 0.03);
+    group.add(rose);
+    const roseRing = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.09, 6, 12), stone);
+    roseRing.position.copy(rose.position);
+    group.add(roseRing);
+    for (const r of [0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4]) {
+      const mullion = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.08, 0.05), darkWood);
+      mullion.position.copy(rose.position);
+      mullion.rotation.z = r;
+      group.add(mullion);
+    }
+
+    // Pointed-arch doorway: recessed double door under angled lintels.
+    const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.9, 0.12), darkWood);
+    doorLeaf.position.set(0, 1.45, d / 2 + 0.05);
+    group.add(doorLeaf);
+    for (const sSide of [-1, 1]) {
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.26, 0.3), stone);
+      arch.position.set(sSide * 0.55, 3.25 + Math.abs(sSide) * 0, d / 2 + 0.08);
+      arch.rotation.z = sSide * 0.75;
+      group.add(arch);
+      const jamb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.0, 0.3), stone);
+      jamb.position.set(sSide * 1.2, 1.5, d / 2 + 0.08);
+      group.add(jamb);
+    }
+
+    // The bell tower: attached at the front-left corner, spire above the roof.
+    const towerW = 2.6;
+    const towerH = height + roofH + 3.2;
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(towerW, towerH, towerW), stone);
+    tower.position.set(-(w / 2 + towerW / 2 - 0.2), towerH / 2, d / 2 - towerW / 2);
+    tower.castShadow = tower.receiveShadow = true;
+    group.add(tower);
+    // Belfry openings near the top.
+    const belfryDark = this.ps2.patch(
+      new THREE.MeshStandardMaterial({ color: 0x0a0a10, roughness: 1 })
+    );
+    for (const [ox, oz, ry] of [
+      [0, towerW / 2 + 0.02, 0],
+      [towerW / 2 + 0.02, 0, Math.PI / 2],
+      [-(towerW / 2 + 0.02), 0, Math.PI / 2],
+    ]) {
+      const opening = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.5, 0.06), belfryDark);
+      opening.position.set(tower.position.x + ox, towerH - 1.6, tower.position.z + oz);
+      opening.rotation.y = ry;
+      group.add(opening);
+    }
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(towerW * 0.72, 3.4, 4), slate);
+    spire.rotation.y = Math.PI / 4;
+    spire.position.set(tower.position.x, towerH + 1.7, tower.position.z);
+    spire.castShadow = true;
+    group.add(spire);
+    lancet(group, tower.position.x, 1.9, tower.position.z + towerW / 2 + 0.02, 0, 0.65);
+
+    group.position.set(position[0], 0, position[1]);
+    group.rotation.y = rotationY;
+    group.updateMatrixWorld(true);
+    return {
+      object: group,
+      colliders: [new THREE.Box3().setFromObject(body), new THREE.Box3().setFromObject(tower)],
+    };
+  }
+
   /** Parish notice board: two posts and a shingled little roof. */
   noticeBoard({ position, rotationY = 0 }) {
     const group = new THREE.Group();
