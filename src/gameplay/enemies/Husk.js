@@ -53,7 +53,21 @@ const VARIANTS = {
   watcher: { hp: 70, speed: { haunt: 0.4, pursue: 1.25, investigate: 1.0, return: 0.6 }, detect: 4.5, dormant: true, wakeRadius: 2.7 },
   crawler: { hp: 55, speed: { haunt: 0.3, pursue: 0.62, investigate: 0.5, return: 0.4 }, detect: 3.5, crawl: true },
   twitcher: { hp: 60, speed: { haunt: 0.5, pursue: 1.38, investigate: 1.1, return: 0.7 }, detect: 5.0 },
+  // The neighbors. Scripted-chase only: they know where you are (no LOS
+  // check, town-sized senses), they are nearly as fast as a running player,
+  // and they do not go home. Never spawn these outside a chase beat.
+  neighbor: {
+    hp: 60,
+    speed: { haunt: 1.1, pursue: 3.0, investigate: 2.4, return: 1.0 },
+    detect: 200,
+    lose: 400,
+    xray: true,
+    dressed: true,
+  },
 };
+
+/** Coat colors the neighbors were wearing at dusk. Deterministic per post. */
+const NEIGHBOR_COATS = [0x5a4a66, 0x6a4a3a, 0x3a4a5c, 0x7a4a52, 0x4a5a44];
 
 export class Husk {
   /** @type {THREE.Group} */
@@ -97,8 +111,17 @@ export class Husk {
     this.#playerStats = playerStats;
     this.#cfg = VARIANTS[spawn.variant ?? 'shambler'] ?? VARIANTS.shambler;
 
-    const rotSkin = ps2.patch(new THREE.MeshStandardMaterial({ color: 0x7a8560, roughness: 1 }));
-    const rags = ps2.patch(new THREE.MeshStandardMaterial({ color: 0x4a4038, roughness: 1 }));
+    // Neighbors keep their dusk clothes; the skin has just gone wrong.
+    const dressed = this.#cfg.dressed;
+    const coat = dressed
+      ? NEIGHBOR_COATS[
+          Math.abs(Math.floor(spawn.position.x * 7 + spawn.position.z * 13)) % NEIGHBOR_COATS.length
+        ]
+      : 0x4a4038;
+    const rotSkin = ps2.patch(
+      new THREE.MeshStandardMaterial({ color: dressed ? 0x9a9284 : 0x7a8560, roughness: 1 })
+    );
+    const rags = ps2.patch(new THREE.MeshStandardMaterial({ color: coat, roughness: 1 }));
 
     // Torso pivot at the waist (carries head + arms); legs on the root.
     const torso = new THREE.Group();
@@ -153,8 +176,10 @@ export class Husk {
       home: spawn.position,
       homeRadius: spawn.homeRadius ?? 4,
       detectRadius: this.#cfg.detect,
-      loseRadius: 14,
-      hasLineOfSight: (from, to) => !physics.segmentBlockedXZ(from, to),
+      loseRadius: this.#cfg.lose ?? 14,
+      hasLineOfSight: this.#cfg.xray
+        ? () => true
+        : (from, to) => !physics.segmentBlockedXZ(from, to),
     });
 
     if (this.#cfg.dormant) {

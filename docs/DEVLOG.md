@@ -5,6 +5,56 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 14: character designs + GRAVEN Phase D — the night
+
+**Characters.** Townsfolk v2: defs now carry `hair` (short/long/bun/bald/
+cap/hat), `beard`, `outfit` (coat/dress/robe), `apron`, `vest`, `build`
+(girth), extended palette (hair/skirt/apron/vest/hat/beard). All 14 town
+NPCs have unique looks. Townsfolk exposes `get head()` (night beats bolt
+things onto it) and `pointAt(pos)` (raises the right arm — Mike's beat).
+PlayerRig: dark hair, open collar, cross-body satchel + bag, belt.
+Phase C interiors were DEFERRED by the user — jumped straight to D.
+
+**The night.** `graven-town` builds from `story.get('nightfall')` — one
+map, two truths. TownKit takes `{ windowsLit, lampsLit }` so the whole
+vocabulary goes dark in one place. Night: cold moon key, dead lamps, dark
+windows, church lancets glowing a low wrong red (the only guide light),
+fog 0x090b12 @ 0.026, `townNight` ambient (the day track's corpse), FULL
+hud (hudMinimal only by day), no NPCs.
+
+Sequence (all flags, all autosaved):
+1. Sleep at the inn → `sleptAtInn` + `nightfall` → transition to the same
+   level, night build.
+2. WINDOW_SCRIPT auto-plays on night entry until `windowSceneSeen`
+   (GameplayState #enterLevel hook → #playScene). The churchyard has a pit
+   that wasn't there + 12 congregation Townsfolk + torch FlickerLights,
+   built only while the flag is unset; the onComplete re-transition clears
+   the set.
+3. Mike: translucent flickering Townsfolk in the square (interact '— Mike?'
+   → pointAt(church) → captions → vanish → `mikeSeen`).
+4. Rosa at the church-path mouth, back turned ('…Rosa?', gated on
+   mikeSeen) → turns → split-jaw mesh bolted to her head + wraithShriek +
+   impulse + '"You looked."' → `chaseStarted`.
+5. THE CHASE: husk variant `neighbor` — speed 3.0 (run is 4.2 — walking
+   dies), `detect 200`, `lose 400`, `xray: true` (hasLineOfSight stubbed
+   true), `dressed: true` (keeps dusk coat colors, deterministic per
+   post). NINE spawn across the districts `onlyIf: 'chaseStarted'` — the
+   roster's live onlyIf re-check is what releases them mid-level. NEVER
+   use `neighbor` outside a scripted chase.
+6. Church doors (night + chaseStarted) → `doorsBarred` → transition to the
+   chapel; BAR_DOORS_SCRIPT plays over the arrival once (`barSceneSeen`)
+   — the chapel entrance "barred from the other side" is now barred by YOU.
+   Retcon of chapel text is Phase E.
+7. Death during the chase reloads the autosave anchored at nightfall (the
+   inn door), per design: caught = retry from waking.
+
+Night objectives inserted between Act I and Act II (self-complete for
+saves already below). Verified headless end to end: sleep → window scene →
+mike → reveal → swarm converging on screenshot → doors → bar cinematic →
+chapel with 'Search the chapel…' objective. Zero page errors.
+
+---
+
 ## 2026-07-03 — Session 13: GRAVEN Phase B — the town, the drive, Act I
 
 New Game is now: title → 2-minute drive cinematic → the town of Graven at

@@ -3,6 +3,8 @@ import { defineCameraZone } from '../CameraZone.js';
 import { TownKit } from '../builders/TownKit.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
 import { makeNpc, makeItemPickup, makePickupMesh } from './levelHelpers.js';
+import { Townsfolk } from '../../gameplay/npcs/Townsfolk.js';
+import { FlickerLight } from '../effects/FlickerLight.js';
 import { readDocument } from '../../gameplay/story/documents.js';
 
 /**
@@ -36,7 +38,10 @@ export const GRAVEN_TOWN = {
   name: 'Graven',
 
   build({ kit, story, inventory, events }) {
-    const town = new TownKit(kit);
+    // One map, two truths. The night build is the same town with the warmth
+    // subtracted: dark windows, dead lamps, cold moon, nobody home.
+    const night = Boolean(story.get('nightfall'));
+    const town = new TownKit(kit, { windowsLit: !night, lampsLit: !night });
     const root = new THREE.Group();
     const colliders = [];
     const updatables = [];
@@ -229,7 +234,7 @@ export const GRAVEN_TOWN = {
     // The church: tall, patient, facing west down its own yard.
     add(town.house({
       position: [27, -24], size: [9, 13], height: 5.2, rotationY: -Math.PI / 2,
-      tint: 0xcfc4ae, roofTint: 0x54443c, windows: 3, lit: true,
+      tint: 0xcfc4ae, roofTint: 0x54443c, windows: 3, lit: !night,
     }));
     const tower = add(kit.pillar({ position: [21.5, -29.5], radius: 1.1, height: 10, texture: 'plasterRot' }));
     tower.castShadow = true;
@@ -244,8 +249,8 @@ export const GRAVEN_TOWN = {
       new THREE.MeshStandardMaterial({
         color: 0x241d16,
         roughness: 0.35,
-        emissive: 0xd98d3a,
-        emissiveIntensity: 0.9,
+        emissive: night ? 0x7a1812 : 0xd98d3a,
+        emissiveIntensity: night ? 1.3 : 0.9,
       })
     );
     for (const z of [-21.2, -26.8]) {
@@ -293,18 +298,33 @@ export const GRAVEN_TOWN = {
     backdrop(town.tree({ position: [14, -35.5], scale: 1.2 }));
 
     /* ---------------------------- LIGHTING ----------------------------- */
-    root.add(new THREE.AmbientLight(0x9a8878, 2.2));
-    root.add(new THREE.HemisphereLight(0x87a3c9, 0xa07850, 1.6));
-    const sun = new THREE.DirectionalLight(0xffc27d, 3.0);
-    sun.position.set(-34, 20, 18);
-    sun.target.position.set(8, 0, -8);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.left = -55;
-    sun.shadow.camera.right = 55;
-    sun.shadow.camera.top = 55;
-    sun.shadow.camera.bottom = -55;
-    root.add(sun, sun.target);
+    if (!night) {
+      root.add(new THREE.AmbientLight(0x9a8878, 2.2));
+      root.add(new THREE.HemisphereLight(0x87a3c9, 0xa07850, 1.6));
+      const sun = new THREE.DirectionalLight(0xffc27d, 3.0);
+      sun.position.set(-34, 20, 18);
+      sun.target.position.set(8, 0, -8);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.camera.left = -55;
+      sun.shadow.camera.right = 55;
+      sun.shadow.camera.top = 55;
+      sun.shadow.camera.bottom = -55;
+      root.add(sun, sun.target);
+    } else {
+      root.add(new THREE.AmbientLight(0x232a3a, 1.8));
+      root.add(new THREE.HemisphereLight(0x2a3448, 0x14121a, 1.1));
+      const moon = new THREE.DirectionalLight(0x63719b, 2.0);
+      moon.position.set(24, 26, 8);
+      moon.target.position.set(0, 0, -8);
+      moon.castShadow = true;
+      moon.shadow.mapSize.set(2048, 2048);
+      moon.shadow.camera.left = -55;
+      moon.shadow.camera.right = 55;
+      moon.shadow.camera.top = 55;
+      moon.shadow.camera.bottom = -55;
+      root.add(moon, moon.target);
+    }
 
     /* ---------------------------- TOWNSFOLK ---------------------------- */
     const npcCtx = { root, ps2: kit.ps2, events, updatables, colliders };
@@ -314,7 +334,7 @@ export const GRAVEN_TOWN = {
     };
     const hasPhoto = () => Boolean(inventory?.has('mikesPhotograph'));
 
-    interactables.push(
+    if (!night) interactables.push(
       /* ------------------------ THE QUEST FIVE ----------------------- */
       makeNpc(npcCtx, {
         id: 'rosa',
@@ -667,12 +687,22 @@ export const GRAVEN_TOWN = {
       {
         id: 'church-door',
         position: new THREE.Vector3(22.2, 1, -24),
-        radius: 1.6,
-        prompt: 'The church doors',
+        radius: night ? 2.2 : 1.6,
+        prompt: () => (night ? (q('chaseStarted') ? 'THE DOORS' : 'The church doors') : 'The church doors'),
         onInteract: () => {
-          events.emit('ui/toast', {
-            text: 'Shut, and warmer than wood should be. Inside, very faintly: singing. Evensong ended an hour ago.',
-          });
+          if (!night) {
+            events.emit('ui/toast', {
+              text: 'Shut, and warmer than wood should be. Inside, very faintly: singing. Evensong ended an hour ago.',
+            });
+            return;
+          }
+          if (!q('chaseStarted')) {
+            events.emit('ui/toast', { text: 'Shut fast. The singing has stopped. Everything has stopped.' });
+            return;
+          }
+          // Inside. Bar them. (The barring plays over the chapel arrival.)
+          story.set('doorsBarred', true);
+          events.emit('level/transition', { levelId: 'chapel-of-the-hollow' });
         },
       },
       {
@@ -689,20 +719,25 @@ export const GRAVEN_TOWN = {
         id: 'inn-door',
         position: new THREE.Vector3(0, 1, -27),
         radius: 1.7,
-        prompt: () => (q('quest:priest') ? 'Turn in for the night' : 'The Gull & Anchor'),
+        prompt: () =>
+          night ? 'The inn' : q('quest:priest') ? 'Turn in for the night' : 'The Gull & Anchor',
         onInteract: () => {
+          if (night) {
+            events.emit('ui/toast', {
+              text: 'Locked. Behind the door, where the fire was: nothing at all.',
+            });
+            return;
+          }
           if (!q('quest:priest')) {
             events.emit('ui/toast', {
               text: 'Tobias, through the doorway: “Room’s airing out, friend! See the town — I’ll wave you in when it’s ready.”',
             });
             return;
           }
-          // TODO(Phase D): this fade-to-black becomes the night sequence —
-          // the window cutscene, the empty town, the chase. For now the
-          // sleep stitches straight to waking below.
+          // Act I ends in a warm bed. What happens next is not Act I.
           story.set('sleptAtInn', true);
-          events.emit('ui/toast', { text: 'You sleep. The town, eventually, does not.' });
-          events.emit('level/transition', { levelId: 'chapel-of-the-hollow' });
+          story.set('nightfall', true);
+          events.emit('level/transition', { levelId: 'graven-town', spawn: 'innDoor' });
         },
       },
       // Optional sustenance.
@@ -747,6 +782,163 @@ export const GRAVEN_TOWN = {
         flavor: 'Taken — GRAVE TONIC. The label says, in a careful hand: FOR THE VISITOR.',
       })
     );
+
+    /* ------------------------------ NIGHT ------------------------------ */
+    if (night) {
+      // The pit. It was not in the churchyard this afternoon.
+      const pit = new THREE.Mesh(
+        new THREE.CircleGeometry(1.9, 12),
+        kit.ps2.patch(new THREE.MeshStandardMaterial({ color: 0x050507, roughness: 1 }))
+      );
+      pit.rotation.x = -Math.PI / 2;
+      pit.position.set(25, 0.03, -20.5);
+      root.add(pit);
+      root.add(kit.rubble({ position: [25, -20.5], seed: 66, count: 9, spread: 2.3 }).object);
+
+      if (!story.get('windowSceneSeen')) {
+        // The congregation, mid-thanksgiving. Subjects of the window scene;
+        // the re-transition after it clears them away.
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2;
+          const x = 25 + Math.cos(a) * 3.7;
+          const z = -20.5 + Math.sin(a) * 3.7;
+          const witness = new Townsfolk(kit.ps2, {
+            position: new THREE.Vector3(x, 0, z),
+            facing: Math.atan2(25 - x, -20.5 - z),
+            hair: i % 3 === 0 ? 'bun' : i % 2 === 0 ? 'short' : 'bald',
+            outfit: i % 2 === 0 ? 'dress' : 'coat',
+            palette: { coat: [0x3a3440, 0x443a34, 0x343e3a, 0x3e3644][i % 4], skin: 0xb0a090 },
+          });
+          root.add(witness.object);
+          updatables.push(witness);
+        }
+        for (const [x, z] of [[22.2, -18.6], [27.8, -22.4]]) {
+          const torch = new FlickerLight({
+            position: new THREE.Vector3(x, 1.6, z),
+            intensity: 11,
+            distance: 9,
+            color: 0xd9803a,
+          });
+          root.add(torch.light);
+          updatables.push(torch);
+        }
+      }
+
+      // Mike. Or the shape the town lets you have of him.
+      if (story.get('windowSceneSeen') && !story.get('mikeSeen')) {
+        const mike = new Townsfolk(kit.ps2, {
+          position: new THREE.Vector3(-1, 0, 5.4),
+          facing: Math.PI * 0.9,
+          hair: 'short',
+          palette: { coat: 0x9ab0c9, skin: 0xdde8f0, legs: 0x8a9ab0, hair: 0x4a5866 },
+        });
+        const ghostMats = [];
+        mike.object.traverse((n) => {
+          if (n.material) {
+            n.material.transparent = true;
+            n.material.opacity = 0.55;
+            n.material.emissive = new THREE.Color(0x50687f);
+            n.material.emissiveIntensity = 0.45;
+            ghostMats.push(n.material);
+          }
+        });
+        root.add(mike.object);
+        let mikePhase = 0;
+        let mikeBeat = -1; // -1 waiting; >= 0 seconds since the approach
+        updatables.push({
+          update: (dt) => {
+            if (!mike.object.parent) return;
+            mike.update(dt);
+            mikePhase += dt;
+            const flicker = 0.45 + Math.sin(mikePhase * 9) * 0.08 + Math.sin(mikePhase * 1.3) * 0.08;
+            for (const m of ghostMats) m.opacity = flicker;
+            if (mikeBeat < 0) return;
+            mikeBeat += dt;
+            if (mikeBeat > 1.4 && mikeBeat - dt <= 1.4) {
+              events.emit('ui/caption', { text: 'He is pointing at the church.' });
+            }
+            if (mikeBeat > 3.6) {
+              events.emit('ui/caption', { text: null });
+              events.emit('audio/sfx', { id: 'stingerKill' });
+              mike.object.removeFromParent();
+              story.set('mikeSeen', true);
+            }
+          },
+        });
+        interactables.push({
+          id: 'mike-apparition',
+          position: new THREE.Vector3(-1, 1, 5.4),
+          radius: 4.2,
+          prompt: '— Mike?',
+          canInteract: () => mikeBeat < 0,
+          onInteract: () => {
+            mikeBeat = 0;
+            mike.pointAt(new THREE.Vector3(20, 1, -18));
+            events.emit('audio/sfx', { id: 'stingerDetect' });
+            events.emit('ui/caption', { text: 'MIKE —' });
+          },
+        });
+      }
+
+      // Rosa, at the mouth of the church path, facing the wrong way.
+      if (story.get('windowSceneSeen') && !story.get('chaseStarted')) {
+        const rosaNight = new Townsfolk(kit.ps2, {
+          position: new THREE.Vector3(7, 0, -17.5),
+          facing: Math.PI / 2, // her back to the street
+          outfit: 'dress',
+          apron: true,
+          hair: 'bun',
+          build: 1.12,
+          palette: { coat: 0x8a7c62, skin: 0xb0a090, skirt: 0x5c4038, apron: 0x9a9484, hair: 0x5a4a3c },
+        });
+        root.add(rosaNight.object);
+        updatables.push(rosaNight);
+        let revealBeat = -1;
+        let jawAttached = false;
+        updatables.push({
+          update: (dt) => {
+            if (revealBeat < 0 || !rosaNight.object.parent) return;
+            revealBeat += dt;
+            if (revealBeat > 0.9 && !jawAttached) {
+              jawAttached = true;
+              // The smile goes all the way down.
+              const jaw = new THREE.Mesh(
+                new THREE.BoxGeometry(0.16, 0.22, 0.08),
+                kit.ps2.patch(
+                  new THREE.MeshStandardMaterial({
+                    color: 0x2a0505,
+                    emissive: 0x6a0a0a,
+                    emissiveIntensity: 0.9,
+                    roughness: 1,
+                  })
+                )
+              );
+              jaw.position.set(0, -0.12, 0.1);
+              rosaNight.head.add(jaw);
+              events.emit('audio/sfx', { id: 'wraithShriek' });
+              events.emit('camera/impulse', { strength: 0.6 });
+              events.emit('ui/caption', { text: '“You looked.”' });
+            }
+            if (revealBeat > 2.6) {
+              events.emit('ui/caption', { text: null });
+              rosaNight.object.removeFromParent();
+              story.set('chaseStarted', true); // the roster re-checks onlyIf live
+            }
+          },
+        });
+        interactables.push({
+          id: 'rosa-night',
+          position: new THREE.Vector3(7, 1, -17.5),
+          radius: 2.6,
+          prompt: '…Rosa?',
+          canInteract: () => q('mikeSeen') && revealBeat < 0,
+          onInteract: () => {
+            revealBeat = 0;
+            rosaNight.faceToward(new THREE.Vector3(4, 0, -17.5));
+          },
+        });
+      }
+    }
 
     /* -------------------------- CAMERA ZONES --------------------------- */
     // The town is shot kindly: higher, warmer, wider than the chapel ever
@@ -911,10 +1103,31 @@ export const GRAVEN_TOWN = {
         arrival: { position: new THREE.Vector3(-33.2, 0, 13), rotationY: Math.PI / 2 },
         innDoor: { position: new THREE.Vector3(0, 0, -25.5), rotationY: Math.PI },
       },
-      enemySpawns: [], // Act I daytime: no combat, no enemies, ever.
-      fog: { color: 0xd9a878, density: 0.012 },
-      ambientTrack: 'townDay',
-      hudMinimal: true,
+      // Daytime Graven has no combat, ever. Night Graven has the neighbors,
+      // held behind 'chaseStarted' — the roster re-checks onlyIf live, so
+      // Rosa's reveal is what lets them out.
+      enemySpawns: night
+        ? [
+            [13.5, -17.5], // the path ahead of you
+            [26, -14.5],   // the churchyard gap
+            [0, -24],      // the inn court
+            [0, -8],       // main street
+            [-6, 3],       // bakery row
+            [4, 12],       // the square
+            [-11, 12],     // square west
+            [1, 22],       // boardwalk
+            [22, 20],      // east lane
+          ].map(([x, z]) => ({
+            type: 'husk',
+            variant: 'neighbor',
+            position: new THREE.Vector3(x, 0, z),
+            homeRadius: 8,
+            onlyIf: 'chaseStarted',
+          }))
+        : [],
+      fog: night ? { color: 0x090b12, density: 0.026 } : { color: 0xd9a878, density: 0.012 },
+      ambientTrack: night ? 'townNight' : 'townDay',
+      hudMinimal: !night,
       surfaces: {
         default: 'stone',
         regions: [

@@ -24,7 +24,7 @@ import { MainMenuState } from './MainMenuState.js';
 import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
 import { ITEMS } from '../../gameplay/inventory/itemCatalog.js';
 import { CinematicState } from './CinematicState.js';
-import { BELL_SCRIPT, END_NOTE } from '../../gameplay/cinematics/scripts.js';
+import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT } from '../../gameplay/cinematics/scripts.js';
 import { DoorTransitionScene } from '../../world/effects/DoorTransitionScene.js';
 
 /**
@@ -348,6 +348,34 @@ export class GameplayState extends GameState {
     cameraDirector.setZones(runtime.cameraZones, this.#player.object);
     renderer.setCamera(cameraDirector.camera);
     s.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
+
+    // Story beats that own the camera the moment a level opens.
+    const events = s.get(Services.EVENTS);
+    if (levelId === 'graven-town' && story.get('nightfall') && !story.get('windowSceneSeen')) {
+      // The window: what the corner room saw. The crowd set is built only
+      // while the flag is unset; the re-transition clears it away.
+      this.#playScene(WINDOW_SCRIPT, () => {
+        story.set('windowSceneSeen', true);
+        events.emit('level/transition', { levelId: 'graven-town', spawn: 'innDoor' });
+      });
+    }
+    if (levelId === 'chapel-of-the-hollow' && story.get('doorsBarred') && !story.get('barSceneSeen')) {
+      this.#playScene(BAR_DOORS_SCRIPT, () => story.set('barSceneSeen', true));
+    }
+  }
+
+  /** Push a cinematic over gameplay; `then` runs after it pops. */
+  #playScene(script, then) {
+    const machine = this.services.get(Services.STATE_MACHINE);
+    machine.push(
+      new CinematicState(this.services, {
+        script,
+        onComplete: () => {
+          machine.pop();
+          then?.();
+        },
+      })
+    );
   }
 
   /** The iconic beat: darkness, a door swings open, the next room. */

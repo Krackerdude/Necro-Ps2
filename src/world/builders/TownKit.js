@@ -16,10 +16,18 @@ import * as THREE from 'three';
  */
 export class TownKit {
   #kit;
+  #windowsLit;
+  #lampsLit;
 
-  /** @param {import('./ArchitectureKit.js').ArchitectureKit} kit */
-  constructor(kit) {
+  /**
+   * @param {import('./ArchitectureKit.js').ArchitectureKit} kit
+   * @param {{ windowsLit?: boolean, lampsLit?: boolean }} [mood] — the night
+   *        build passes false/false and the whole vocabulary goes dark.
+   */
+  constructor(kit, { windowsLit = true, lampsLit = true } = {}) {
     this.#kit = kit;
+    this.#windowsLit = windowsLit;
+    this.#lampsLit = lampsLit;
   }
 
   get ps2() {
@@ -47,7 +55,7 @@ export class TownKit {
     roofTint = 0x7a5240,
     windows = 2,
     door = true,
-    lit = true,
+    lit = this.#windowsLit,
   }) {
     const [w, d] = size;
     const group = new THREE.Group();
@@ -227,6 +235,7 @@ export class TownKit {
    * level); unlit ones still glow via emissive and read fine at 448p.
    */
   streetLamp({ position, lit = false }) {
+    lit = lit && this.#lampsLit;
     const group = new THREE.Group();
     const iron = this.material('ironDark');
     const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 2.6, 6), iron);
@@ -242,7 +251,7 @@ export class TownKit {
         new THREE.MeshStandardMaterial({
           color: 0x443520,
           emissive: 0xffc27d,
-          emissiveIntensity: 1.4,
+          emissiveIntensity: this.#lampsLit ? 1.4 : 0.04,
         })
       )
     );

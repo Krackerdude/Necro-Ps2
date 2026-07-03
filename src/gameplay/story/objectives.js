@@ -54,6 +54,28 @@ const CHAIN = [
     done: ({ story }) => townOver(story),
   },
 
+  /* ------------------------ THE NIGHT OF GRAVEN ----------------------- */
+  // These only surface after 'nightfall' (everything above is done by then)
+  // and complete themselves for saves that are already below.
+  {
+    id: 'night-anyone',
+    text: 'The town is empty. Find anyone',
+    done: ({ story }) =>
+      Boolean(story.get('mikeSeen') || story.get('chaseStarted')) ||
+      Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+  {
+    id: 'night-church',
+    text: 'He was pointing at the church',
+    done: ({ story }) =>
+      Boolean(story.get('chaseStarted')) || Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+  {
+    id: 'night-run',
+    text: 'RUN — THE CHURCH DOORS',
+    done: ({ story }) => Boolean(story.get('visited:chapel-of-the-hollow')),
+  },
+
   /* ---------------------- ACT II: BELOW THE TOWN --------------------- */
   {
     id: 'find-key',

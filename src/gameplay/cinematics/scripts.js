@@ -51,6 +51,51 @@ export const DRIVE_SCRIPT = [
   { wait: { duration: 1.6 } },
 ];
 
+/**
+ * The window. Plays over the NIGHT town the moment you wake — the camera is
+ * your view from the inn's corner room, then what it cannot help but see in
+ * the churchyard. The crowd set (pit, torches, the given) exists in the
+ * night build only until `windowSceneSeen`.
+ */
+export const WINDOW_SCRIPT = [
+  { fade: { opacity: 0, duration: 2.0 } },
+  { sfx: { id: 'bellToll' } },
+  // Your window: the dark street below, the hill beyond.
+  { camera: { from: [0.5, 3.4, -26.6], to: [0.2, 3.5, -26.9], lookAt: [16, 1.5, -18], duration: 6 } },
+  { caption: { text: 'The bell wakes you. Not the dusk bell. This one counts, and the count is wrong.', duration: 4.6 } },
+  { camera: { from: [0.2, 3.5, -26.9], to: [1.2, 3.6, -26.5], lookAt: [24, 2, -20], duration: 6 } },
+  { caption: { text: 'Every window in Graven is dark. The churchyard is not.', duration: 4.0 } },
+  // What the window sees: the whole town, standing around the pit.
+  { camera: { from: [14, 5.5, -14], to: [17, 4.2, -16], lookAt: [25, 0.5, -20.5], duration: 7 } },
+  { caption: { text: 'The whole town stands in the grass. Nobody holds a lantern. Nobody needs one.', duration: 4.6 } },
+  { camera: { from: [19, 2.2, -16.5], to: [21, 1.6, -17.5], lookAt: [25, 0.4, -20.5], duration: 7 } },
+  { caption: { text: 'There is a pit where no pit was this afternoon. Something is lowered into it.', duration: 4.6 } },
+  { sfx: { id: 'bellToll' } },
+  { impulse: { strength: 0.3 } },
+  { caption: { text: 'It does not struggle. The singing starts. You know the tune — Rosa hums it.', duration: 4.8 } },
+  { fade: { opacity: 1, duration: 1.6 } },
+  { caption: { text: 'You do not remember lying back down.', duration: 3.6 } },
+  { wait: { duration: 0.8 } },
+];
+
+/**
+ * Barring the doors. Plays over the chapel interior the instant you make it
+ * inside — the door behind the camera takes the first fists mid-caption.
+ */
+export const BAR_DOORS_SCRIPT = [
+  { fade: { opacity: 0, duration: 0.4 } },
+  { sfx: { id: 'doorTransition' } },
+  { camera: { from: [0, 1.7, 6.2], to: [0.4, 1.5, 6.8], lookAt: [0, 1.8, 9.9], duration: 3.2 } },
+  { caption: { text: 'The bar drops into its cradle as the first fists arrive.', duration: 3.2 } },
+  { impulse: { strength: 0.7 } },
+  { sfx: { id: 'doorTransition' } },
+  { camera: { from: [0.4, 1.5, 6.8], to: [-0.6, 1.3, 5.6], lookAt: [0, 2.2, 9.9], duration: 3.6 } },
+  { impulse: { strength: 0.5 } },
+  { caption: { text: 'Fists. Then palms, flat and patient. Then, much worse, nothing.', duration: 4.2 } },
+  { camera: { from: [-0.6, 1.3, 5.6], to: [-0.2, 1.6, 3.4], lookAt: [0, 2.6, -14], duration: 4.2 } },
+  { caption: { text: 'Outside: the singing. Inside: a church nobody has prayed in for a very long time.', duration: 4.4 } },
+];
+
 /** Retired opening (pre-town builds); kept for the Phase D/E night stitch. */
 export const OPENING_SCRIPT = [
   { fade: { opacity: 0, duration: 1.2 } },

@@ -29,6 +29,7 @@ export class Townsfolk {
   #glanceTimer = 3 + Math.random() * 5;
   #glanceTarget = 0;
   #faceTarget = null;
+  #pointing = false;
   #baseRotation;
 
   /**
@@ -70,8 +71,8 @@ export class Townsfolk {
       parent.add(pivot);
       return pivot;
     };
-    mkLimb(0.11 * build, 0.52, coat, torso, -0.28 * build, 0.48);
-    mkLimb(0.11 * build, 0.52, coat, torso, 0.28 * build, 0.48);
+    const armL = mkLimb(0.11 * build, 0.52, coat, torso, -0.28 * build, 0.48);
+    const armR = mkLimb(0.11 * build, 0.52, coat, torso, 0.28 * build, 0.48);
     mkLimb(0.14, 0.78, legs, this.object, -0.12, 0.78);
     mkLimb(0.14, 0.78, legs, this.object, 0.12, 0.78);
 
@@ -171,7 +172,18 @@ export class Townsfolk {
     this.#baseRotation = def.facing ?? Math.random() * Math.PI * 2;
     this.object.rotation.y = this.#baseRotation;
 
-    this.#joints = { torso, head };
+    this.#joints = { torso, head, armL, armR };
+  }
+
+  /** The head group — night beats bolt things onto it. */
+  get head() {
+    return this.#joints.head;
+  }
+
+  /** Raise the right arm toward a world position and face it. */
+  pointAt(position) {
+    this.faceToward(position);
+    this.#pointing = true;
   }
 
   /** Turn to look at a world position (called when a conversation opens). */
@@ -201,6 +213,11 @@ export class Townsfolk {
     }
     this.#joints.head.rotation.y +=
       (this.#glanceTarget - this.#joints.head.rotation.y) * Math.min(1, 2.5 * dt);
+
+    if (this.#pointing) {
+      const arm = this.#joints.armR;
+      arm.rotation.x += (-1.4 - arm.rotation.x) * Math.min(1, 4 * dt);
+    }
 
     // Smooth turn toward a conversation partner (or back to rest).
     if (this.#faceTarget !== null) {
