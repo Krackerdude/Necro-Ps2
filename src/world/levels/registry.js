@@ -7,6 +7,7 @@ import { COAST_ROAD } from './coastRoad.js';
 import { INN_INTERIOR } from './innInterior.js';
 import { BELL_TOWER } from './bellTower.js';
 import { SCRIPTORIUM } from './scriptorium.js';
+import { UNDERCROFT } from './undercroft.js';
 
 /**
  * Level registry — id -> definition.
@@ -26,6 +27,7 @@ const LEVELS = Object.freeze({
   [INN_INTERIOR.id]: INN_INTERIOR,
   [BELL_TOWER.id]: BELL_TOWER,
   [SCRIPTORIUM.id]: SCRIPTORIUM,
+  [UNDERCROFT.id]: UNDERCROFT,
 });
 
 export function getLevel(id) {

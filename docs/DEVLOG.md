@@ -5,6 +5,57 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 20: Church Phase 4 — THE UNDERCROFT WING (♣)
+
+Third and final wing, down the apse stair: 17 spaces (undercroft.js).
+All three temp stones are gone from the crossing — every stone is earned
+in its wing now.
+
+**Regional mechanic — THE FLOOR.** Soft turned earth (visible dark
+patches, SOFT rects shared with spawns) belongs to the DIGGERS
+(enemies/Digger.js, type 'digger'): they travel beneath it as moving
+mounds — fast, INVULNERABLE (takeHit thunks off), constrained to their
+soft rects — and must surface to fight (or surface frustrated at a stone
+boundary after 3 s). Stone paving forces them up; surfaced they're
+ordinary meat that re-burrows when you disengage over soil. rootAlmanac
+teaches it.
+
+**THE GARDENER** (enemies/Gardener.js, type 'gardener', HP 300): the
+digger at boss scale in the Planting Hall — grave-mound rows crossed by
+three paved ISLANDS. Cycle: burrowed wake (invuln) → marks an eruption
+ring at your position (0.9 s) → ERUPTS (30 dmg unless you're outside the
+ring or standing ON STONE — a stoned-out whiff leaves him surfaced and
+confused for 10 s instead of 7) → vulnerable spade-giant → re-burrows.
+Tower=rhythm, scriptorium=footwork, undercroft=read the floor. Death →
+gardenerFelled opens seed vault + orchard doors.
+
+**DEACON MOULD** — planted waist-deep by choice, sixty years, waters
+himself, hears the mounds gossip. Intro cutscene. SIDE ERRAND: fill his
+tin cup at the flooded gallery's black water → Warden's Draught + the
+scale's secret (the bronze hand weighs SEVEN — never marked). If the
+satchel is full at turn-in, `mouldOwesReward` pays out later via a
+watcher.
+
+**Finale — THE WEIGHING OF THE BONES**: five relics on plinths (Ⅴ skull,
+Ⅲ femur, Ⅱ nails, Ⅰ teeth, unmarked hand=7), toggle onto the pan, a
+readout lectern, and "Let the ground weigh it". A FAIR GIFT IS TWELVE
+STONE (tithingTable; hand required — 5+7 or 3+2+7; its weight is
+discoverable by weighing it alone, or from Mould). Wrong total sets
+`scaleMistake` (a digger rises in the antechamber, once) with
+too-heavy/too-light flavor. Right → groundSolved → cutscene → Stone of
+the Ground.
+
+Also: clover key jarred in the seed vault (KEY, CLOVER, ONE) → the
+♣-locked Warden's Garden (buried draught + potted salve + wardensPlot —
+row three is empty and recently turned); 8 documents; wormworks tunnels
+with RIBS (rib-shaped lore stitches to the cloister below); flooded
+gallery wading; chapel-of-roots shrine; 17 camera zones; `undercroft`
+ambient (peristaltic subsoil). Verified headless: entry, Mould loop
+(GOTCHA: his interact radius is tight — stand within 1.4 m XZ), boss
+chain, key/garden, scale mistake + 12-stone solve → stone. Zero errors.
+
+---
+
 ## 2026-07-03 — Session 19: Church Phase 3 — THE SCRIPTORIUM WING (♦)
 
 Second wing, through the east transept: 14 rooms + boss + ♦-locked

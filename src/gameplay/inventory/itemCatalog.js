@@ -188,6 +188,26 @@ export const ITEMS = Object.freeze({
     discardFlavor: 'The bookmarks are with Moth now. All her sisters, home.',
   },
 
+  mouldsFlask: {
+    kind: 'key',
+    name: 'Mould’s Cup',
+    glyph: 'u',
+    description:
+      'A tin flask gone green with sixty years of patience. Deacon Mould would like it filled with the good black water, please and thank you.',
+    spentWhen: (story) => Boolean(story.get('mouldQuestDone')),
+    discardFlavor: 'The cup stays with its deacon, where cups belong.',
+  },
+
+  mouldsFlaskFull: {
+    kind: 'key',
+    name: 'Mould’s Cup (full)',
+    glyph: 'ū',
+    description:
+      'The good black, heavier than water has any right to be. It shifts against the tin like it is reading you.',
+    spentWhen: (story) => Boolean(story.get('mouldQuestDone')),
+    discardFlavor: 'Drunk to the dregs by a very happy deacon.',
+  },
+
   spadeKey: {
     kind: 'key',
     name: 'Spade Key',

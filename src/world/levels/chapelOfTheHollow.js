@@ -264,21 +264,6 @@ export const CHAPEL_OF_THE_HOLLOW = {
     // wing's stone pulled loose in the rubble, so the cage stays openable
     // in this build. Wing phases replace the rubble with real transitions
     // and move the stones to the far end of their wings.
-    const wingDoor = (kind, doorPos, doorRotY, rubblePos, emblemPos, emblemRotY, toastText) => {
-      add(kit.door({ position: doorPos, rotationY: doorRotY, width: 1.8, height: 3.0 }));
-      add(kit.rubble({ position: rubblePos, seed: 40 + kind.length, count: 8, solid: true }));
-      const mark = buildEmblem(kit, kind);
-      mark.position.set(emblemPos[0], 3.6, emblemPos[1]);
-      mark.rotation.y = emblemRotY;
-      root.add(mark);
-      interactables.push({
-        id: `wing-door-${kind}`,
-        position: new THREE.Vector3(rubblePos[0], 1, rubblePos[1]),
-        radius: 1.8,
-        prompt: `The ${kind.charAt(0).toUpperCase() + kind.slice(1)} Wing`,
-        onInteract: () => events.emit('ui/toast', { text: toastText }),
-      });
-    };
     // The Spade Wing is OPEN (phase 2): a real door into the bell tower.
     {
       const mark = buildEmblem(kit, 'spade');
@@ -325,10 +310,28 @@ export const CHAPEL_OF_THE_HOLLOW = {
         )
       );
     }
-    wingDoor(
-      'clover', [0, -23.8], 0, [0, -22.6], [0, -23.7], 0,
-      'The stair to the undercroft has collapsed. Behind the stone: the smell of the garth, but closer.'
-    );
+    // The Clover Wing is OPEN (phase 4): a real stair into the undercroft.
+    {
+      const mark = buildEmblem(kit, 'clover');
+      mark.position.set(0, 3.2, -23.7);
+      root.add(mark);
+      const cloverLeaf = kit.door({ position: [0, -23.8], rotationY: 0, width: 1.8, height: 3.0 });
+      root.add(cloverLeaf.object);
+      interactables.push(
+        makeTransition(
+          { story, inventory, events },
+          {
+            id: 'to-undercroft',
+            position: new THREE.Vector3(0, 1, -23.2),
+            radius: 1.7,
+            prompt: 'Descend to the Undercroft — the Clover Wing',
+            targetLevel: 'undercroft',
+            targetSpawn: 'fromChurch',
+            door: cloverLeaf.object,
+          }
+        )
+      );
+    }
 
     /* --------------------------- SET DRESSING -------------------------- */
     // Signature landmark: the toppled saint by the south-west pews — the
@@ -660,18 +663,6 @@ export const CHAPEL_OF_THE_HOLLOW = {
       // the rubble of its collapsed door so the cage stays openable in this
       // build. The wing phases move these to the far end of their wings.
       makeItemPickup(pickupCtx, {
-        id: 'temp-stone-ground',
-        itemId: 'stoneOfTheGround',
-        mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(-1.6, 0.45, -22.2),
-          color: 0x7aa46a,
-          emissive: 0x2a4222,
-        }),
-        position: new THREE.Vector3(-1.6, 1, -22.2),
-        prompt: 'Pull the stone from the rubble',
-        flavor: 'Taken — STONE OF THE GROUND, shaken loose by the collapse.',
-      }),
-      makeItemPickup(pickupCtx, {
         id: 'chapel-machete',
         itemId: 'rustMachete',
         mesh: (() => {
@@ -849,6 +840,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
         fromCloister: { position: new THREE.Vector3(21.5, 0, 6.2), rotationY: -Math.PI / 2 },
         fromBellTower: { position: new THREE.Vector3(-11.2, 0, -14), rotationY: Math.PI / 2 },
         fromScriptorium: { position: new THREE.Vector3(11.2, 0, -14), rotationY: -Math.PI / 2 },
+        fromUndercroft: { position: new THREE.Vector3(0, 0, -22.4), rotationY: 0 },
       },
       enemySpawns: [
         { type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 },

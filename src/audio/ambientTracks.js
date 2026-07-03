@@ -269,6 +269,27 @@ const TRACKS = {
     };
   },
 
+  /** The undercroft: subsoil pressure — deep, damp, faintly digestive. */
+  undercroft: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 33, type: 'sine', gain: 0.08 }),
+      drone(ctx, out, { freq: 36.5, type: 'sine', gain: 0.05 }),
+      drone(ctx, out, { freq: 66, type: 'triangle', gain: 0.01 }),
+      // Slow peristaltic swell — the wing is a throat and knows it.
+      ...breathNoise(ctx, out, { cutoff: 200, gain: 0.03, lfoRate: 0.06 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
   /** Chapel: lower, closer, with a slow dissonant beat between drones. */
   chapel: (ctx, bus) => {
     const out = ctx.createGain();

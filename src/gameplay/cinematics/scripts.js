@@ -185,6 +185,38 @@ export const COLOPHON_SCRIPT = [
   { caption: { text: 'Every book in the wing turns one page, together. The Stone of the Word rises — the library’s full stop, on loan.', duration: 4.8 } },
 ];
 
+/** Deacon Mould — first entry to his bed-chamber (undercroft). */
+export const MOULD_SCRIPT = [
+  { camera: { from: [-1.2, 1.8, -5], to: [0.6, 1.3, -7], lookAt: [2.2, 1.2, -9.5], duration: 4.2 } },
+  { caption: { text: 'There is a man planted waist-deep in a raised bed, and he is watering himself with a watering can.', duration: 4.6 } },
+  { camera: { from: [0.6, 1.3, -7], to: [1.4, 1.1, -8], lookAt: [2.2, 1.3, -9.6], duration: 3.8 } },
+  { caption: { text: '“A WALKER!” he booms, delighted, patting the soil at his own waist like a proud father. “Come in, come in! Mind the rows — the planted get jealous.”', duration: 5.2 } },
+  { caption: { text: '“Deacon Mould. Sixty years in the bed and coming along NICELY.”', duration: 3.8 } },
+];
+
+/** The Gardener — first entry to the Planting Hall (undercroft boss). */
+export const GARDENER_SCRIPT = [
+  { camera: { from: [0, 1.4, -23], to: [0, 2.2, -25], lookAt: [0, 1.0, -30], duration: 4.4 } },
+  { caption: { text: 'The Planting Hall. Fresh mounds in tidy rows, and stone paths between them, swept clean. Someone keeps this place with love.', duration: 4.8 } },
+  { sfx: { id: 'footstepBone' } },
+  { impulse: { strength: 0.4 } },
+  { camera: { from: [0, 2.2, -25], to: [1.8, 1.1, -26.5], lookAt: [-2, 0.6, -30], duration: 4.0 } },
+  { caption: { text: 'A row of mounds bulges. Something the size of a toolshed is swimming through the graves toward you, politely, between the rows.', duration: 5.0 } },
+  { sfx: { id: 'wraithShriek' } },
+  { camera: { from: [1.8, 1.1, -26.5], to: [-1.4, 1.5, -25.5], lookAt: [0, 1.2, -29], duration: 3.6 } },
+  { caption: { text: 'THE GARDENER. He marks his spot before he surfaces — READ THE FLOOR. The stone paths are yours; the soil is entirely his.', duration: 5.0 } },
+];
+
+/** The scale balances — the Stone of the Ground is given. */
+export const WEIGHING_SCRIPT = [
+  { sfx: { id: 'saveChime' } },
+  { camera: { from: [-3, 1.8, -52], to: [-1.2, 1.4, -53.8], lookAt: [0, 1.6, -55.5], duration: 4.0 } },
+  { caption: { text: 'Twelve stone, exactly. The beam settles level with the sound of a long argument ending.', duration: 4.4 } },
+  { impulse: { strength: 0.35 } },
+  { camera: { from: [-1.2, 1.4, -53.8], to: [0, 1.3, -54.4], lookAt: [0, 1.5, -55.5], duration: 3.6 } },
+  { caption: { text: 'The empty pan was never empty. Whatever sat in it accepts the trade, and the Stone of the Ground surfaces like a held breath let go.', duration: 5.0 } },
+];
+
 /** Retired opening (pre-town builds); kept for the Phase D/E night stitch. */
 export const OPENING_SCRIPT = [
   { fade: { opacity: 0, duration: 1.2 } },

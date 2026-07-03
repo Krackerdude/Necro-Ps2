@@ -2,6 +2,8 @@ import { Wraith } from './Wraith.js';
 import { Husk } from './Husk.js';
 import { Tolltaker } from './Tolltaker.js';
 import { Censor } from './Censor.js';
+import { Digger } from './Digger.js';
+import { Gardener } from './Gardener.js';
 
 /**
  * EnemyRoster — owns every enemy in the active level.
@@ -24,6 +26,8 @@ const ENEMY_TYPES = Object.freeze({
   husk: (deps) => new Husk(deps),
   tolltaker: (deps) => new Tolltaker(deps),
   censor: (deps) => new Censor(deps),
+  digger: (deps) => new Digger(deps),
+  gardener: (deps) => new Gardener(deps),
 });
 
 export class EnemyRoster {

@@ -202,6 +202,96 @@ export const DOCUMENTS = {
       'live in the house: the household, plus one.\n\n' +
       'Plus one. Plus ONE. I keep counting it. It keeps being there.',
   },
+  rootAlmanac: {
+    title: 'THE CELLAR ALMANAC',
+    body:
+      'Plant shallow. Harvest patient. And KEEP TO THE PAVING.\n\n' +
+      'The soft rows belong to the planted — they swim it like eels and ' +
+      'nothing you own will bite them through it. On stone they must come ' +
+      'up for air, and up for air they are only parishioners again.\n\n' +
+      'The paths are swept every night. Nobody sweeps them. Think about ' +
+      'who that leaves.',
+  },
+  wellRubbing: {
+    title: 'A RUBBING FROM THE OLD WELL',
+    body:
+      'The well predates the church. The church predates the town. The ' +
+      'carving on the well predates the language it is in.\n\n' +
+      'Best rendering: HERE THE GROUND FIRST ASKED. HERE WE FIRST SAID YES.\n\n' +
+      'Below that, much newer, much smaller: two names and a date, ' +
+      'sweethearts’ work. People will carve anything on anything.',
+  },
+  tithingTable: {
+    title: 'THE TITHING TABLE',
+    body:
+      'WEIGHTS AND MEASURES OF THE THANKSGIVING:\n\n' +
+      'A fair gift is TWELVE STONE — the weight of a guest, no more, no ' +
+      'less. The ground counts a light pan as theft.\n\n' +
+      'And it counts a heavy pan as MOCKERY, which is worse. Greed reads ' +
+      'as appetite, and the ground answers appetite with appetite.\n\n' +
+      'Relics for the weighing are kept in the scale room, marked in ' +
+      'stone-units. All but one. Some weights the church prefers not to ' +
+      'write down.',
+  },
+  mouldsSermon: {
+    title: 'MOULD’S PINNED SERMON (delivered annually, from the bed)',
+    body:
+      'Friends. Neighbors. Rows.\n\n' +
+      'They call it being buried. I call it being PLANTED, and the ' +
+      'difference is everything: buried things are finished, planted ' +
+      'things are EXPECTED.\n\n' +
+      'The ground is not our enemy. The ground is a landlord. The rent is ' +
+      'strange but the tenancy is long, and I have never once been cold.\n\n' +
+      '(annotation, Wren’s hand: he waters himself. we’ve stopped arguing.)',
+  },
+  plantingCalendar: {
+    title: 'THE PLANTING CALENDAR',
+    body:
+      'SPRING: turn the rows. The Gardener does this. Do not help.\n' +
+      'SUMMER: the rows settle. Walk the paving only.\n' +
+      'AUTUMN: thanksgiving. The Gardener digs the year’s bed the night ' +
+      'before, always the right size. Nobody tells him the size.\n' +
+      'WINTER: he stands in the hall with his spade and waits. If you ' +
+      'must pass in winter, remember: he marks the ground where he will ' +
+      'rise. He has never once risen anywhere else. He is very proud of ' +
+      'that.',
+  },
+  seedManifest: {
+    title: 'THE SEED VAULT MANIFEST',
+    body:
+      'Jarred and shelved, per the warden:\n\n' +
+      'BARLEY, WINTER — 12 jars.\nRYE, PATIENT — 9 jars.\n' +
+      'SEEDS, IRON (tallow rounds) — 2 jars. Everything is a seed if you ' +
+      'plant it in the right thing.\n' +
+      'KEY, CLOVER, ONE — 1 jar. For the warden’s plot. If you are ' +
+      'reading this and you are not the warden, he is past minding.\n\n' +
+      'GUESTS — see PLANTING HALL. We do not jar the guests.',
+  },
+  wormworksNote: {
+    title: 'THE TUNNELER’S NOTE',
+    body:
+      'The tunnels under the hall are not dug. Dug tunnels have tool ' +
+      'marks. These have RIBS.\n\n' +
+      'I mapped them for the warden: they run from the planting hall down ' +
+      'and DOWN, past where my lamp gives up, toward the sunken places. ' +
+      'Every tunnel the same shape. Every tunnel a throat.\n\n' +
+      'The warden read my map, thanked me, and burned it. “The church ' +
+      'grew a gullet,” he said. “Better nobody knows which way it ' +
+      'swallows.”',
+  },
+  wardensPlot: {
+    title: 'THE WARDEN’S PLOT LEDGER',
+    body:
+      'My own garden. My own rules. Behind my own key.\n\n' +
+      'Row one: draughts. You bury a vial of the deep vintage and the ' +
+      'plot does not grow it — it CONCENTRATES it. The ground tithes ' +
+      'everything, even medicine. I take my cut anyway.\n\n' +
+      'Row two: salve cuttings. Do not ask the rootstock.\n\n' +
+      'Row three is empty. Row three is MINE. A man who caged the key ' +
+      'should keep one bed made, in case the ground ever calls his ' +
+      'arrangement mockery.\n\n' +
+      '(The soil of row three is turned. Recently.)',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:
