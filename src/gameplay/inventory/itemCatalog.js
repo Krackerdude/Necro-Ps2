@@ -112,6 +112,32 @@ export const ITEMS = Object.freeze({
     },
   },
 
+  freshBread: {
+    kind: 'consumable',
+    name: 'Fresh Bread',
+    glyph: '◗',
+    stack: 3,
+    description:
+      'Still warm from Rosa’s oven. The crust cracks like something glad to be opened.',
+    use: ({ stats, events }) => {
+      if (stats.health >= stats.maxHealth) return false;
+      stats.heal(30);
+      events.emit('audio/sfx', { id: 'heal' });
+      events.emit('ui/toast', { text: 'It tastes like the town wants you to stay.' });
+      return true;
+    },
+  },
+
+  mikesPhotograph: {
+    kind: 'key',
+    name: 'Mike’s Photograph',
+    glyph: '▣',
+    description:
+      'Mike, squinting into some other summer, one arm around a stranger’s dog. ' +
+      'The only recent picture of him you own. You’ve shown it to enough people ' +
+      'that the corners have gone soft.',
+  },
+
   blackIronKey: {
     kind: 'key',
     name: 'Black Iron Key',

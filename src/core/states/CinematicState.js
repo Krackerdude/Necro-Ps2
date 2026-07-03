@@ -54,6 +54,11 @@ export class CinematicState extends GameState {
   }
 
   update(dt) {
+    // The scene stays alive under the letterbox — fog drifts, flames
+    // flicker, the drive-in's wheels turn. (Gameplay actors are owned by
+    // GameplayState and stay frozen; only level updatables tick.)
+    this.services.get(Services.WORLD).update(dt);
+
     const input = this.services.get(Services.INPUT);
     if (input.wasPressed('interact') || input.wasPressed('pause')) {
       this.#finish();

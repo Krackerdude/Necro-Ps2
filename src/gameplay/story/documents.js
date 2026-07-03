@@ -9,6 +9,38 @@
  * add documents generously, one dread implication at a time.
  */
 export const DOCUMENTS = {
+  mikesLetter: {
+    title: 'MIKE\u2019S LETTER',
+    body:
+      'You\u2019ll think I\u2019ve lost it. Maybe. But I found the place, the one from ' +
+      'grandad\u2019s stories \u2014 GRAVEN, it\u2019s real, it\u2019s on no map printed after \u201951.\n\n' +
+      'It\u2019s beautiful here. That\u2019s the part I can\u2019t get past. The bread, the ' +
+      'light on the harbor, the way everyone knows your name by the second ' +
+      'morning. Nobody leaves. I\u2019ve stopped asking why nobody leaves.\n\n' +
+      'There\u2019s a church on the hill. They ring the bell at dusk and everyone ' +
+      'goes inside and I have started to want to go with them, which is why ' +
+      'you have to come. Come before I stop writing letters.\n\n' +
+      '\u2014 M.',
+  },
+  townNotice: {
+    title: 'PARISH NOTICE',
+    body:
+      'BY ORDER OF THE PARISH:\n\n' +
+      'The evening bell will ring at dusk, as it has, as it must.\n\n' +
+      'All doors to be shut by last light. Visitors are the responsibility ' +
+      'of their hosts.\n\n' +
+      'The harvest thanksgiving is moved forward again this year. The ground ' +
+      'is generous, and generosity must be answered promptly.',
+  },
+  harborLedger: {
+    title: 'HARBOR LEDGER',
+    body:
+      'Arrivals, this season: eleven.\n\n' +
+      'Departures, this season: (the column is ruled, inked, and empty)\n\n' +
+      'A later hand, smaller: He asks me why the column is empty. I tell him ' +
+      'the truth \u2014 nobody who comes for the festival ever wants to miss the ' +
+      'next one.',
+  },
   wardenNote: {
     title: 'THE WARDEN’S NOTE',
     body:

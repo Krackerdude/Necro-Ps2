@@ -5,6 +5,60 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 13: GRAVEN Phase B — the town, the drive, Act I
+
+New Game is now: title → 2-minute drive cinematic → the town of Graven at
+dusk → photo quest across six districts → sleep at the inn → wake in the
+chapel (stitch; Phase D replaces it with the night sequence).
+
+- **TownKit** (world/builders/TownKit.js): the daytime vocabulary — houses
+  (plaster body + solid attic prism closing the gables + overhanging plank
+  panels + dusk-lit shuttered windows), market stalls, crates, boats,
+  street lamps (`lit` adds a real point light — budget ~6/level, unlit ones
+  glow by emissive), trees, fences, notice board, bollards, the lighthouse,
+  and the car (returns `wheels` for the cinematic). Same `{object,
+  colliders}` convention as ArchitectureKit; borrows its material cache.
+  GOTCHA (user-caught): roof panels alone leave the gable triangles open —
+  the attic prism (ExtrudeGeometry triangle) is what closes them.
+- **gravenTown.js**: gate road (parked car = photograph pickup + letter
+  document), square (fountain, stalls, notice board, bakery), boardwalk +
+  two piers (rails, boats, harbor shack + ledger), main street (5 houses),
+  the inn, church path + churchyard (lancet windows, 10 m tower, graves),
+  east lane + lighthouse point. 15 camera zones, postcard grammar (high,
+  warm, wide — deliberately kinder than the chapel's). `hudMinimal`, no
+  enemySpawns ever. Surfaces: piers are wood.
+- **The quest chain**: `dialogue/open` defs may pass `lines: () => [...]`
+  (evaluated at open) + `onComplete` (fires on every FULL read — keep it
+  idempotent). Chain flags: quest:rosa → quest:inn → quest:harbor →
+  quest:lighthouse → quest:priest → sleptAtInn. Each key NPC gates on the
+  previous flag (and Rosa on holding the photograph) and falls back to
+  flavor lines otherwise. Objectives CHAIN got an Act I block; every town
+  step also counts done for legacy saves via `visited:chapel-of-the-hollow`.
+- **14 NPCs**: 5 quest (Rosa, Tobias, Aldous, Edda, Father Callum) + 9
+  texture (Maren, Petr, Signe, Ilsa, Brammel, Yuri, Wren, kids Ana & Piet —
+  Townsfolk now takes `scale`). All dialogue carries the same undertow:
+  thanksgiving, generosity, nobody leaves, be indoors when the bell rings.
+- **The drive** (coastRoad.js + DRIVE_SCRIPT): a treadmill set — the car
+  never moves, guardrail posts/fences/trees/rocks flow past and wrap
+  (band 90 m, 9 m/s), wheels spin via `rotateY` (local axle), body bobs.
+  Every shot is authored around the origin. CinematicState now calls
+  `world.update(dt)` so level updatables run under cinematics everywhere
+  (fog drifts during the bell toll too; gameplay actors stay frozen).
+  ~2 min of letter monologue, skippable. MainMenuState loads `coast-road`
+  + `coastDrive` ambient before pushing the script.
+- **STARTING_LEVEL_ID = graven-town.** Old saves keep working (they carry
+  their own level id). Items: freshBread (heal 30), mikesPhotograph (key).
+  Documents: mikesLetter, townNotice, harborLedger.
+- Verified headless end-to-end: cinematic → skip → arrival objective →
+  photograph pickup → all five quest flags in order → inn prompt flips to
+  “Turn in for the night” → sleptAtInn → chapel loads with survival HUD
+  back on. Zero page errors.
+- Camera-authoring note: never place a zone camera near a house footprint —
+  roofs now overhang 0.3+ m and eat the frame. High-over-the-sea-wall and
+  street-mouth positions are the safe spots.
+
+---
+
 ## 2026-07-02 — Session 12: GRAVEN Phase A — retitle, dialogue, townsfolk
 
 The game is now **GRAVEN**. Big story restructure incoming (see plan): a

@@ -170,7 +170,7 @@ export function makeNpc(ctx, def) {
   ctx.colliders.push(
     new THREE.Box3(
       new THREE.Vector3(p.x - npc.radius, 0, p.z - npc.radius),
-      new THREE.Vector3(p.x + npc.radius, 1.7, p.z + npc.radius)
+      new THREE.Vector3(p.x + npc.radius, 1.7 * (def.scale ?? 1), p.z + npc.radius)
     )
   );
   return {

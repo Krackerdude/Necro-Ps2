@@ -8,7 +8,53 @@
  *
  * When new story beats are added, extend this list (and nothing else).
  */
+// The town act ends when you sleep; legacy saves (which predate the town)
+// already carry the chapel's visited flag, so every town step also counts
+// itself done for them.
+const townOver = (story) =>
+  Boolean(story.get('sleptAtInn') || story.get('visited:chapel-of-the-hollow'));
+
 const CHAIN = [
+  /* ------------------------- ACT I: THE TOWN ------------------------- */
+  {
+    id: 'car-things',
+    text: 'Collect your things from the car',
+    done: ({ story, inventory }) =>
+      Boolean(inventory?.has('mikesPhotograph') || story.get('took:car-photograph')) ||
+      townOver(story),
+  },
+  {
+    id: 'ask-around',
+    text: 'Show Mike’s photograph around town',
+    done: ({ story }) => Boolean(story.get('quest:rosa')) || townOver(story),
+  },
+  {
+    id: 'ask-inn',
+    text: 'Ask at the inn — Rosa says Mike took a room there',
+    done: ({ story }) => Boolean(story.get('quest:inn')) || townOver(story),
+  },
+  {
+    id: 'ask-harbor',
+    text: 'Find the harbormaster — Mike never boarded a boat out',
+    done: ({ story }) => Boolean(story.get('quest:harbor')) || townOver(story),
+  },
+  {
+    id: 'ask-lighthouse',
+    text: 'Walk out to the lighthouse and ask the keeper',
+    done: ({ story }) => Boolean(story.get('quest:lighthouse')) || townOver(story),
+  },
+  {
+    id: 'ask-priest',
+    text: 'Climb to the church — the keeper says Mike watched it for days',
+    done: ({ story }) => Boolean(story.get('quest:priest')) || townOver(story),
+  },
+  {
+    id: 'rest-inn',
+    text: 'Dusk is falling. Take your room at the inn',
+    done: ({ story }) => townOver(story),
+  },
+
+  /* ---------------------- ACT II: BELOW THE TOWN --------------------- */
   {
     id: 'find-key',
     text: 'Search the chapel for a way into the crypt',

@@ -411,21 +411,26 @@ export class GameplayState extends GameState {
   }
 
   /** A conversation: NPC turns to you, the box opens, the flag only sets
-   *  when the LAST page is read (Esc closes without credit). */
+   *  when the LAST page is read (Esc closes without credit). `def.lines`
+   *  may be a function (evaluated at open — quest NPCs change what they say
+   *  as flags move) and `def.onComplete` fires on every full read-through
+   *  (levels use it to advance quest flags; make it idempotent). */
   #openDialogue(npc, def) {
     const machine = this.services.get(Services.STATE_MACHINE);
     const events = this.services.get(Services.EVENTS);
     const story = this.services.get(Services.STORY);
     npc.faceToward(this.#player.object.position);
+    const lines = typeof def.lines === 'function' ? def.lines() : def.lines;
     const screen = new DialogueScreen({
       name: def.name,
-      lines: def.lines,
+      lines,
       events,
       onClose: (completed) => {
         machine.pop();
         npc.faceRest();
-        if (completed && !story.get(`talked:${def.id}`)) {
-          story.set(`talked:${def.id}`, true);
+        if (completed) {
+          if (!story.get(`talked:${def.id}`)) story.set(`talked:${def.id}`, true);
+          def.onComplete?.();
         }
       },
     });

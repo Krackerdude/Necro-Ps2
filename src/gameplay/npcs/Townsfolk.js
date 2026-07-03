@@ -70,6 +70,10 @@ export class Townsfolk {
       n.receiveShadow = true;
     });
     this.object.position.copy(def.position);
+    if (def.scale) {
+      this.object.scale.setScalar(def.scale); // children, elders
+      this.radius *= def.scale;
+    }
     this.#baseRotation = def.facing ?? Math.random() * Math.PI * 2;
     this.object.rotation.y = this.#baseRotation;
 

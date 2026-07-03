@@ -125,6 +125,26 @@ const TRACKS = {
     };
   },
 
+  /** The drive: engine drone, road rumble, wind through a cracked window. */
+  coastDrive: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 55, type: 'sawtooth', gain: 0.014 }),
+      drone(ctx, out, { freq: 110, type: 'sawtooth', gain: 0.008 }),
+      drone(ctx, out, { freq: 36, type: 'sine', gain: 0.03 }),
+      ...breathNoise(ctx, out, { cutoff: 700, gain: 0.035, lfoRate: 0.18 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
   /** Town by day: breeze, water hush, distant gulls. The only kind track. */
   townDay: (ctx, bus) => {
     const out = ctx.createGain();

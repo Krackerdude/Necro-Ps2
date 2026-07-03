@@ -37,7 +37,14 @@ Deploys on **Vercel** with zero config (auto-detected Vite static build).
 
 - **Main menu** — 3D graveyard vista with a slow camera push-in, stylized 2D overlay
   (New Game / Load Game / Options).
-- **Three levels, one arc** — *Chapel of the Hollow* (note → Black Iron Key →
+- **Act I: the town of Graven** — New Game opens on a two-minute drive-in
+  cinematic (a letter from a friend who stopped writing), then a fully
+  explorable harbor town at dusk: gate road, square, boardwalk and piers,
+  main street, churchyard, lighthouse point. Fourteen townsfolk with paged
+  typewriter dialogue; a photo-quest chain (baker → innkeeper → harbormaster
+  → lighthouse keeper → priest) that ends with a room at the inn. Daytime is
+  pure exploration — no combat, minimal HUD.
+- **Three levels below, one arc** — *Chapel of the Hollow* (note → Black Iron Key →
   crypt → Hollow Icon) opens a trapdoor to *The Sunken Cloister* (flooded garth,
   husks on the walks, the Verdigris Key in the black water), which unlocks
   *Ossuary of the Hollow* (bone corridors, the Bell Chamber, and the finale:
