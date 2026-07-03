@@ -187,6 +187,26 @@ const TRACKS = {
     };
   },
 
+  /** Indoors at the inn: fire-warm hush, wood settling, low comfort. */
+  hearth: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 82, type: 'sine', gain: 0.014 }),
+      drone(ctx, out, { freq: 123, type: 'triangle', gain: 0.007 }),
+      // Fire-adjacent noise: warm, low, slowly breathing.
+      ...breathNoise(ctx, out, { cutoff: 480, gain: 0.03, lfoRate: 0.22 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
   /** The town after the bell: the kind track's corpse. Cold, hollow, close. */
   townNight: (ctx, bus) => {
     const out = ctx.createGain();
@@ -199,6 +219,27 @@ const TRACKS = {
       drone(ctx, out, { freq: 57, type: 'triangle', gain: 0.012 }),
       // The same sea breeze as the day track, drained of warmth.
       ...breathNoise(ctx, out, { cutoff: 320, gain: 0.03, lfoRate: 0.06 }),
+    ];
+    return {
+      stop() {
+        out.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => nodes.forEach((n) => n.stop?.()), 1400);
+      },
+    };
+  },
+
+  /** The bell tower: high wind, and a bronze partial that never decays. */
+  tower: (ctx, bus) => {
+    const out = ctx.createGain();
+    out.gain.value = 0;
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
+    out.connect(bus);
+    const nodes = [
+      drone(ctx, out, { freq: 47, type: 'sine', gain: 0.06 }),
+      drone(ctx, out, { freq: 47, detune: 8, type: 'sine', gain: 0.045 }),
+      // The Great Bell's ghost partial, hanging in the shaft.
+      drone(ctx, out, { freq: 392, type: 'sine', gain: 0.004 }),
+      ...breathNoise(ctx, out, { cutoff: 620, gain: 0.032, lfoRate: 0.13 }),
     ];
     return {
       stop() {

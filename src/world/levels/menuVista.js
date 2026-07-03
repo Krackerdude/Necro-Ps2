@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
+import { TownKit } from '../builders/TownKit.js';
 
 /**
- * MENU VISTA — the 3D diorama behind the main menu: the chapel exterior at
- * night, seen across a drowned graveyard. No player, no colliders; the
- * camera is driven manually by MainMenuState using `menuCamera`.
+ * MENU VISTA — the 3D diorama behind the main menu: GRAVEN's gothic church
+ * at night, seen across its graveyard — the same building the game ends up
+ * barring you inside. No player, no colliders; the camera is driven
+ * manually by MainMenuState using `menuCamera`.
  */
 export const MENU_VISTA = {
   id: 'menu-vista',
@@ -19,23 +21,12 @@ export const MENU_VISTA = {
     // Ground.
     root.add(kit.slab({ center: [0, 0], size: [60, 60], y: 0, texture: 'boneDust', repeat: [18, 18] }).object);
 
-    // Chapel facade in the distance.
-    root.add(kit.wall({ from: [-7, -14], to: [7, -14], height: 8, texture: 'stoneWall', repeat: [7, 4] }).object);
-    root.add(kit.wall({ from: [-7, -14], to: [-7, -10], height: 8 }).object);
-    root.add(kit.wall({ from: [7, -14], to: [7, -10], height: 8 }).object);
-    // Steeple block + spire silhouette.
-    const steeple = kit.wall({ from: [-2, -14.4], to: [2, -14.4], height: 12, thickness: 3.6 });
-    root.add(steeple.object);
-    const spire = new THREE.Mesh(
-      new THREE.ConeGeometry(1.8, 4.5, 4),
-      kit.material('ironDark')
+    // The church of Graven, night-lit: the same gothic build the town uses,
+    // stained glass burning that low wrong red, facing the camera path.
+    const town = new TownKit(kit, { windowsLit: false, lampsLit: false });
+    root.add(
+      town.church({ position: [0, -20.5], rotationY: Math.PI, width: 10, depth: 15, height: 7 }).object
     );
-    spire.position.set(0, 14.2, -14.4);
-    spire.castShadow = true;
-    root.add(spire);
-    root.add(kit.door({ position: [0, -13.8], width: 2.2, height: 3.4 }).object);
-    root.add(kit.pillar({ position: [-3.2, -13.6], height: 7 }).object);
-    root.add(kit.pillar({ position: [3.2, -13.6], height: 7 }).object);
 
     // Graveyard rows, slightly drunken.
     const grave = kit.gravestoneTemplate();

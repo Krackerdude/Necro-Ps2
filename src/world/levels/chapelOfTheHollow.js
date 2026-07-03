@@ -3,7 +3,7 @@ import { defineCameraZone } from '../CameraZone.js';
 import { FlickerLight } from '../effects/FlickerLight.js';
 import { FogCards } from '../effects/FogCards.js';
 import { createInstancedScatter } from '../../rendering/instancing/InstancedScatter.js';
-import { makeItemPickup, makeTransition, makePickupMesh } from './levelHelpers.js';
+import { makeItemPickup, makeTransition, makeItemSocket, makePickupMesh } from './levelHelpers.js';
 import { buildWeaponModel } from '../../assets/models/weaponModels.js';
 import { readDocument } from '../../gameplay/story/documents.js';
 
@@ -33,6 +33,43 @@ import { readDocument } from '../../gameplay/story/documents.js';
 const WALL_H = 5;
 const ROOM_H = 3;
 
+/** Wing-door emblem: the shape motif, glowing faintly over each arch. */
+function buildEmblem(kit, kind) {
+  const group = new THREE.Group();
+  const colors = { spade: 0xc9c2a8, diamond: 0x6a9ad9, clover: 0x5aa04a };
+  const mat = kit.ps2.patch(
+    new THREE.MeshStandardMaterial({
+      color: 0x1a1a20,
+      emissive: colors[kind],
+      emissiveIntensity: 0.9,
+      roughness: 0.6,
+    })
+  );
+  if (kind === 'spade') {
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.04, 10), mat);
+    head.rotation.x = Math.PI / 2;
+    head.position.y = 0.08;
+    group.add(head);
+    const point = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.24, 4), mat);
+    point.rotation.z = Math.PI;
+    point.rotation.y = Math.PI / 4;
+    point.position.y = -0.1;
+    group.add(point);
+  } else if (kind === 'diamond') {
+    const pane = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.04), mat);
+    pane.rotation.z = Math.PI / 4;
+    group.add(pane);
+  } else {
+    for (const a of [0, (2 * Math.PI) / 3, (4 * Math.PI) / 3]) {
+      const lobe = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.04, 8), mat);
+      lobe.rotation.x = Math.PI / 2;
+      lobe.position.set(Math.sin(a) * 0.11, Math.cos(a) * 0.11 + 0.04, 0);
+      group.add(lobe);
+    }
+  }
+  return group;
+}
+
 export const CHAPEL_OF_THE_HOLLOW = {
   id: 'chapel-of-the-hollow', // historical id — saves carry it
   name: 'Graven Church',
@@ -55,7 +92,10 @@ export const CHAPEL_OF_THE_HOLLOW = {
     // Carpet runner down the aisle, slightly raised to avoid z-fighting.
     add(kit.slab({ center: [0, 0], size: [2, 19], y: 0.01, texture: 'carpetRed', repeat: [1, 8] }));
 
-    add(kit.wall({ from: [-6, -10], to: [6, -10], height: WALL_H }));
+    // North wall opens into the crossing behind the altar.
+    add(kit.wall({ from: [-6, -10], to: [-2.5, -10], height: WALL_H }));
+    add(kit.wall({ from: [2.5, -10], to: [6, -10], height: WALL_H }));
+    add(kit.wall({ from: [-2.5, -10], to: [2.5, -10], height: WALL_H - 3.4, yBase: 3.4, texture: 'plasterRot' }));
     add(kit.wall({ from: [-6, 10], to: [6, 10], height: WALL_H }));
     // West wall with vestry doorway gap (z -4.7..-3.3).
     add(kit.wall({ from: [-6, -10], to: [-6, -4.7], height: WALL_H }));
@@ -148,6 +188,129 @@ export const CHAPEL_OF_THE_HOLLOW = {
       },
     });
 
+    /* ------------------------- THE CROSSING ---------------------------- */
+    // The church finally has the floor plan its exterior promised: a
+    // crossing behind the altar, two transept arms, and an apse — each
+    // ending in a sealed wing door carved with its motif. The wings
+    // themselves are the next three phases; until each ships, its door is
+    // collapsed and its stone lies in the rubble within arm's reach.
+    add(kit.slab({ center: [0, -15], size: [10, 10], y: 0, texture: 'stoneFloor', repeat: [5, 5] }));
+    add(kit.slab({ center: [0, -15], size: [10, 10], y: WALL_H, texture: 'plasterRot', flip: true }));
+    add(kit.wall({ from: [-5, -20], to: [-5, -17], height: WALL_H }));
+    add(kit.wall({ from: [-5, -11], to: [-5, -10], height: WALL_H }));
+    add(kit.wall({ from: [5, -20], to: [5, -17], height: WALL_H }));
+    add(kit.wall({ from: [5, -11], to: [5, -10], height: WALL_H }));
+    add(kit.wall({ from: [-5, -17], to: [-5, -11], height: WALL_H - 3.2, yBase: 3.2, texture: 'plasterRot' }));
+    add(kit.wall({ from: [5, -17], to: [5, -11], height: WALL_H - 3.2, yBase: 3.2, texture: 'plasterRot' }));
+    add(kit.wall({ from: [-5, -20], to: [-2, -20], height: WALL_H }));
+    add(kit.wall({ from: [2, -20], to: [5, -20], height: WALL_H }));
+    add(kit.wall({ from: [-2, -20], to: [2, -20], height: WALL_H - 3.0, yBase: 3.0, texture: 'plasterRot' }));
+    for (const [cx, cz] of [[-4, -11.2], [4, -11.2], [-4, -18.8], [4, -18.8]]) {
+      add(kit.pillar({ position: [cx, cz], height: WALL_H }));
+    }
+    add(kit.candelabra({ position: [-3.2, -15] }));
+    add(kit.candelabra({ position: [3.2, -15] }));
+    add(kit.banner({ position: [-3.5, -19.8], rotationY: 0, y: 4.4 }));
+    add(kit.banner({ position: [3.5, -19.8], rotationY: 0, y: 4.4 }));
+
+    // Interior stained glass: from inside, always the wrong red.
+    const stained = kit.ps2.patch(
+      new THREE.MeshStandardMaterial({
+        color: 0x1a140e,
+        roughness: 0.3,
+        emissive: 0x7a1812,
+        emissiveIntensity: 1.1,
+      })
+    );
+    for (const [lx, lz, ry] of [
+      [-3.5, -19.88, 0],
+      [3.5, -19.88, 0],
+      [-9, -16.9, 0],
+      [9, -16.9, 0],
+      [-9, -11.1, 0],
+      [9, -11.1, 0],
+    ]) {
+      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.0, 0.08), stained);
+      pane.position.set(lx, 2.6, lz);
+      pane.rotation.y = ry;
+      root.add(pane);
+    }
+
+    /* ------------------------ THE TRANSEPT ARMS ------------------------ */
+    // West arm (the Spade — bell tower wing) and east arm (the Diamond —
+    // scriptorium wing); the apse holds the Clover (undercroft wing).
+    add(kit.slab({ center: [-9, -14], size: [8, 6], y: 0, texture: 'stoneFloor', repeat: [4, 3] }));
+    add(kit.slab({ center: [-9, -14], size: [8, 6], y: WALL_H, texture: 'plasterRot', flip: true }));
+    add(kit.wall({ from: [-13, -17], to: [-5, -17], height: WALL_H }));
+    add(kit.wall({ from: [-13, -11], to: [-5, -11], height: WALL_H }));
+    add(kit.wall({ from: [-13, -17], to: [-13, -11], height: WALL_H }));
+    add(kit.slab({ center: [9, -14], size: [8, 6], y: 0, texture: 'stoneFloor', repeat: [4, 3] }));
+    add(kit.slab({ center: [9, -14], size: [8, 6], y: WALL_H, texture: 'plasterRot', flip: true }));
+    add(kit.wall({ from: [5, -17], to: [13, -17], height: WALL_H }));
+    add(kit.wall({ from: [5, -11], to: [13, -11], height: WALL_H }));
+    add(kit.wall({ from: [13, -17], to: [13, -11], height: WALL_H }));
+
+    /* ----------------------------- THE APSE ---------------------------- */
+    add(kit.slab({ center: [0, -22], size: [6, 4], y: 0, texture: 'stoneFloor', repeat: [3, 2] }));
+    add(kit.slab({ center: [0, -22], size: [6, 4], y: WALL_H - 1, texture: 'plasterRot', flip: true }));
+    add(kit.wall({ from: [-3, -24], to: [-3, -20], height: WALL_H - 1 }));
+    add(kit.wall({ from: [3, -24], to: [3, -20], height: WALL_H - 1 }));
+    add(kit.wall({ from: [-3, -24], to: [3, -24], height: WALL_H - 1 }));
+    add(kit.votives({ position: [-2.2, -22.6], seed: 11 }));
+
+    /* -------------------------- THE WING DOORS ------------------------- */
+    // Each: a heavy door, a rubble collapse in front of it, the motif
+    // emblem above, and — TEMPORARY until its wing phase ships — that
+    // wing's stone pulled loose in the rubble, so the cage stays openable
+    // in this build. Wing phases replace the rubble with real transitions
+    // and move the stones to the far end of their wings.
+    const wingDoor = (kind, doorPos, doorRotY, rubblePos, emblemPos, emblemRotY, toastText) => {
+      add(kit.door({ position: doorPos, rotationY: doorRotY, width: 1.8, height: 3.0 }));
+      add(kit.rubble({ position: rubblePos, seed: 40 + kind.length, count: 8, solid: true }));
+      const mark = buildEmblem(kit, kind);
+      mark.position.set(emblemPos[0], 3.6, emblemPos[1]);
+      mark.rotation.y = emblemRotY;
+      root.add(mark);
+      interactables.push({
+        id: `wing-door-${kind}`,
+        position: new THREE.Vector3(rubblePos[0], 1, rubblePos[1]),
+        radius: 1.8,
+        prompt: `The ${kind.charAt(0).toUpperCase() + kind.slice(1)} Wing`,
+        onInteract: () => events.emit('ui/toast', { text: toastText }),
+      });
+    };
+    // The Spade Wing is OPEN (phase 2): a real door into the bell tower.
+    {
+      const mark = buildEmblem(kit, 'spade');
+      mark.position.set(-12.7, 3.6, -14);
+      mark.rotation.y = Math.PI / 2;
+      root.add(mark);
+      const spadeLeaf = kit.door({ position: [-12.8, -14], rotationY: Math.PI / 2, width: 1.8, height: 3.0 });
+      root.add(spadeLeaf.object); // leaf only — the transition owns passage
+      interactables.push(
+        makeTransition(
+          { story, inventory, events },
+          {
+            id: 'to-bell-tower',
+            position: new THREE.Vector3(-12.2, 1, -14),
+            radius: 1.7,
+            prompt: 'Enter the Bell Tower — the Spade Wing',
+            targetLevel: 'bell-tower',
+            targetSpawn: 'fromChurch',
+            door: spadeLeaf.object,
+          }
+        )
+      );
+    }
+    wingDoor(
+      'diamond', [12.8, -14], -Math.PI / 2, [11.6, -14], [12.7, -14], -Math.PI / 2,
+      'The passage to the scriptorium has collapsed. Behind the stone: paper settling, or being settled.'
+    );
+    wingDoor(
+      'clover', [0, -23.8], 0, [0, -22.6], [0, -23.7], 0,
+      'The stair to the undercroft has collapsed. Behind the stone: the smell of the garth, but closer.'
+    );
+
     /* --------------------------- SET DRESSING -------------------------- */
     // Signature landmark: the toppled saint by the south-west pews — the
     // first thing the entrance shot frames.
@@ -204,6 +367,11 @@ export const CHAPEL_OF_THE_HOLLOW = {
       new FlickerLight({ position: new THREE.Vector3(-10.8, 1.3, -4), intensity: 13, distance: 8 }),
       new FlickerLight({ position: new THREE.Vector3(11, 2.3, 4), intensity: 9, distance: 8, color: 0xb9c4de }),
       new FlickerLight({ position: new THREE.Vector3(20, 1.4, 3), intensity: 15, distance: 10, color: 0x9fdc7a }),
+      // The crossing and its arms — candle-warm center, red wash at the ends.
+      new FlickerLight({ position: new THREE.Vector3(0, 2.2, -15), intensity: 13, distance: 12, castShadow: true }),
+      new FlickerLight({ position: new THREE.Vector3(-9.5, 2.0, -14), intensity: 8, distance: 8, color: 0xc95a3a }),
+      new FlickerLight({ position: new THREE.Vector3(9.5, 2.0, -14), intensity: 8, distance: 8, color: 0xc95a3a }),
+      new FlickerLight({ position: new THREE.Vector3(0, 2.0, -22), intensity: 7, distance: 7, color: 0x9fdc7a }),
     ];
     for (const f of flickers) {
       root.add(f.light);
@@ -230,6 +398,139 @@ export const CHAPEL_OF_THE_HOLLOW = {
 
     // Pickup context shared by the loot below.
     const pickupCtx = { root, story, inventory, events, updatables };
+
+    /* ------------------------- THE WARDEN'S CAGE ----------------------- */
+    // The Black Iron Key sits caged on the altar; three stone sockets at
+    // the altar's foot open it. Legacy saves that already hold/spent the
+    // key build the cage open and empty.
+    const keyTaken = Boolean(
+      story.get('took:chapel-key') || story.get('hasCryptKey') || inventory?.has('blackIronKey')
+    );
+    const cageIsOpen = Boolean(story.get('cageOpened') || story.get('cryptDoorOpen') || keyTaken);
+
+    const iron = kit.material('ironDark', { metalness: 0.6, roughness: 0.55 });
+    const cage = new THREE.Group();
+    cage.position.set(0, 1.18, -8);
+    const rim = (y) => {
+      for (const [w, d, px, pz] of [[0.84, 0.06, 0, 0.39], [0.84, 0.06, 0, -0.39], [0.06, 0.84, 0.39, 0], [0.06, 0.84, -0.39, 0]]) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, d), iron);
+        bar.position.set(px, y, pz);
+        cage.add(bar);
+      }
+    };
+    rim(0);
+    rim(0.78);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.05, 0.9), iron);
+    top.position.y = 0.83;
+    cage.add(top);
+    for (const [px, pz] of [[0.39, 0.39], [0.39, -0.39], [-0.39, 0.39], [-0.39, -0.39]]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.8, 0.07), iron);
+      post.position.set(px, 0.39, pz);
+      cage.add(post);
+    }
+    // Bars: back and sides always; the front is a separate group so the
+    // opened cage can lose it (live, via the flag watcher below).
+    const barsFor = (face) => {
+      const g = new THREE.Group();
+      for (const off of [-0.2, 0, 0.2]) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.74, 0.045), iron);
+        if (face === 'n' || face === 's') bar.position.set(off, 0.39, face === 'n' ? -0.39 : 0.39);
+        else bar.position.set(face === 'e' ? 0.39 : -0.39, 0.39, off);
+        g.add(bar);
+      }
+      return g;
+    };
+    cage.add(barsFor('n'), barsFor('e'), barsFor('w'));
+    const cageFront = barsFor('s');
+    if (!cageIsOpen) cage.add(cageFront);
+    cage.traverse((n) => (n.castShadow = true));
+    root.add(cage);
+    updatables.push({
+      update: () => {
+        if (cageFront.parent && story.get('cageOpened')) {
+          cageFront.removeFromParent();
+          events.emit('audio/sfx', { id: 'doorUnlock' });
+        }
+      },
+    });
+
+    // The key itself, visible through the bars until taken.
+    const cagedKey = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.11, 0),
+      kit.material('ironDark', { emissive: 0x30303a, emissiveIntensity: 0.9 })
+    );
+    cagedKey.position.set(0, 1.55, -8);
+    if (!keyTaken) root.add(cagedKey);
+    updatables.push({
+      update: (dt) => {
+        if (cagedKey.parent) cagedKey.rotation.y += dt * 0.9;
+      },
+    });
+
+    // Socket pedestals at the altar's foot.
+    for (const px of [-1.1, 0, 1.1]) {
+      const pedestal = kit.pillar({ position: [px, -7.1], radius: 0.16, height: 0.7, texture: 'stoneWall' });
+      add(pedestal);
+    }
+    const STONES = [
+      { itemId: 'stoneOfTheHour', flag: 'stoneSeated:hour', x: -1.1, name: 'the Stone of the Hour' },
+      { itemId: 'stoneOfTheWord', flag: 'stoneSeated:word', x: 0, name: 'the Stone of the Word' },
+      { itemId: 'stoneOfTheGround', flag: 'stoneSeated:ground', x: 1.1, name: 'the Stone of the Ground' },
+    ];
+    if (!cageIsOpen) {
+      for (const stone of STONES) {
+        interactables.push(
+          makeItemSocket(
+            { story, inventory, events },
+            {
+              id: `socket-${stone.flag}`,
+              itemId: stone.itemId,
+              flag: stone.flag,
+              position: new THREE.Vector3(stone.x, 1, -7.1),
+              radius: 1.2,
+              prompt: `Seat ${stone.name}`,
+              missingText: `The socket is cut for ${stone.name}. You do not have it.`,
+              placedText: `${stone.name.charAt(0).toUpperCase() + stone.name.slice(1)} settles in with the sound of a held breath released.`,
+              onPlaced: () => {
+                if (STONES.every((st) => story.get(st.flag)) && !story.get('stonesSeated')) {
+                  story.set('stonesSeated', true); // GameplayState plays the cage scene
+                }
+              },
+            }
+          )
+        );
+      }
+    }
+    interactables.push(
+      {
+        id: 'cage-plaque',
+        position: new THREE.Vector3(-0.6, 1, -7.4),
+        radius: 1.1,
+        prompt: 'Read the cage’s rubric',
+        onInteract: () => readDocument(events, story, 'cagePlaque'),
+      },
+      {
+        id: 'cage-key',
+        position: new THREE.Vector3(0.5, 1, -7.6),
+        radius: 1.2,
+        prompt: 'Take the Black Iron Key',
+        canInteract: () =>
+          Boolean(story.get('cageOpened') || story.get('cryptDoorOpen')) &&
+          !story.get('took:chapel-key') &&
+          !inventory?.has('blackIronKey'),
+        onInteract: () => {
+          if (inventory && !inventory.canFit('blackIronKey')) {
+            events.emit('ui/toast', { text: 'Your satchel is full. The key waits. It is good at that.' });
+            return;
+          }
+          inventory?.add('blackIronKey');
+          story.set('took:chapel-key', true);
+          cagedKey.removeFromParent();
+          events.emit('audio/sfx', { id: 'pickup' });
+          events.emit('ui/toast', { text: 'Taken — BLACK IRON KEY. It is colder than the room.' });
+        },
+      }
+    );
 
     /* --------------------------- INTERACTABLES ------------------------- */
     interactables.push(
@@ -336,18 +637,32 @@ export const CHAPEL_OF_THE_HOLLOW = {
 
     /* ------------------------------ LOOT ------------------------------- */
     for (const pickup of [
+      // TEMPORARY (until wing phases 2–4): each wing's stone lies loose in
+      // the rubble of its collapsed door so the cage stays openable in this
+      // build. The wing phases move these to the far end of their wings.
       makeItemPickup(pickupCtx, {
-        id: 'chapel-key',
-        itemId: 'blackIronKey',
+        id: 'temp-stone-word',
+        itemId: 'stoneOfTheWord',
         mesh: makePickupMesh(kit, {
-          position: new THREE.Vector3(0.4, 1.25, -8),
-          color: 0x3a3a44,
-          emissive: 0x30303a,
+          position: new THREE.Vector3(10.2, 0.45, -16.0),
+          color: 0x8aa4c9,
+          emissive: 0x2a3a52,
         }),
-        position: new THREE.Vector3(0.4, 1, -7.8),
-        radius: 1.3,
-        prompt: 'Take the Black Iron Key',
-        flavor: 'Taken — BLACK IRON KEY. It is colder than the room.',
+        position: new THREE.Vector3(10.2, 1, -16.0),
+        prompt: 'Pull the stone from the rubble',
+        flavor: 'Taken — STONE OF THE WORD, shaken loose by the collapse.',
+      }),
+      makeItemPickup(pickupCtx, {
+        id: 'temp-stone-ground',
+        itemId: 'stoneOfTheGround',
+        mesh: makePickupMesh(kit, {
+          position: new THREE.Vector3(-1.6, 0.45, -22.2),
+          color: 0x7aa46a,
+          emissive: 0x2a4222,
+        }),
+        position: new THREE.Vector3(-1.6, 1, -22.2),
+        prompt: 'Pull the stone from the rubble',
+        flavor: 'Taken — STONE OF THE GROUND, shaken loose by the collapse.',
       }),
       makeItemPickup(pickupCtx, {
         id: 'chapel-machete',
@@ -475,6 +790,47 @@ export const CHAPEL_OF_THE_HOLLOW = {
       }),
     ];
 
+    cameraZones.push(
+      // The crossing: high from over the altar arch, columns framing.
+      defineCameraZone({
+        id: 'crossing',
+        min: [-5, -1, -20],
+        max: [5, 4, -10],
+        camera: [-4.1, 2.5, -10.9],
+        trackTarget: true,
+        trackStiffness: 3,
+        rollDeg: -2,
+        fovOverride: 60,
+      }),
+      // Transept arms: one-point shots toward their sealed doors.
+      defineCameraZone({
+        id: 'west-transept',
+        min: [-13, -1, -17],
+        max: [-5, 3, -11],
+        camera: [-5.4, 2.0, -11.8],
+        lookAt: [-13, 1.8, -14],
+        fovOverride: 50,
+      }),
+      defineCameraZone({
+        id: 'east-transept',
+        min: [5, -1, -17],
+        max: [13, 3, -11],
+        camera: [5.4, 2.0, -16.2],
+        lookAt: [13, 1.8, -14],
+        fovOverride: 50,
+      }),
+      // The apse: tight, low, the clover door looming.
+      defineCameraZone({
+        id: 'apse',
+        min: [-3, -1, -24],
+        max: [3, 3, -20],
+        camera: [0, 2.1, -19.4],
+        lookAt: [0, 1.5, -24],
+        fovOverride: 54,
+        priority: 1,
+      })
+    );
+
     return {
       root,
       colliders,
@@ -484,6 +840,7 @@ export const CHAPEL_OF_THE_HOLLOW = {
       spawn: { position: new THREE.Vector3(0, 0, 8), rotationY: Math.PI },
       spawnPoints: {
         fromCloister: { position: new THREE.Vector3(21.5, 0, 6.2), rotationY: -Math.PI / 2 },
+        fromBellTower: { position: new THREE.Vector3(-11.2, 0, -14), rotationY: Math.PI / 2 },
       },
       enemySpawns: [
         { type: 'wraith', position: new THREE.Vector3(21.5, 0, 5.5), homeRadius: 5.5 },
@@ -511,6 +868,10 @@ export const CHAPEL_OF_THE_HOLLOW = {
           { id: 'corridor', label: 'Passage', min: [6, 2.5], max: [16, 5.5] },
           { id: 'crypt', label: 'Crypt', min: [16, -2], max: [24, 8] },
           { id: 'nave', label: 'Nave', min: [-6, -10], max: [6, 10] },
+          { id: 'crossing', label: 'The Crossing', min: [-5, -20], max: [5, -10] },
+          { id: 'west-arm', label: 'West Transept', min: [-13, -17], max: [-5, -11] },
+          { id: 'east-arm', label: 'East Transept', min: [5, -17], max: [13, -11] },
+          { id: 'apse', label: 'Apse', min: [-3, -24], max: [3, -20] },
         ],
         markers: [
           { type: 'shrine', position: [-11.2, -4] },

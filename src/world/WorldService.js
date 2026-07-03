@@ -77,6 +77,7 @@ export class WorldService {
 
   unload() {
     if (!this.runtime) return;
+    this.runtime.dispose?.(); // levels may hold event subscriptions
     disposeObject3D(this.runtime.root);
     this.#physics.setStaticColliders([]);
     this.scene = null;

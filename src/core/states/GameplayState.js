@@ -24,7 +24,7 @@ import { MainMenuState } from './MainMenuState.js';
 import { STARTING_LEVEL_ID, getLevel } from '../../world/levels/registry.js';
 import { ITEMS } from '../../gameplay/inventory/itemCatalog.js';
 import { CinematicState } from './CinematicState.js';
-import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT } from '../../gameplay/cinematics/scripts.js';
+import { BELL_SCRIPT, END_NOTE, WINDOW_SCRIPT, BAR_DOORS_SCRIPT, CAGE_SCRIPT } from '../../gameplay/cinematics/scripts.js';
 import { DoorTransitionScene } from '../../world/effects/DoorTransitionScene.js';
 
 /**
@@ -64,6 +64,11 @@ export class GameplayState extends GameState {
   #dead = false;
   #transitioning = false;
   #doorScene = null;
+  /** Cinematic queued by #enterLevel, played only once the level is settled
+   *  (pushing mid-transition is how you soft-lock a door animation). */
+  #pendingScene = null;
+  /** A transition requested while one was in flight — run, never drop. */
+  #queuedTransition = null;
   #lastDetectStinger = 0;
 
   enter(params = {}) {
@@ -134,6 +139,7 @@ export class GameplayState extends GameState {
     // --- level ------------------------------------------------------------
     this.#enterLevel(snapshot?.levelId ?? STARTING_LEVEL_ID, null, snapshot);
     if (snapshot) this.#player.restoreState(snapshot.participants.player);
+    this.#flushPendingScene();
 
     // Old saves may carry keys that were already spent.
     this.#discardSpentKeys();
@@ -163,6 +169,31 @@ export class GameplayState extends GameState {
       }),
       // A key whose every lock is open leaves the satchel on its own.
       events.on('story/flag-changed', () => this.#discardSpentKeys()),
+      // Levels declare their own story-driven scenes and room comments:
+      // runtime.cinematics = [{ when: <flag>, seen: <once-flag>, script }]
+      // runtime.roomComments = { '<flag>': 'toast text' } (mapSeen flags
+      // fire exactly once, so comments self-limit).
+      events.on('story/flag-changed', ({ flag, value }) => {
+        if (!value) return;
+        const runtime = s.get(Services.WORLD).runtime;
+        if (!runtime) return;
+        for (const cine of runtime.cinematics ?? []) {
+          if (cine.when === flag && !story.get(cine.seen)) {
+            story.set(cine.seen, true);
+            this.#playScene(cine.script);
+          }
+        }
+        const comment = runtime.roomComments?.[flag];
+        if (comment) events.emit('ui/toast', { text: comment });
+      }),
+      // The third stone seats: the cage gives up the key, on camera.
+      events.on('story/flag-changed', ({ flag, value }) => {
+        if (flag !== 'stonesSeated' || !value) return;
+        this.#playScene(CAGE_SCRIPT, () => {
+          const story = s.get(Services.STORY);
+          if (!story.get('cageOpened')) story.set('cageOpened', true);
+        });
+      }),
       // The hour is told: the ambient bed dies, everything standing lies
       // down, and the toll plays as a directed scene ending on the note.
       events.on('story/flag-changed', ({ flag, value }) => {
@@ -349,19 +380,30 @@ export class GameplayState extends GameState {
     renderer.setCamera(cameraDirector.camera);
     s.get(Services.AUDIO).playAmbient(runtime.ambientTrack);
 
-    // Story beats that own the camera the moment a level opens.
-    const events = s.get(Services.EVENTS);
+    // Story beats that own the camera the moment a level opens. These are
+    // QUEUED, not pushed: transitions must fully settle first, and the
+    // caller (enter / #beginTransition) flushes at the safe moment.
     if (levelId === 'graven-town' && story.get('nightfall') && !story.get('windowSceneSeen')) {
-      // The window: what the corner room saw. The crowd set is built only
-      // while the flag is unset; the re-transition clears it away.
-      this.#playScene(WINDOW_SCRIPT, () => {
-        story.set('windowSceneSeen', true);
-        events.emit('level/transition', { levelId: 'graven-town', spawn: 'innDoor' });
-      });
+      // The window: what the corner room saw. The night level watches the
+      // flag and clears the crowd itself — no re-transition.
+      this.#pendingScene = {
+        script: WINDOW_SCRIPT,
+        then: () => story.set('windowSceneSeen', true),
+      };
     }
     if (levelId === 'chapel-of-the-hollow' && story.get('doorsBarred') && !story.get('barSceneSeen')) {
-      this.#playScene(BAR_DOORS_SCRIPT, () => story.set('barSceneSeen', true));
+      this.#pendingScene = {
+        script: BAR_DOORS_SCRIPT,
+        then: () => story.set('barSceneSeen', true),
+      };
     }
+  }
+
+  #flushPendingScene() {
+    if (!this.#pendingScene) return;
+    const { script, then } = this.#pendingScene;
+    this.#pendingScene = null;
+    this.#playScene(script, then);
   }
 
   /** Push a cinematic over gameplay; `then` runs after it pops. */
@@ -380,7 +422,10 @@ export class GameplayState extends GameState {
 
   /** The iconic beat: darkness, a door swings open, the next room. */
   #beginTransition({ levelId, spawn }) {
-    if (this.#transitioning) return;
+    if (this.#transitioning) {
+      this.#queuedTransition = { levelId, spawn };
+      return;
+    }
     this.#transitioning = true;
     const events = this.services.get(Services.EVENTS);
     const renderer = this.services.get(Services.RENDERER);
@@ -399,6 +444,10 @@ export class GameplayState extends GameState {
           this.services.get(Services.SAVE).autosave();
           events.emit('ui/fade', { opacity: 0, duration: TRANSITION_FADE });
           this.#transitioning = false;
+          const queued = this.#queuedTransition;
+          this.#queuedTransition = null;
+          if (queued) this.#beginTransition(queued);
+          else this.#flushPendingScene();
         }, 260);
       });
     }, 260);

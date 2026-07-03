@@ -96,6 +96,55 @@ export const BAR_DOORS_SCRIPT = [
   { caption: { text: 'Outside: the singing. Inside: a church nobody has prayed in for a very long time.', duration: 4.4 } },
 ];
 
+/**
+ * The Warden's Cage opens — plays over the church the moment the third
+ * stone seats. Coordinates are the altar/crossing of chapel-of-the-hollow.
+ */
+export const CAGE_SCRIPT = [
+  { sfx: { id: 'saveChime' } },
+  { camera: { from: [1.8, 1.4, -5.6], to: [0.8, 1.3, -6.6], lookAt: [0, 1.3, -8], duration: 3.2 } },
+  { caption: { text: 'The three stones speak to each other in agreement.', duration: 3.0 } },
+  { impulse: { strength: 0.5 } },
+  { sfx: { id: 'doorUnlock' } },
+  { camera: { from: [0.8, 1.3, -6.6], to: [0.2, 1.5, -7.1], lookAt: [0, 1.35, -8], duration: 3.4 } },
+  { caption: { text: 'The cage does not unlock so much as give up.', duration: 3.0 } },
+  { impulse: { strength: 0.3 } },
+  { camera: { from: [0.2, 1.5, -7.1], to: [-1.6, 1.2, -5.8], lookAt: [0, 1.5, -8], duration: 3.2 } },
+  { caption: { text: 'The Black Iron Key lies in the open, colder than ever, and somewhere below, something adjusts its grip.', duration: 4.2 } },
+];
+
+/** Mother Alders — plays once on first entering her parlor (bell tower). */
+export const ALDERS_SCRIPT = [
+  { camera: { from: [4.8, 1.8, -22.4], to: [6.2, 1.4, -24], lookAt: [8.6, 0.9, -26], duration: 4.2 } },
+  { caption: { text: 'There is a rocking chair in the tower. It is occupied. The occupant is DELIGHTED.', duration: 4.0 } },
+  { camera: { from: [6.2, 1.4, -24], to: [7.2, 1.2, -24.8], lookAt: [8.6, 1.0, -26.2], duration: 3.8 } },
+  { caption: { text: '“A visitor! SIT. Mind the rope, dear — it’s mostly hair. Donated. Everyone donates, eventually.”', duration: 4.6 } },
+  { caption: { text: '“You’ll be wanting the Hour, I expect. Everyone who climbs wants the Hour. The tower does love to be wanted.”', duration: 4.6 } },
+];
+
+/** The Tolltaker — plays once on first entering the Great Bell chamber. */
+export const TOLLTAKER_SCRIPT = [
+  { camera: { from: [0, 1.2, -37], to: [0, 2.4, -39], lookAt: [0, 3.0, -44], duration: 4.5 } },
+  { caption: { text: 'The Great Bell has not rung in eighty years. Beneath it, something has knelt the whole time, holding the silence like a job.', duration: 5.0 } },
+  { sfx: { id: 'huskGroan' } },
+  { impulse: { strength: 0.4 } },
+  { camera: { from: [0, 2.4, -39], to: [1.8, 1.1, -40.5], lookAt: [0, 1.6, -44], duration: 4.0 } },
+  { caption: { text: 'It stands. The kneeling, it turns out, was politeness.', duration: 3.6 } },
+  { sfx: { id: 'wraithShriek' } },
+  { camera: { from: [1.8, 1.1, -40.5], to: [-1.2, 1.4, -39.5], lookAt: [0, 2.2, -43], duration: 3.6 } },
+  { caption: { text: 'It wears the cracked bell like a hood. It cannot hear you. It has never once needed to. RING SOMETHING.', duration: 4.6 } },
+];
+
+/** The carillon answers — plays the moment the fourth bell lands. */
+export const CARILLON_SCRIPT = [
+  { sfx: { id: 'bellToll' } },
+  { camera: { from: [4, 1.6, -61.5], to: [5.8, 1.9, -63], lookAt: [7, 1.1, -65], duration: 3.8 } },
+  { caption: { text: 'Four notes, in the tower’s own order. The room holds them the way lungs hold a breath.', duration: 3.8 } },
+  { impulse: { strength: 0.35 } },
+  { camera: { from: [5.8, 1.9, -63], to: [6.6, 1.3, -64], lookAt: [7, 1.2, -65], duration: 3.4 } },
+  { caption: { text: 'Something far above nods. The Stone of the Hour rises like it was only ever waiting to be asked politely.', duration: 4.4 } },
+];
+
 /** Retired opening (pre-town builds); kept for the Phase D/E night stitch. */
 export const OPENING_SCRIPT = [
   { fade: { opacity: 0, duration: 1.2 } },

@@ -22,6 +22,80 @@ export const DOCUMENTS = {
       'you have to come. Come before I stop writing letters.\n\n' +
       '\u2014 M.',
   },
+  mikesJournal: {
+    title: 'MIKE’S JOURNAL — THE LAST PAGE',
+    body:
+      'Developed the churchyard roll in the washbasin. Sixty-one went up ' +
+      'the hill at the bell. I counted them in from the point. I counted ' +
+      'them out. Sixty.\n\n' +
+      'Did it again the next dusk. Sixty out, fifty-nine home. The town is ' +
+      'a tide that always comes in one short, and nobody on the pier ever ' +
+      'mentions the sea.\n\n' +
+      'Callum watched me photograph the doors today. He was very kind ' +
+      'about it. He is very kind about everything. That is the thing I ' +
+      'cannot get past anymore.\n\n' +
+      'If someone finds this: the pictures are with the one person here ' +
+      'who told me to burn them.',
+  },
+  cagePlaque: {
+    title: 'THE CAGE, ITS RUBRIC',
+    body:
+      'THREE STONES, THREE WITNESSES:\n\n' +
+      'The HOUR, from the tower wing, which counts what the town owes.\n' +
+      'The WORD, from the scriptorium wing, which records who agreed.\n' +
+      'The GROUND, from the undercroft wing, which collects.\n\n' +
+      'Seat all three and the cage will open, and God forgive whoever ' +
+      'needs it to.',
+  },
+  ringersRoll: {
+    title: 'THE RINGERS’ ROLL',
+    body:
+      'Bell-ringers of the parish, in perpetuity:\n\n' +
+      'ALDERS, F. — the Dirge, forty years. Retired into the south wall.\n' +
+      'COLE, M. — the Mercy. Retired into the south wall.\n' +
+      'BRECHT, A. & BRECHT, O. — the Quarrels, cast for the brothers so ' +
+      'they would stop fighting over one rope. It did not work.\n\n' +
+      'NOTE: ringers are interred with their hands cast in bronze, mid-pull. ' +
+      'The tower likes to keep the option open.',
+  },
+  foundryNote: {
+    title: 'THE FOUNDER’S SLATE',
+    body:
+      'Great Bell recast THRICE. Cracks every time, always the same seam.\n\n' +
+      'The bronze is not at fault. The bell cracks the night before every ' +
+      'thanksgiving, like a throat clearing itself.\n\n' +
+      'The big lad asked to keep the third casting. He wears it. I did not ' +
+      'argue. You do not argue with the Tolltaker about bells.',
+  },
+  wardensRestLog: {
+    title: 'THE GUEST LOG, WARDEN’S REST',
+    body:
+      'One cot, kept made. One bottle, kept full. The tower insists.\n\n' +
+      'Guests this century: two.\n\n' +
+      'The first slept one night and went up to the carillon whistling. ' +
+      'The tower kept the whistle. You can hear it in the chimes on quiet ' +
+      'nights, still going up.',
+  },
+  hymnOfHours: {
+    title: 'THE HYMN OF HOURS (NAILED UP, UPSIDE DOWN)',
+    body:
+      'As sung on thanksgiving, descending:\n\n' +
+      'MERCY last of all,\n' +
+      'the younger quarrel third,\n' +
+      'the elder quarrel second,\n' +
+      'and FIRST — always first — the low dark Dirge.\n\n' +
+      '(A later hand: the tower nails this page up wrong way round because ' +
+      'it thinks that is funny. It is a LITTLE funny. — M.A.)',
+  },
+  clockPlaque: {
+    title: 'THE HOROLOGIST’S PLAQUE',
+    body:
+      'This movement keeps GRAVEN TIME, which is not the same thing.\n\n' +
+      'Strike no hour idly. The wing has ears, and the works announce ' +
+      'mistakes at full voice.\n\n' +
+      'If you must wake the vault: the verger wrote that the ground sleeps ' +
+      'deepest at the THIRD hour. Strike it softly and take what is yours.',
+  },
   townNotice: {
     title: 'PARISH NOTICE',
     body:
@@ -48,7 +122,9 @@ export const DOCUMENTS = {
       'no further. I was Graven’s warden before Callum wore the collar. ' +
       'I nailed these doors myself, from this side, the year I understood ' +
       'what the thanksgiving feeds.\n\n' +
-      'I keep the black key upon the altar, where He can watch it.\n\n' +
+      'I keep the black key upon the altar, caged. The hours, the words, and ' +
+      'the ground must all agree before it moves again — I quarried a stone ' +
+      'from each wing to make sure they never would.\n\n' +
       'Do not go below. The thing we buried under the garth does not know ' +
       'it is dead, and the icon it clutches is the only thing keeping the ' +
       'ground closed. The town above sings to it once a year so it will ' +

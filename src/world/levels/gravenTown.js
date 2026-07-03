@@ -57,15 +57,15 @@ export const GRAVEN_TOWN = {
 
     /* ------------------------------ GROUND ----------------------------- */
     const GRASS = { texture: 'boneDust' };
-    const grassSlab = (center, size) => {
-      const piece = kit.slab({ center, size, y: 0, texture: GRASS.texture, repeat: [size[0] / 2, size[1] / 2] });
+    const grassSlab = (center, size, y = 0) => {
+      const piece = kit.slab({ center, size, y, texture: GRASS.texture, repeat: [size[0] / 2, size[1] / 2] });
       piece.object.traverse((n) => {
         if (n.material) n.material = kit.material('boneDust', { color: 0x76855c, repeat: [size[0] / 2, size[1] / 2] });
       });
       return piece;
     };
-    const dirtSlab = (center, size) => {
-      const piece = kit.slab({ center, size, y: 0, texture: 'stoneFloor', repeat: [size[0] / 2.5, size[1] / 2.5] });
+    const dirtSlab = (center, size, y = 0) => {
+      const piece = kit.slab({ center, size, y, texture: 'stoneFloor', repeat: [size[0] / 2.5, size[1] / 2.5] });
       piece.object.traverse((n) => {
         if (n.material) n.material = kit.material('stoneFloor', { color: 0xb09a78, repeat: [size[0] / 2.5, size[1] / 2.5] });
       });
@@ -80,16 +80,16 @@ export const GRAVEN_TOWN = {
 
     add(dirtSlab([-30, 11], [32, 10]));                     // gate road
     add(kit.slab({ center: [-1, 10], size: [26, 20], y: 0, texture: 'stoneFloor', repeat: [13, 10] })); // square
-    add(grassSlab([-1, -3.5], [26, 7]));                    // bakery row strip
+    add(grassSlab([-1, -3.5], [26, 7], 0.012)); // above yards+square: no z-fight                    // bakery row strip
     add(kit.slab({ center: [0, -14], size: [10, 28], y: 0, texture: 'stoneFloor', repeat: [5, 14] })); // main street
-    add(grassSlab([-9, -14], [8, 28]));                     // west yards
-    add(grassSlab([9, -14], [8, 28]));                      // east yards
-    add(kit.slab({ center: [0, -30], size: [16, 9], y: 0, texture: 'stoneFloor', repeat: [8, 4.5] })); // inn court
-    add(dirtSlab([10.5, -17.5], [11, 5]));                  // church path
-    add(grassSlab([25, -22], [18, 20]));                    // churchyard
+    add(grassSlab([-9, -14], [8, 28], 0.008));                     // west yards
+    add(grassSlab([9, -14], [8, 28], 0.008));                      // east yards
+    add(kit.slab({ center: [0, -30], size: [16, 9], y: 0.016, texture: 'stoneFloor', repeat: [8, 4.5] })); // inn court (over street+yards)
+    add(dirtSlab([10.5, -17.5], [11, 5], 0.02));                  // church path
+    add(grassSlab([25, -22], [18, 20], 0.014));                    // churchyard
     add(kit.slab({ center: [1, 24], size: [30, 8], y: 0, texture: 'stoneFloor', repeat: [15, 4] })); // boardwalk
-    add(dirtSlab([24, 20], [16, 8]));                       // east lane
-    add(grassSlab([39, 17], [14, 18]));                     // lighthouse point
+    add(dirtSlab([24, 20], [16, 8], 0.008));                       // east lane
+    add(grassSlab([39, 17], [14, 18], 0.008));                     // lighthouse point
     // Piers — barely above the tide.
     add(kit.slab({ center: [5, 34], size: [6, 12], y: 0.02, texture: 'woodPlanks', repeat: [3, 6] }));
     add(kit.slab({ center: [-6, 31], size: [4, 6], y: 0.02, texture: 'woodPlanks', repeat: [2, 3] }));
@@ -231,35 +231,11 @@ export const GRAVEN_TOWN = {
     add(town.tree({ position: [14, -13.4], scale: 1.15, lean: -0.1 }));
     add(town.tree({ position: [18.5, -30], scale: 1.25, lean: 0.12 }));
     add(town.tree({ position: [31.5, -14.5], scale: 1.0, lean: -0.08 }));
-    // The church: tall, patient, facing west down its own yard.
-    add(town.house({
-      position: [27, -24], size: [9, 13], height: 5.2, rotationY: -Math.PI / 2,
-      tint: 0xcfc4ae, roofTint: 0x54443c, windows: 3, lit: !night,
-    }));
-    const tower = add(kit.pillar({ position: [21.5, -29.5], radius: 1.1, height: 10, texture: 'plasterRot' }));
-    tower.castShadow = true;
-    const towerCap = new THREE.Mesh(
-      new THREE.ConeGeometry(1.5, 1.8, 6),
-      kit.material('woodPlanks', { color: 0x54443c })
-    );
-    towerCap.position.set(21.5, 10.9, -29.5);
-    root.add(towerCap);
-    // Tall lancet windows either side of the doors, lit from evensong.
-    const lancetGlass = kit.ps2.patch(
-      new THREE.MeshStandardMaterial({
-        color: 0x241d16,
-        roughness: 0.35,
-        emissive: night ? 0x7a1812 : 0xd98d3a,
-        emissiveIntensity: night ? 1.3 : 0.9,
-      })
-    );
-    for (const z of [-21.2, -26.8]) {
-      const lancet = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.4, 0.8), lancetGlass);
-      lancet.position.set(20.45, 3.1, z);
-      root.add(lancet);
-    }
+    // The church: gothic, buttressed, stained glass down both flanks, a
+    // needle spire. It faces west down its own yard, and it is TALL — the
+    // one silhouette you can read from anywhere in town.
+    add(town.church({ position: [27.5, -24], rotationY: -Math.PI / 2, width: 9.5, depth: 14, height: 6.5 }));
     add(kit.votives({ position: [20.6, -22], seed: 3 }));
-    add(kit.wallStain({ position: [20.44, -24], y: 4.2, rotationY: -Math.PI / 2, size: 1.4, kind: 'damp' }));
     // Graves. Read the dates later, when you know what to look for.
     const grave = kit.gravestoneTemplate();
     root.add(
@@ -367,42 +343,6 @@ export const GRAVEN_TOWN = {
         },
         onComplete: () => {
           if (hasPhoto() && !q('quest:rosa')) story.set('quest:rosa', true);
-        },
-      }),
-      makeNpc(npcCtx, {
-        id: 'tobias',
-        name: 'Tobias, the innkeeper',
-        position: new THREE.Vector3(1.8, 0, -26.4),
-        facing: Math.PI,
-        hair: 'bald',
-        beard: true,
-        vest: true,
-        build: 1.18,
-        palette: { coat: 0x8a7458, skin: 0xc9a082, legs: 0x3a3028, vest: 0x5c2c30, beard: 0x9a9088 },
-        lines: () => {
-          if (q('quest:priest'))
-            return [
-              'There you are. Rosa sent bread up, the fire’s lit, and the corner room is yours — same one your friend had. The harbor view.',
-              'Sleep well, friend. The bell will ring at dusk. Pay it no mind. It’s only custom.',
-            ];
-          if (q('quest:inn'))
-            return [
-              'Aldous will be down on the long pier — he practically sleeps standing up down there. Go on, I’ll air out your room while you’re about it.',
-            ];
-          if (!q('quest:rosa'))
-            return [
-              'Welcome to the Gull & Anchor! Room, meal, or gossip — we stock all three.',
-              'See a bit of the town first, though. Graven at dusk is worth your eyes. I’ll be here. I’m always here.',
-            ];
-          return [
-            'Rosa sent you? Then you’re family already. Let’s see the photograph.',
-            'Michael. Corner room, eleven nights, paid for seven more he never used. Left his key on the desk one morning and his luggage in the room and that was the end of him.',
-            'I’d have said he took the boat out, except — well. Aldous keeps the harbor ledger, and Aldous swears no boat took him. You’d want to ask Aldous himself, down on the long pier.',
-            'His things are still boxed in my cellar. Nobody came for them. Until now, I suppose.',
-          ];
-        },
-        onComplete: () => {
-          if (q('quest:rosa') && !q('quest:inn')) story.set('quest:inn', true);
         },
       }),
       makeNpc(npcCtx, {
@@ -686,7 +626,7 @@ export const GRAVEN_TOWN = {
       },
       {
         id: 'church-door',
-        position: new THREE.Vector3(22.2, 1, -24),
+        position: new THREE.Vector3(20.6, 1, -24),
         radius: night ? 2.2 : 1.6,
         prompt: () => (night ? (q('chaseStarted') ? 'THE DOORS' : 'The church doors') : 'The church doors'),
         onInteract: () => {
@@ -719,8 +659,7 @@ export const GRAVEN_TOWN = {
         id: 'inn-door',
         position: new THREE.Vector3(0, 1, -27),
         radius: 1.7,
-        prompt: () =>
-          night ? 'The inn' : q('quest:priest') ? 'Turn in for the night' : 'The Gull & Anchor',
+        prompt: () => (night ? 'The inn' : 'Enter the Gull & Anchor'),
         onInteract: () => {
           if (night) {
             events.emit('ui/toast', {
@@ -728,16 +667,7 @@ export const GRAVEN_TOWN = {
             });
             return;
           }
-          if (!q('quest:priest')) {
-            events.emit('ui/toast', {
-              text: 'Tobias, through the doorway: “Room’s airing out, friend! See the town — I’ll wave you in when it’s ready.”',
-            });
-            return;
-          }
-          // Act I ends in a warm bed. What happens next is not Act I.
-          story.set('sleptAtInn', true);
-          story.set('nightfall', true);
-          events.emit('level/transition', { levelId: 'graven-town', spawn: 'innDoor' });
+          events.emit('level/transition', { levelId: 'inn-interior', spawn: 'fromTown' });
         },
       },
       // Optional sustenance.
@@ -796,8 +726,16 @@ export const GRAVEN_TOWN = {
       root.add(kit.rubble({ position: [25, -20.5], seed: 66, count: 9, spread: 2.3 }).object);
 
       if (!story.get('windowSceneSeen')) {
-        // The congregation, mid-thanksgiving. Subjects of the window scene;
-        // the re-transition after it clears them away.
+        // The congregation, mid-thanksgiving. Subjects of the window scene.
+        // They live in one group, and a watcher removes it the moment the
+        // scene flag lands — no re-transition, no second door beat.
+        const crowd = new THREE.Group();
+        root.add(crowd);
+        updatables.push({
+          update: () => {
+            if (crowd.parent && story.get('windowSceneSeen')) crowd.removeFromParent();
+          },
+        });
         for (let i = 0; i < 12; i++) {
           const a = (i / 12) * Math.PI * 2;
           const x = 25 + Math.cos(a) * 3.7;
@@ -809,7 +747,7 @@ export const GRAVEN_TOWN = {
             outfit: i % 2 === 0 ? 'dress' : 'coat',
             palette: { coat: [0x3a3440, 0x443a34, 0x343e3a, 0x3e3644][i % 4], skin: 0xb0a090 },
           });
-          root.add(witness.object);
+          crowd.add(witness.object);
           updatables.push(witness);
         }
         for (const [x, z] of [[22.2, -18.6], [27.8, -22.4]]) {
@@ -819,7 +757,7 @@ export const GRAVEN_TOWN = {
             distance: 9,
             color: 0xd9803a,
           });
-          root.add(torch.light);
+          crowd.add(torch.light);
           updatables.push(torch);
         }
       }
@@ -1070,25 +1008,16 @@ export const GRAVEN_TOWN = {
         trackStiffness: 3,
         fovOverride: 58,
       }),
-      // The point: low and wide; the lighthouse does the talking.
+      // The point: high from the lane corner — tower right, sea beyond,
+      // nothing between the lens and the player.
       defineCameraZone({
         id: 'lighthouse-point',
         min: [32, -1, 8],
         max: [46, 4, 26],
-        camera: [33, 1.3, 24.4],
+        camera: [44.6, 4.6, 24.6], // SE corner, high — tower left, path clear
         trackTarget: true,
         trackStiffness: 2.6,
-        fovOverride: 64,
-      }),
-      // At the tower's foot: the up-shot. Small zone, high priority.
-      defineCameraZone({
-        id: 'lighthouse-base',
-        min: [36.2, -1, 11.5],
-        max: [42.5, 4, 18.5],
-        camera: [37.2, 0.9, 18.2],
-        lookAt: [39.2, 8.0, 14.0],
-        fovOverride: 70,
-        priority: 2,
+        fovOverride: 58,
       }),
     ];
 

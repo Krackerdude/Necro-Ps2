@@ -61,6 +61,13 @@ export class PlayerStats {
     this.#emit();
   }
 
+  /** Permanent upgrade (Warden's Draughts etc). Rides in saves. */
+  increaseMaxHealth(amount) {
+    this.#maxHealth += amount;
+    this.#health = Math.min(this.#maxHealth, this.#health + amount);
+    this.#emit();
+  }
+
   /* Save participant interface. */
   captureState() {
     return { health: this.#health, maxHealth: this.#maxHealth };

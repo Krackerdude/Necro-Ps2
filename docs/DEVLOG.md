@@ -5,6 +5,134 @@ when a session starts cold. Update it with EVERY meaningful change.
 
 ---
 
+## 2026-07-03 — Session 18: Church Phase 2 — THE BELL TOWER WING (♠)
+
+First full wing: 13 rooms + boss arena + optional clock room, one
+continuous map (bellTower.js), entered through the church's west transept
+(real transition now; its temp stone is gone — the Stone of the Hour is
+earned at the carillon).
+
+**Regional mechanic — SOUND.** New husk variant `listener`: blind
+(detect 0.9, bandaged eyes) but hears everything; running is dinner,
+walking is survival — the inverse of the town chase. Bell-pulls emit
+`noise/emitted` AT the remote bell (the choir pull lures the Choir of
+Ears' listeners into the refectory — enemies as puzzle pieces). Chime
+clusters are noise tripwires: the level subscribes to footstep noise
+(small radius) and re-emits an 11 m ring at the cluster (`chime: true`
+guards recursion). Levels can now return `dispose()` — WorldService.unload
+calls it (event-subscription cleanup).
+
+**THE TOLLTAKER** (gameplay/enemies/Tolltaker.js, roster type
+'tolltaker'): deaf giant wearing the cracked third casting of the Great
+Bell. Armored ×0.12 until 'bell/great' (arena rope-pulls, shared 9 s
+cooldown) stuns it kneeling for 5.5 s — full damage window; it returns
+briefly enraged. Contact 26. Death sets `tolltakerFelled` (watcher opens
+the warden door north). Intro cinematic on first arena entry.
+
+**Generic level beats**: runtime.cinematics = [{when: flag, seen, script}]
+and runtime.roomComments = {flag: toast} — GameplayState fires them off
+story/flag-changed; mapSeen flags make room-entry triggers free. Used for
+ALDERS_SCRIPT, TOLLTAKER_SCRIPT, CARILLON_SCRIPT + three "the church is
+growing" player comments.
+
+**Mother Alders** — the bell-widow, knitting rope out of donated hair in
+the parlor the tower grew for her in '61. Dialogue evolves (pre-boss hint:
+the bell is the one thing he feels; post-boss: carillon hints; post-stone:
+a word for the key). A joy. Deeply wrong.
+
+**Puzzles**: the CARILLON (ring 4 bells in the hymn's order — the hymn is
+nailed up upside down, the two Quarrels are disambiguated by their cast
+years on the plaques; wrong ring resets loudly) → Stone of the Hour.
+CLOCK ROOM (optional, ♠-locked — Spade Key sits at the refectory's head
+seat): cycle the hour hand, strike III (clockPlaque + verger lore); wrong
+strikes emit a 40 m noise that tells every listener where you are; right
+opens a sealed vault alcove (Warden's Draught + tonic). GOTCHA: vault loot
+must live INSIDE the walled alcove — a door mesh alone gates nothing.
+
+5 documents (ringersRoll, foundryNote, wardensRestLog, hymnOfHours,
+clockPlaque), shrine save room, 8 pickups, 15 camera zones, `tower`
+ambient (wind + the bell's ghost partial). Verified headless end to end:
+transition, key, clock flow (sealed→III→open), both auto-cinematics,
+boss death chain, wrong-order rejection, carillon → stone in satchel.
+NOTE for wing phases 3–4: headless E-presses need ≥350 ms spacing under
+SwiftShader or inputs land in the same frame.
+
+---
+
+## 2026-07-03 — Session 17: Church expansion Phase 1 — the Crossing & the Cage
+
+The RE4-style restructure begins: the Black Iron Key is no longer loose on
+the altar — it sits in THE WARDEN'S CAGE, opened only by three stones from
+three wings. Wings ship in phases 2–4 (spade=bell tower, diamond=
+scriptorium, clover=undercroft), each a full loop (combat+puzzle+lore+
+locked doors+a resident lunatic) with only a flavor lean, per user.
+
+- **Remodel** (chapelOfTheHollow): nave's north wall opens into a CROSSING
+  (columns, candelabra, banners, interior stained glass — always the wrong
+  red), WEST/EAST TRANSEPT arms, and an APSE. Each ends in a sealed wing
+  door: heavy door + solid rubble + glowing motif emblem (buildEmblem:
+  spade/diamond/clover). New camera zones (crossing track, one-point arm
+  shots, tight apse) + map rooms + FlickerLights (crossing warm, arm ends
+  red, apse green).
+- **The Cage**: iron bar cage on the altar, key rotating inside, three
+  socket pedestals at the altar's foot (makeItemSocket, flags
+  stoneSeated:hour/word/ground). Third seat → `stonesSeated` →
+  GameplayState plays CAGE_SCRIPT → `cageOpened` → a watcher updatable
+  removes the cage front live → take key (sets took:chapel-key, same flag
+  as ever — crypt flow unchanged). Legacy saves (key held/spent) build the
+  cage open and empty.
+- **Items**: stoneOfTheHour/Word/Ground (♠♦♣, spentWhen cageOpened),
+  spade/diamond/cloverKey (shape-lock keys, spawned by wing phases),
+  wardensDraught (+25 MAX HEALTH — PlayerStats.increaseMaxHealth, already
+  save-persisted). Docs: cagePlaque; warden's note now explains the cage.
+- **TEMPORARY**: each wing's stone lies in the rubble of its collapsed door
+  so the game stays completable this build. Wing phases relocate them.
+  GOTCHA: keep temp pickups OUTSIDE the wing-door interactable's radius —
+  the interaction system picks the nearest prompt.
+- Verified headless: gather 3 → seat 3 → cage cinematic → cageOpened →
+  stones auto-discard → key → crypt unlocks. Zero errors.
+
+---
+
+## 2026-07-03 — Session 16: playtest fixes (user pass #2) + the inn interior
+
+Six user-reported issues, all fixed and verified:
+- **SOFT LOCK after the sleep cutscene** (door-swing loop + errors + frozen
+  player). Root cause: #enterLevel pushed the window cinematic MID
+  door-transition, and its onComplete fired a second level/transition that
+  #beginTransition silently DROPPED if still in flight. Fixes, all three:
+  (1) cinematics queued by #enterLevel land in `#pendingScene` and are
+  flushed only after the transition settles (or after enter() on load);
+  (2) transitions requested while one is in flight are QUEUED and run
+  after, never dropped; (3) the window scene no longer re-transitions at
+  all — the night level wraps the congregation in one group and a watcher
+  updatable removes it when `windowSceneSeen` lands. RULE: never push a
+  state from inside #enterLevel; queue it.
+- **The inn is explorable by day** (levels/innInterior.js, id
+  'inn-interior'): common room (hearth that takes no wood, bar, tables,
+  beams) + "upstairs" as a same-level region at +40x reached by a stairs
+  door transition. Tobias moved inside behind his bar (quest unchanged);
+  new flavor NPCs Henrik and Greta; Mike's boxed things + journal page
+  (doc `mikesJournal` — the count that comes back one short). THE BED is
+  now the Act I sleep trigger (gated on quest:priest); the town's inn door
+  just transitions inside by day, stays locked at night. `hearth` ambient.
+- **Gothic church**: TownKit.church() — buttresses, steep slate roof,
+  stained-glass lancets (amber/red/blue by day, all wrong-red at night),
+  rose window, pointed-arch door, attached bell tower + needle spire.
+  Replaces the house-form church in town; colliders from body+tower.
+- **Main menu vista** now shows the same gothic church (night mood) — it
+  IS the building the game bars you inside; the old chapel-facade mock is
+  gone.
+- **Z-fighting**: overlapping ground slabs get layered heights (yards
+  0.008, bakery strip 0.012, churchyard 0.014, inn court 0.016, path
+  0.02). RULE: any slab that overlaps another gets its own y.
+- **Lighthouse cameras**: the base up-shot zone was deleted (tower ate the
+  frame); the point shot moved to the SE corner, high, tower on the left.
+Verified headless: inn quest flow inside, journal, gated bed, sleep →
+window scene → skip → PLAYER MOVES (1.68 m) — no soft lock, no errors.
+
+---
+
 ## 2026-07-03 — Session 15: GRAVEN Phase E — the retcon pass
 
 Act II's text now belongs to the same story as the town above. No ids,
