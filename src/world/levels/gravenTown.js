@@ -67,6 +67,12 @@ export const GRAVEN_TOWN = {
       return piece;
     };
 
+    // Base terrain: one giant meadow under everything, so no camera ever
+    // sees void past a fence — beyond it, only more Graven, then the sea.
+    const meadow = grassSlab([0, -12], [160, 76]); // stops at the shoreline (z=26)
+    meadow.object.position.y = -0.08;
+    root.add(meadow.object);
+
     add(dirtSlab([-30, 11], [32, 10]));                     // gate road
     add(kit.slab({ center: [-1, 10], size: [26, 20], y: 0, texture: 'stoneFloor', repeat: [13, 10] })); // square
     add(grassSlab([-1, -3.5], [26, 7]));                    // bakery row strip
